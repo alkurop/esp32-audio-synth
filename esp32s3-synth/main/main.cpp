@@ -1,9 +1,6 @@
 // main.cpp
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "tinyusb.h"
-#include "tusb_console.h"
-#include "tusb_cdc_acm.h"
 #include <esp_log.h>
 #include "midi_module.hpp"
 #include "sound_module.hpp"
