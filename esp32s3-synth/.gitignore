@@ -1,0 +1,6 @@
+sdkconfig
+sdkconfig.old
+/build
+/.idea
+.DS_STORE
+/managed_components

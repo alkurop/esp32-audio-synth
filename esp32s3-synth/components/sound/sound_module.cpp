@@ -1,0 +1,108 @@
+// sound_module.cpp
+#include "sound_module.hpp"
+#include "utils.hpp"
+#include "tag.hpp"
+#include <esp_log.h>
+#include <driver/i2s_std.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
+using namespace sound_module;
+using namespace midi_module;
+
+SoundModule::SoundModule(const SoundConfig &config)
+    : _config(config)
+{
+    // Initialize voices vector with configured polyphony
+    _voices.reserve(_config.numVoices);
+    for (size_t i = 0; i < _config.numVoices; ++i)
+    {
+        Voice v(_config.sampleRate, 16);
+        v.set_midi_channel(static_cast<uint8_t>(i));
+        _voices.push_back(v);
+    }
+}
+
+void SoundModule::init()
+{
+    // Step 1: Create I2S TX channel
+    i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
+    ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &_txChan, nullptr));
+
+    // Step 2: Configure TX for standard I2S mode
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+    i2s_std_config_t tx_std_cfg = {
+        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(_config.sampleRate),
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
+        .gpio_cfg = {
+            .mclk = I2S_GPIO_UNUSED,
+            .bclk = _config.i2s.bclk_io,
+            .ws = _config.i2s.lrclk_io,
+            .dout = _config.i2s.data_io,
+            .din = I2S_GPIO_UNUSED,
+            .invert_flags = {false, false, false},
+        },
+    };
+#pragma GCC diagnostic pop
+
+    ESP_ERROR_CHECK(i2s_channel_init_std_mode(_txChan, &tx_std_cfg));
+    ESP_ERROR_CHECK(i2s_channel_enable(_txChan));
+
+    // Step 3: Launch audio task pinned to core 1
+    if (_audioTask == nullptr)
+    {
+        xTaskCreatePinnedToCore(
+            audio_task_entry,
+            "audio_task",
+            4096,
+            this,
+            5,
+            &_audioTask,
+            1 // core 1
+        );
+    }
+}
+
+void SoundModule::handle_note(const NoteMessage &msg)
+{
+    for (auto &voice : _voices)
+    {
+        if (msg.on)
+            voice.note_on(msg.channel, msg.note, msg.velocity);
+        else
+            voice.note_off(msg.channel, msg.note);
+    }
+}
+
+void SoundModule::process()
+{
+    size_t num_samples = _config.bufferSize;
+    std::vector<int16_t> buffer(num_samples * 2);
+
+    for (size_t i = 0; i < num_samples; ++i)
+    {
+        float mix = 0.0f;
+        for (auto &voice : _voices)
+        {
+            mix += voice.get_sample();
+        }
+        mix /= static_cast<float>(_config.numVoices);
+        float clamped = clamp(mix, -1.0f, 1.0f);
+        int16_t sample = static_cast<int16_t>(clamped * _config.amplitude);
+        buffer[2 * i] = sample;
+        buffer[2 * i + 1] = sample;
+    }
+
+    size_t bytes_written;
+    i2s_channel_write(_txChan, buffer.data(), buffer.size() * sizeof(int16_t), &bytes_written, portMAX_DELAY);
+}
+
+void SoundModule::audio_task_entry(void *arg)
+{
+    auto *self = static_cast<SoundModule *>(arg);
+    while (true)
+    {
+        self->process();
+    }
+}

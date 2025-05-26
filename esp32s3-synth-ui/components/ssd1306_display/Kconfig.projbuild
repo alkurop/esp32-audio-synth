@@ -1,0 +1,11 @@
+menu "Synth Menu"
+
+config HUMAN_INT_OFFSET
+    int "Human-integer display offset"
+    default 1
+    help
+        Value to add to all raw integer parameters before displaying
+        (e.g. set to 1 for 1-based MIDI channels).  Leave at 0 for
+        zero-based display in development.
+
+endmenu

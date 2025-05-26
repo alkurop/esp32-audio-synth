@@ -1,0 +1,21 @@
+menu "Metalbox MIDI Device Config"
+
+config MIDI_COMPANY_NAME
+    string "MIDI Company Name"
+    default "Metalbox"
+    help
+      The manufacturer name for the USB MIDI device.
+
+config MIDI_PRODUCT_NAME
+    string "MIDI Product Name"
+    default "Metalbox Synth"
+    help
+      The product name for the USB MIDI device.
+
+config MIDI_DEVICE_ID
+    string "MIDI Device ID (Serial Number)"
+    default "0001"
+    help
+      The serial number string for the USB MIDI device.
+
+endmenu

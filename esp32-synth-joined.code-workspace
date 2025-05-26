@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "path": "esp32s3-synth"
+    },
+    {
+      "path": "esp32s3-synth-ui"
+    }
+  ],
+  "settings": {
+    // Optional: override ESP-IDF specific settings per folder if needed
+  }
+}

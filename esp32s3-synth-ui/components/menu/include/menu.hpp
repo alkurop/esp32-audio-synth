@@ -1,0 +1,61 @@
+#pragma once
+
+#include <cstdint>
+#include <functional>
+#include <vector>
+#include <array>
+#include "menu_struct.hpp"
+#include "encoder_range.hpp"
+#include "param_cache.hpp"
+#include "param_store.hpp"
+
+namespace menu
+{
+
+    // Maximum number of fields any page can have (from menu_struct)
+    static constexpr uint8_t MaxFieldsPerPage = 4;
+    // Total number of pages
+    static constexpr uint8_t PageCount = static_cast<uint8_t>(Page::_Count);
+
+    /**
+     * Menu controller: handles navigation and integrates
+     * with ParameterStore for persistent values and presets.
+     * Each rotary corresponds to one field; no explicit 'field' index is stored.
+     */
+    class Menu
+    {
+    public:
+        using DisplayCallback = std::function<void(const MenuState &state)>;
+        explicit Menu(uint8_t voiceCount);
+        void init(DisplayCallback displayCallback);
+        void enterMenuPage();
+        void exitMenuPage();
+        void closePopup();
+        void enterPopup();
+        void rotateKnob(uint8_t knob, int8_t value);
+
+    private:
+        /// Notify the display callback of the current cached state.
+        void notify();
+        std::array<EncoderRange, 4> calcEncoderRanges();
+        void changeValueMenuList(uint8_t knob, int8_t value);
+        void changeValuePopup(uint8_t knob, int8_t value);
+        void changeValuePage(uint8_t knob, int8_t value);
+        bool updatePopupStateForward();
+        bool updatePopupStateBack();
+
+
+        uint8_t voiceCount;
+        ParamCache cache;
+        PopupState popup;
+        ParamStore paramStore;
+
+        uint8_t voice = 0; // zero-based index internally
+
+        AppMode mode = AppMode::MenuList;
+        uint8_t itemIndex = 0;
+
+        DisplayCallback displayCb;
+    };
+
+} // namespace menu

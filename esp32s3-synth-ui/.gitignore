@@ -1,0 +1,8 @@
+sdkconfig
+sdkconfig.old
+dependencies.lock
+/build
+/.idea
+.DS_STORE
+/managed_components
+dependencies.lock

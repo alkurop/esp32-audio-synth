@@ -1,0 +1,86 @@
+#pragma once
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
+#include <driver/gpio.h>
+#include <driver/pulse_cnt.h>
+#include <functional>
+#include <cstdint>
+
+namespace ui
+{
+
+    /**
+     * @brief Configuration for the Rotary encoder pins, ID, and behavior
+     */
+    struct RotaryConfig
+    {
+        uint8_t id = 0;     ///< Identifier for this encoder instance
+        gpio_num_t pin_clk; ///< GPIO number for encoder CLK pin
+        gpio_num_t pin_dt;  ///< GPIO number for encoder DT pin
+
+        uint8_t minValue = 0;   ///< Minimum allowed encoder value
+        uint8_t maxValue = 127; ///< Maximum allowed encoder value
+        uint8_t increment = 1;
+        uint16_t glitchFilterNs = 100;
+    };
+
+    /**
+     * @brief Wrapper for an EC11-style rotary encoder using PCNT
+     */
+    class Rotary
+    {
+    public:
+        RotaryConfig config;
+        QueueHandle_t eventQueue = nullptr;
+
+        using RotaryCallback = std::function<void(uint8_t id, uint8_t newValue)>;
+
+        /**
+         * @brief Construct a new Rotary encoder handle
+         * @param config  Pin, ID, and behavior configuration
+         */
+        explicit Rotary(const RotaryConfig &config);
+
+        /**
+         * @brief Initialize the encoder and register a callback for value changes
+         * @param cb  Function called with (id, newValue) when position changes
+         */
+        void init(const RotaryCallback &cb);
+
+        /**
+         * @brief Set the minimum and maximum allowed value at runtime
+         * @param minValue  Lower bound for the encoder value
+         *          * @param maxValue  Upper bound for the encoder value
+
+         */
+        inline void setRange(uint8_t minValue, uint8_t maxValue)
+        {
+            config.minValue = minValue;
+            config.maxValue = maxValue;
+        }
+
+        /**
+         * @brief Force the current position (will invoke callback)
+         * @param value  New position to set
+         */
+        inline void setPosition(uint8_t value)
+        {
+            position = value;
+            if (callback)
+            {
+                callback(config.id, position);
+            }
+        }
+
+    private:
+        RotaryCallback callback = nullptr;
+        uint8_t position = 0;
+
+        pcnt_unit_handle_t unit = nullptr;
+        void initGPIOInterrupt();
+        void initPCNT();
+        void startTask();
+        void processEvents();
+    };
+
+} // namespace ui
