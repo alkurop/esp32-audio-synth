@@ -22,37 +22,6 @@ static const char *TAG = "Main";
 using namespace ui;
 using namespace menu;
 
-static QueueHandle_t menuRenderQueue = nullptr;
-static void render_task(void *arg)
-{
-    auto disp = static_cast<SSD1306 *>(arg);
-    MenuState st;
-
-    ESP_LOGI(TAG, "Render task running on core %d", xPortGetCoreID());
-    for (;;)
-    {
-        // wait forever for a new state
-        if (xQueueReceive(menuRenderQueue, &st, portMAX_DELAY) == pdTRUE)
-        {
-            // draw according to mode
-            switch (st.mode)
-            {
-            case menu::AppMode::MenuList:
-                disp->renderMenuList(st);
-                break;
-            case menu::AppMode::Page:
-                disp->renderMenuPage(st);
-                break;
-            case menu::AppMode::Popup:
-                disp->renderPopup(st);
-                break;
-            default:
-                break;
-            }
-        }
-    }
-}
-
 SSD1306Config displayConfig = {
     .sda_pin = GPIO_NUM_14,
     .scl_pin = GPIO_NUM_13,
@@ -95,7 +64,7 @@ Rotary rotary0(cfg0);
 Rotary rotary1(cfg1);
 Rotary rotary2(cfg2);
 Rotary rotary3(cfg3);
-Rotary *encoders[4] = {&rotary0, &rotary1, &rotary2, &rotary3};
+Rotary *encoders[ENCODER_COUNT] = {&rotary0, &rotary1, &rotary2, &rotary3};
 
 Button button0;
 Button button1;
@@ -131,6 +100,42 @@ auto down = [](uint8_t number, bool state)
         return;
     ESP_LOGI(TAG, "Button down");
 };
+
+static QueueHandle_t menuRenderQueue = nullptr;
+static void render_task(void *arg)
+{
+    auto disp = static_cast<SSD1306 *>(arg);
+    MenuState st;
+
+    ESP_LOGI(TAG, "Render task running on core %d", xPortGetCoreID());
+    for (;;)
+    {
+        // wait forever for a new state
+        if (xQueueReceive(menuRenderQueue, &st, portMAX_DELAY) == pdTRUE)
+        {
+            for (int i = 0; i < ENCODER_COUNT; i++)
+            {
+                auto range = st.encoderRanges[i];
+                encoders[i]->setRange(range.min, range.max);
+            }
+            // draw according to mode
+            switch (st.mode)
+            {
+            case menu::AppMode::MenuList:
+                disp->renderMenuList(st);
+                break;
+            case menu::AppMode::Page:
+                disp->renderMenuPage(st);
+                break;
+            case menu::AppMode::Popup:
+                disp->renderPopup(st);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
 
 void createMenuRenderTask()
 {
