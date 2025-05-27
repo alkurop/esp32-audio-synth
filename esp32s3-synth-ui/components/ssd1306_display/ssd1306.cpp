@@ -143,47 +143,53 @@ void SSD1306::initMenuList(lv_obj_t *scr)
 {
     static constexpr int ITEM_H = 16;
 
-    // 1) create container
+    // 1) create & position the scrolling container
     menuContainer = lv_obj_create(scr);
-    lv_obj_set_size(menuContainer, cfg.width, cfg.height - 16);
+    lv_obj_set_size(menuContainer, cfg.width, cfg.height - ITEM_H);
     lv_obj_align_to(menuContainer, topbar_label,
                     LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
     lv_obj_set_scrollbar_mode(menuContainer, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_scroll_dir(menuContainer, LV_DIR_VER);
 
     // 2) total items = pages + popup workflows
-    const auto itemCnt = static_cast<uint8_t>(menu::menuItemCnt);
-    const auto pageCnt = static_cast<uint8_t>(menu::pageCnt);
+    const uint8_t pageCnt = static_cast<uint8_t>(menu::pageCnt);
+    const uint8_t wfCnt = static_cast<uint8_t>(menu::workflowCnt);
+    const uint8_t itemCnt = pageCnt + wfCnt;
 
+    // 3) build each menu line
     for (uint8_t i = 0; i < itemCnt; ++i)
     {
-        // decide whether this slot is a real page or a popup workflow
-        const char *txt;
+        const char *txt = nullptr;
+
         if (i < pageCnt)
         {
+            // a “real” page
             txt = menu::menuPages[i].title;
         }
         else
         {
-            auto wf = menu::popupWorkflows[i - pageCnt];
-            txt = wf.title;
+            // a workflow entry
+            uint8_t wfIdx = i - pageCnt;
+            if (wfIdx < static_cast<uint8_t>(Workflow::Count))
+                txt = popupMenuTitles[wfIdx];
         }
 
-        // create & position label
+        // if txt is still null something’s wrong—but we’ll skip that here
+
+        // 4) create & position the label
         lv_obj_t *lbl = lv_label_create(menuContainer);
         lv_label_set_text(lbl, txt);
         lv_obj_set_width(lbl, lv_obj_get_width(menuContainer));
         lv_obj_set_y(lbl, i * ITEM_H);
 
-        // remember it for highlighting later
+        // cache it for later (e.g. highlighting)
         menuItems[i] = lbl;
     }
 }
 
 void SSD1306::renderMenuList(const menu::MenuState &st)
 {
-    if (!lvgl_port_lock(0))
-        return;
+
     lv_obj_t *scr = lv_scr_act();
     // Update title bar
     renderTopBar(st, scr);
@@ -196,7 +202,6 @@ void SSD1306::renderMenuList(const menu::MenuState &st)
     // Show menu and highlight
     showMenuList(st.menuItemIndex);
     lv_timer_handler();
-    lvgl_port_unlock();
 }
 
 void SSD1306::showMenuList(uint8_t page)
@@ -219,9 +224,7 @@ void SSD1306::showMenuList(uint8_t page)
 
 void SSD1306::renderMenuPage(const menu::MenuState &st)
 {
-    // Lock LVGL
-    if (!lvgl_port_lock(0))
-        return;
+
     lv_obj_t *scr = lv_scr_act();
 
     // Hide the main menu list
@@ -233,7 +236,6 @@ void SSD1306::renderMenuPage(const menu::MenuState &st)
     int fieldCount = std::min<uint8_t>(pi.fieldCount, 4);
     if (fieldCount == 0)
     {
-        lvgl_port_unlock();
         return;
     }
     int cell_width = container_w / fieldCount;
@@ -299,7 +301,6 @@ void SSD1306::renderMenuPage(const menu::MenuState &st)
 
     // Refresh & unlock
     lv_timer_handler();
-    lvgl_port_unlock();
 }
 
 void SSD1306::showPage()
@@ -361,74 +362,55 @@ void SSD1306::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
 
 void SSD1306::renderPopup(const menu::MenuState &st)
 {
-    // 1) Lock LVGL
-    if (!lvgl_port_lock(0))
-        return;
-    lv_obj_t *scr = lv_scr_act();
+    using namespace menu;
+    const auto &ps = st.popup;
 
-    // 2) Figure out which workflow we’re in (same as before)…
-    int wfIndex = -1;
-    for (int i = 0; i < workflowCnt; ++i)
-    {
-        if (popupWorkflows[i].baseMode == st.popup.mode)
-        {
-            wfIndex = i;
-            break;
-        }
-    }
-    if (wfIndex < 0)
-    {
-        lvgl_port_unlock();
+    // 1) Validate workflow index
+    auto wfIdx = static_cast<size_t>(ps.workflowIndex);
+    if (wfIdx >= static_cast<size_t>(Workflow::Count))
         return;
-    }
-    const PopupWorkflow &wf = popupWorkflows[wfIndex];
 
-    // ───────────────────────────
-    // 2.5) Update the top bar text with the popup title
-    lv_label_set_text(topbar_label, wf.title);
+    // 2) Grab the workflow & current step entry
+    const auto &wf = popupWorkflows[wfIdx];
+    const auto &entry = wf.steps[ps.stepIndex];
+
+    // 3) Update top‐bar with the step’s title
+    lv_label_set_text(topbar_label, entry.title);
     lv_obj_align(topbar_label, LV_ALIGN_TOP_MID, 0, 0);
-    // ───────────────────────────
 
-    // 3) Show/hide as needed
-    showPopup(); // hide main list, show popup container
+    // 4) Show the popup container (hides main menu)
+    showPopup();
 
-    // 4) Compute step offset within the workflow
-    int stepOffset = static_cast<int>(st.popup.mode) - static_cast<int>(wf.baseMode);
-    stepOffset = std::clamp(stepOffset, 0, int(wf.count) - 1);
-
-    // 5) Layout
+    // 5) Layout constants
     int container_w = cfg.width - 8;
     int container_h = cfg.height - 18;
     int title_h = 12;
     int step_h = 10;
     int body_y = title_h + step_h + 4;
 
+    // 6) (Re)create & clear the container
     if (!popupContainer)
     {
-        popupContainer = lv_obj_create(scr);
+        popupContainer = lv_obj_create(lv_scr_act());
         lv_obj_set_size(popupContainer, container_w, container_h);
         lv_obj_align_to(popupContainer, topbar_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 4);
     }
     lv_obj_clean(popupContainer);
 
-    // 6) Draw workflow title
+    // 7) Draw the step‐indicator bar & labels
+    int step_w = container_w / wf.stepCount;
+    for (size_t i = 0; i < wf.stepCount; ++i)
     {
+        // step label
         lv_obj_t *lbl = lv_label_create(popupContainer);
-        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_14, LV_STATE_DEFAULT);
-        lv_label_set_text(lbl, wf.title);
-        lv_obj_align(lbl, LV_ALIGN_TOP_MID, 0, 0);
-    }
+        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_12, LV_STATE_DEFAULT);
+        lv_label_set_text(lbl, wf.steps[i].title);
+        lv_obj_set_pos(lbl,
+                       i * step_w + (step_w - lv_obj_get_width(lbl)) / 2,
+                       title_h);
 
-    // 7) Draw step labels across top
-    int step_w = container_w / wf.count;
-    for (uint8_t i = 0; i < wf.count; ++i)
-    {
-        lv_obj_t *s = lv_label_create(popupContainer);
-        lv_obj_set_style_text_font(s, &lv_font_montserrat_12, LV_STATE_DEFAULT);
-        lv_label_set_text(s, wf.steps[i]);
-        lv_obj_set_pos(s, i * step_w + (step_w - lv_obj_get_width(s)) / 2, title_h);
-
-        if (i == stepOffset)
+        // highlight current step
+        if (i == ps.stepIndex)
         {
             lv_obj_t *bar = lv_obj_create(popupContainer);
             lv_obj_set_size(bar, step_w - 4, 2);
@@ -437,14 +419,17 @@ void SSD1306::renderPopup(const menu::MenuState &st)
         }
     }
 
-    // 8) If this is a “rename” step, draw the 4-char buffer + cursor
-    if (wf.steps[stepOffset][0] == 'R') // crude test: “Rename …”
+    // 8) Render the step’s content
+    switch (entry.mode)
     {
-        const auto &p = st.popup;
-        char buf[6] = {};
-        std::memcpy(buf, p.editName, 4);
+    case PopupMode::SaveVoiceRename:
+    case PopupMode::SaveProjectRename:
+    {
+        // draw the 4-char edit buffer + cursor
+        char buf[5] = {};
+        std::memcpy(buf, ps.editName, 4);
         for (int i = 0; i < 4; ++i)
-            if (!buf[i])
+            if (buf[i] == '\0')
                 buf[i] = '_';
 
         int cell = container_w / 4;
@@ -457,7 +442,8 @@ void SSD1306::renderPopup(const menu::MenuState &st)
             int x = i * cell + (cell - 8) / 2;
             lv_obj_set_pos(c, x, body_y);
 
-            if (i == st.popup.slotIndex)
+            // cursor under current slotIndex
+            if (i == ps.slotIndex)
             {
                 lv_obj_t *cur = lv_obj_create(popupContainer);
                 lv_obj_set_size(cur, 8, 2);
@@ -465,11 +451,22 @@ void SSD1306::renderPopup(const menu::MenuState &st)
                 lv_obj_set_pos(cur, x, body_y + 14);
             }
         }
+        break;
     }
 
-    // 9) Done! refresh & unlock
+    default:
+    {
+        // generic content: e.g. show slotIndex or a checkmark
+        // you can replace this with your actual drawing:
+        lv_obj_t *info = lv_label_create(popupContainer);
+        lv_label_set_text_fmt(info, "Slot %d", ps.slotIndex + 1);
+        lv_obj_align(info, LV_ALIGN_CENTER, 0, 0);
+        break;
+    }
+    }
+
+    // 9) Trigger LVGL refresh
     lv_timer_handler();
-    lvgl_port_unlock();
 }
 
 void SSD1306::showPopup()

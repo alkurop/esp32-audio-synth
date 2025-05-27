@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <array>
+#include "popup_struct.hpp"
 
 namespace menu
 {
@@ -11,49 +12,6 @@ namespace menu
         Page,     // parameter editing
         Popup     // load/save dialog
     };
-
-    //--- Popup/dialog modes for load/save workflows ---
-    enum class PopupMode : uint8_t
-    {
-        LoadVoiceList,      // select voice to load
-        LoadVoiceConfirm,   // confirm voice loaded
-        SaveVoiceList,      // select voice slot to save
-        SaveVoiceRename,    // rename voice popup
-        SaveVoiceConfirm,   // confirm voice saved
-        LoadProjectList,    // select project to load
-        LoadProjectConfirm, // confirm project loaded
-        SaveProjectList,    // select project slot to save
-        SaveProjectRename,  // rename project popup
-        SaveProjectConfirm,
-        None, // regular page/knob navigation
-              // confirm project saved,
-    };
-
-    // right after your PopupMode enum
-
-    // human-readable labels for each step in the workflows:
-    static constexpr const char *loadVoiceSteps[] = {"Voice List", "Confirm Load"};
-    static constexpr const char *saveVoiceSteps[] = {"Voice List", "Rename Voice", "Confirm Save"};
-    static constexpr const char *loadProjectSteps[] = {"Project List", "Confirm Load"};
-    static constexpr const char *saveProjectSteps[] = {"Project List", "Rename Project", "Confirm Save"};
-
-    // one struct per workflow:
-    struct PopupWorkflow
-    {
-        const char *title;        // what appears in the main menu
-        const char *const *steps; // labels for each step of that workflow
-        uint8_t count;            // how many steps
-        PopupMode baseMode;       // the first PopupMode for this workflow
-    };
-
-    // a constexpr array of all four:
-    static constexpr PopupWorkflow popupWorkflows[] = {
-        {"Load Voice", loadVoiceSteps, 2, PopupMode::LoadVoiceList},
-        {"Save Voice", saveVoiceSteps, 3, PopupMode::SaveVoiceList},
-        {"Load Project", loadProjectSteps, 2, PopupMode::LoadProjectList},
-        {"Save Project", saveProjectSteps, 3, PopupMode::SaveProjectList},
-    };
-
     // pages
     enum class Page : uint8_t
     {
@@ -214,14 +172,6 @@ namespace menu
 
     static_assert((uint8_t)Page::_Count == (sizeof(menuPages) / sizeof(PageInfo)), "Page count mismatch");
 
-    /** Popup/dialog overlay state */
-    struct PopupState
-    {
-        PopupMode mode = PopupMode::None; ///< current overlay mode
-        int8_t slotIndex = -1;            ///< selected slot (voice or project)
-        char editName[5] = {'\0'};        ///< 4-char rename buffer
-        bool nameEditing = false;         ///< in rename edit
-    };
     /// Simple [min,max] for an encoder knob.
     struct EncoderRange
     {
@@ -248,10 +198,7 @@ namespace menu
     static constexpr uint8_t workflowCnt = sizeof(popupWorkflows) / sizeof(*popupWorkflows);
     static constexpr uint8_t menuItemCnt = pageCnt + workflowCnt;
 
-    static constexpr char nameAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    static constexpr std::size_t nameAlphabetSize = sizeof(nameAlphabet) - 1;
-
-    /// “Is this index a real Page?”
+       /// “Is this index a real Page?”
     static inline bool isPageItem(uint8_t itemIndex)
     {
         return itemIndex < pageCnt;
