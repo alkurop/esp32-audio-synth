@@ -111,13 +111,13 @@ bool Menu::updatePopupStateForward()
     {
     case PopupMode::LoadVoiceConfirm:
     {
-        eventCb(LoadVoiceEvent{state.popup.slotIndex});
+        loadVoice(state.popup.slotIndex);
         break;
     }
 
     case PopupMode::LoadProjectConfirm:
     {
-        eventCb(LoadProjectEvent{state.popup.slotIndex});
+        loadProject(state.popup.slotIndex);
         break;
     }
 
@@ -125,18 +125,14 @@ bool Menu::updatePopupStateForward()
     {
         // grab the 4-char name as std::string
         std::string name(state.popup.editName, state.popup.editName + 4);
-        eventCb(SaveVoiceEvent{
-            state.popup.slotIndex,
-            name});
+        saveVoice(state.popup.slotIndex, name);
         break;
     }
 
     case PopupMode::SaveProjectConfirm:
     {
         std::string name(state.popup.editName, state.popup.editName + 4);
-        eventCb(SaveProjectEvent{
-            state.popup.slotIndex,
-            name});
+        saveProject(state.popup.slotIndex, name);
         break;
     }
 

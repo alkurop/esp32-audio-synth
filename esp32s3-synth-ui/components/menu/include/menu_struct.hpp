@@ -170,6 +170,10 @@ namespace menu
         {"Global BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
     };
 
+    // Total number of pages
+    static constexpr uint8_t PageCount = static_cast<uint8_t>(Page::_Count);
+    static constexpr uint8_t MaxFieldsPerPage = 4;
+
     static_assert((uint8_t)Page::_Count == (sizeof(menuPages) / sizeof(PageInfo)), "Page count mismatch");
 
     /// Simple [min,max] for an encoder knob.

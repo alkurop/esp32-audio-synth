@@ -2,7 +2,6 @@
 #include <freertos/task.h>
 #include <esp_log.h>
 #include <cstdio>
-#include <variant>
 
 #include "rotary.hpp"
 #include "button.hpp"
@@ -108,6 +107,7 @@ static void render_task(void *arg)
     auto disp = static_cast<SSD1306 *>(arg);
     MenuState st;
 
+    ESP_LOGI(TAG, "Render task running on core %d", xPortGetCoreID());
     for (;;)
     {
         // wait forever for a new state
@@ -155,29 +155,6 @@ void createMenuRenderTask()
     configASSERT(ok == pdPASS);
 }
 
-const auto menuVisitor = overloaded{
-    [](const menu::DisplayEvent &d)
-    {
-        // forward the new state to the render task
-        xQueueOverwrite(menuRenderQueue, &d.state);
-    },
-    [](const menu::SaveVoiceEvent &s)
-    {
-        ESP_LOGI(TAG, "Save Voice");
-    },
-    [](const menu::SaveProjectEvent &p)
-    {
-        ESP_LOGI(TAG, "Save Project");
-    },
-    [](const menu::LoadProjectEvent &p)
-    {
-        ESP_LOGI(TAG, "Load Project");
-    },
-    [](const menu::LoadVoiceEvent &p)
-    {
-        ESP_LOGI(TAG, "Load Voice");
-    }};
-
 extern "C" void app_main()
 {
     rotary0.init(rotaryCallback);
@@ -197,6 +174,8 @@ extern "C" void app_main()
     ESP_ERROR_CHECK(display.init());
     createMenuRenderTask();
 
-    menuHolder.init([](const menu::MenuEvent &ev)
-                    { std::visit(menuVisitor, ev); });
+    menuHolder.init([](const MenuState &state)
+                    {
+        // overwrite any pending state so we only keep the latest
+        xQueueOverwrite(menuRenderQueue, &state); });
 }
