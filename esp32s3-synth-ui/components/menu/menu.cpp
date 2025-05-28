@@ -1,3 +1,4 @@
+// Menu.cpp
 
 #include <algorithm>
 #include <cstdint>
@@ -7,64 +8,88 @@
 
 #include "menu.hpp"
 #include "menu_struct.hpp"
+
 static const char *TAG = "Menu";
 
 using namespace menu;
 
-Menu::Menu(uint8_t voiceCount) : voiceCount(voiceCount), cache(voiceCount), popup(), paramStore() {}
+Menu::Menu(uint8_t voiceCount)
+    : voiceCount(voiceCount), cache(voiceCount), paramStore(), state{} // value‐initialize everything
+{
+    // Set sensible defaults in state:
+    state.mode = AppMode::MenuList;
+    state.menuItemIndex = 0;
+    state.voice = 0;
+    // channel & volume come from cache:
+    state.channel = cache.get(0, Page::Channel, 0);
+    state.volume = cache.get(0, Page::Channel, 1);
+    // fieldValues already zero
+    // popup already default‐constructed (invalid workflowIndex)
+}
 
 void Menu::init(DisplayCallback displayCallback)
 {
     displayCb = std::move(displayCallback);
-    // initial draw
+    // prime the encoder ranges & draw initial screen
+    state.encoderRanges = calcEncoderRanges();
     notify();
 }
 
 void Menu::enterMenuPage()
 {
-    if (mode == AppMode::Popup)
+    if (state.mode == AppMode::Popup)
     {
-        updatePopupStateForward(); // ignore result
+        // advance or fall out
+        if (!updatePopupStateForward())
+        {
+            state.mode = AppMode::MenuList;
+        }
     }
     else
     {
-        mode = isPageItem(itemIndex) ? AppMode::Page : AppMode::Popup;
-        if (mode == AppMode::Popup)
+        // select Page vs Popup
+        if (isPageItem(state.menuItemIndex))
         {
-            enterPopup();
+            state.mode = AppMode::Page;
+        }
+        else
+        {
+            state.mode = AppMode::Popup;
+            enterPopup(); // initializes state.popup
         }
     }
+
+    state.encoderRanges = calcEncoderRanges();
     notify();
 }
 
 void Menu::exitMenuPage()
 {
-    if (mode == AppMode::Popup)
+    if (state.mode == AppMode::Popup)
     {
-        bool didGoBack = updatePopupStateBack();
-        if (!didGoBack)
+        if (!updatePopupStateBack())
         {
             closePopup();
         }
     }
     else
     {
-        mode = AppMode::MenuList;
+        state.mode = AppMode::MenuList;
     }
-    // todo navigate backward in popup workflow
+
+    state.encoderRanges = calcEncoderRanges();
     notify();
 }
 
 void Menu::rotateKnob(uint8_t knob, int8_t pos)
 {
-    switch (mode)
+    switch (state.mode)
     {
     case AppMode::MenuList:
         changeValueMenuList(knob, pos);
         break;
     case AppMode::Page:
         changeValuePage(knob, pos);
-
         break;
     case AppMode::Popup:
         changeValuePopup(knob, pos);
@@ -72,15 +97,41 @@ void Menu::rotateKnob(uint8_t knob, int8_t pos)
     }
 }
 
+void Menu::changeValueMenuList(uint8_t knob, int8_t pos)
+{
+    switch (knob)
+    {
+    case 0:
+        state.menuItemIndex = pos;
+        break;
+    case 1:
+        state.voice = pos;
+        break;
+    case 2:
+        cache.set(state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Chan), pos);
+        break;
+    case 3:
+        cache.set(state.voice, Page::Channel,
+                  static_cast<uint8_t>(ChannelField::Vol), pos);
+        break;
+    default:
+        return;
+    }
+
+    // refresh dependent values
+    state.channel = cache.get(state.voice, Page::Channel, 0);
+    state.volume = cache.get(state.voice, Page::Channel, 1);
+    state.encoderRanges = calcEncoderRanges();
+    notify();
+}
+
 void Menu::changeValuePage(uint8_t knob, int8_t pos)
 {
-    // ─── edit mode ────────────────────────────────────────
-    // knobs 0..3 map to the page’s fields 0..3, pos is absolute
-    const auto &pi = menuPages[itemIndex];
-    if (knob > 3 || knob >= pi.fieldCount)
+    const auto &pi = menuPages[state.menuItemIndex];
+    if (knob >= pi.fieldCount)
         return;
-    const auto &fi = pi.fields[knob];
 
+    const auto &fi = pi.fields[knob];
     int newVal;
     if (fi.type == FieldType::Range)
     {
@@ -88,75 +139,38 @@ void Menu::changeValuePage(uint8_t knob, int8_t pos)
     }
     else
     {
-        // for options, pos wraps around
-        newVal = int(pos) % fi.optCount;
+        newVal = pos % fi.optCount;
     }
-    cache.set(voice, itemToPage(itemIndex), knob, newVal);
-    notify();
-}
 
-void Menu::changeValueMenuList(uint8_t knob, int8_t pos)
-{
-    // ─── navigation mode ───────────────────────────────────
-    switch (knob)
-    {
-    case 0:
-    { // page select: pos is absolute index
-        itemIndex = pos;
-        break;
-    }
-    case 1:
-    { // voice select: pos is absolute voice (0..voiceCount-1)
-        voice = pos;
-        break;
-    }
-    case 2:
-    { // channel (absolute)
-        cache.set(voice, Page::Channel, static_cast<uint8_t>(ChannelField::Chan), pos);
-        break;
-    }
-    case 3:
-    { // volume (absolute)
-        cache.set(voice, Page::Channel, static_cast<uint8_t>(ChannelField::Vol), pos);
-        break;
-    }
-    default:
-        return;
-    }
+    cache.set(state.voice, itemToPage(state.menuItemIndex), knob, newVal);
+
+    // update snapshot
+    state.fieldValues[knob] = cache.get(
+        state.voice,
+        itemToPage(state.menuItemIndex),
+        knob);
+    state.encoderRanges = calcEncoderRanges();
     notify();
 }
 
 std::array<EncoderRange, 4> Menu::calcEncoderRanges()
 {
-    switch (mode)
+    switch (state.mode)
     {
     case AppMode::MenuList:
         return getEncoderRangesMenuList(voiceCount);
     case AppMode::Page:
-        return getEncoderRangesPage(itemToPage(itemIndex));
+        return getEncoderRangesPage(itemToPage(state.menuItemIndex));
     case AppMode::Popup:
-        return getEncoderRangesPopup(popup);
+        return getEncoderRangesPopup(state.popup);
     default:
         return {};
     }
 }
+
 void Menu::notify()
 {
     if (!displayCb)
         return;
-    MenuState s;
-    s.mode = mode;
-    s.popup = popup;
-    s.voice = voice;
-    s.menuItemIndex = itemIndex;
-    s.channel = cache.get(voice, Page::Channel, 0);
-    s.volume = cache.get(voice, Page::Channel, 1);
-    if (isPageItem(itemIndex))
-    {
-        for (int i = 0; i < 4; ++i)
-            s.fieldValues[i] = cache.get(voice, itemToPage(itemIndex), i);
-    }
-    s.popup = popup;
-    s.encoderRanges = calcEncoderRanges();
-    displayCb(s);
+    displayCb(state);
 }

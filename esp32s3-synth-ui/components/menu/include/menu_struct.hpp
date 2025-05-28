@@ -198,7 +198,7 @@ namespace menu
     static constexpr uint8_t workflowCnt = sizeof(popupWorkflows) / sizeof(*popupWorkflows);
     static constexpr uint8_t menuItemCnt = pageCnt + workflowCnt;
 
-       /// “Is this index a real Page?”
+    /// “Is this index a real Page?”
     static inline bool isPageItem(uint8_t itemIndex)
     {
         return itemIndex < pageCnt;
@@ -220,5 +220,17 @@ namespace menu
     static inline const PopupWorkflow &itemToWorkflow(uint8_t itemIndex)
     {
         return popupWorkflows[itemIndex - pageCnt];
+    }
+
+    inline PopupMode getCurrentPopupMode(const PopupState &p)
+    {
+        size_t wf = static_cast<size_t>(p.workflowIndex);
+        if (wf >= workflowCnt)
+            return PopupMode::Count;
+        const auto &workflow = popupWorkflows[wf];
+        uint8_t step = p.stepIndex;
+        if (step >= workflow.stepCount)
+            return PopupMode::Count;
+        return workflow.steps[step].mode;
     }
 } // namespace menu

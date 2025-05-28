@@ -44,18 +44,15 @@ namespace menu
         bool updatePopupStateForward();
         bool updatePopupStateBack();
 
-
         uint8_t voiceCount;
         ParamCache cache;
-        PopupState popup;
         ParamStore paramStore;
 
         uint8_t voice = 0; // zero-based index internally
-
-        AppMode mode = AppMode::MenuList;
-        uint8_t itemIndex = 0;
+        MenuState state;
 
         DisplayCallback displayCb;
     };
+    
 
 } // namespace menu

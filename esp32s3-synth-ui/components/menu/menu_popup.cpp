@@ -1,3 +1,4 @@
+// Menu.cpp
 
 #include <algorithm>
 #include <cstdint>
@@ -7,78 +8,140 @@
 
 #include "menu.hpp"
 #include "menu_struct.hpp"
+
 static const char *TAG = "Menu";
 using namespace menu;
 
-void Menu::changeValuePopup(uint8_t knob, int8_t pos) {}
+void Menu::changeValuePopup(uint8_t knob, int8_t pos)
+{
+    auto &ps = state.popup;
+    // grab the current mode via helper
+    auto mode = getCurrentPopupMode(ps);
+
+    if (isListPopup(mode))
+    {
+        // only encoder 0 matters: selects slotIndex in the list
+        if (knob == 0)
+        {
+            int maxIdx = ps.listItems.empty() ? 0 : int(ps.listItems.size()) - 1;
+            ps.slotIndex = std::clamp<int>(pos, 0, maxIdx);
+        }
+    }
+    else if (isInputPopup(mode))
+    {
+        // each encoder i (0..3) sets the character at editName[i]
+        if (knob < MaxFieldsPerPage)
+        {
+            int idx = std::clamp<int>(pos, 0, nameAlphabetSize - 1);
+            ps.editName[knob] = nameAlphabet[idx];
+            // move the visible “cursor” to this position
+            ps.slotIndex = knob;
+        }
+    }
+    else
+    {
+        // confirmation popups don’t react to knobs
+        return;
+    }
+
+    // update ranges in case they depend on slotIndex or list size
+    state.encoderRanges = calcEncoderRanges();
+    notify();
+}
 
 void Menu::enterPopup()
 {
-    using namespace menu;
+    // 1) flip into Popup mode
+    state.mode = AppMode::Popup;
 
-    // 1) Switch mode
-    mode = AppMode::Popup;
-
-    // 2) Pick which workflow from your linear itemIndex
-    //    (items 0..PageCount-1 are pages, the rest are workflows)
-    uint8_t rawWf = itemIndex - PageCount;
+    // 2) pick workflow from menuItemIndex
+    uint8_t rawWf = state.menuItemIndex - PageCount;
     rawWf = std::min<uint8_t>(rawWf, static_cast<uint8_t>(Workflow::Count) - 1);
 
-    // 3) Reset your PopupState member
-    popup = {}; // zero‐initialize everything, including listItems
-    popup.workflowIndex = static_cast<Workflow>(rawWf);
-    popup.stepIndex = 0; // first step
-    popup.slotIndex = 0; // cursor at top
+    // 3) reset PopupState
+    state.popup = {};
+    state.popup.workflowIndex = static_cast<Workflow>(rawWf);
+    state.popup.stepIndex = 0;
+    state.popup.slotIndex = 0;
 
-    // 4) If that first step wants a list, grab it now
-    const auto &firstEntry = popupWorkflows[rawWf].steps[0];
-    if (isListPopup(firstEntry.mode))
+    // 4) if the first step is a list, fetch names
+    auto firstMode = getCurrentPopupMode(state.popup);
+    if (isListPopup(firstMode))
     {
-        switch (firstEntry.mode)
+        if (firstMode == PopupMode::LoadVoiceList ||
+            firstMode == PopupMode::SaveVoiceList)
         {
-        case PopupMode::LoadVoiceList:
-        case PopupMode::SaveVoiceList:
-            popup.listItems = paramStore.listVoiceNames();
-            break;
-
-        case PopupMode::LoadProjectList:
-        case PopupMode::SaveProjectList:
-            popup.listItems = paramStore.listProjectNames();
-            break;
-
-        default:
-            popup.listItems.clear();
-            break;
+            state.popup.listItems = paramStore.listVoiceNames();
+        }
+        else
+        {
+            state.popup.listItems = paramStore.listProjectNames();
         }
     }
 
-    // 5) Finally, tell the display
+    // 5) recompute ranges & notify
+    state.encoderRanges = calcEncoderRanges();
     notify();
 }
 
 void Menu::closePopup()
 {
-    // 1) Back to the menu list
-    mode = AppMode::MenuList;
+    // go back to list mode
+    state.mode = AppMode::MenuList;
 
-    // 2) Clear out popup state entirely
-    auto &p = popup;
-    p = {}; // workflowIndex = Count (invalid), stepIndex = 0, slotIndex = -1, editName = ""
-            // nameEditing = false
+    // clear popup state
+    state.popup = {};
 
+    state.encoderRanges = calcEncoderRanges();
     notify();
 }
 
 bool Menu::updatePopupStateForward()
 {
-    // Simply try to advance the stepIndex in popup.
-    // Returns true if we moved forward, false if already at last step.
-    return menu::advancePopup(popup);
+    // advance one step
+    bool ok = advancePopup(state.popup);
+    if (ok)
+    {
+        auto mode = getCurrentPopupMode(state.popup);
+        if (isListPopup(mode))
+        {
+            // repopulate listItems on entering a list step
+            if (mode == PopupMode::LoadVoiceList ||
+                mode == PopupMode::SaveVoiceList)
+            {
+                state.popup.listItems = paramStore.listVoiceNames();
+            }
+            else
+            {
+                state.popup.listItems = paramStore.listProjectNames();
+            }
+            state.popup.slotIndex = 0;
+        }
+    }
+    return ok;
 }
 
 bool Menu::updatePopupStateBack()
 {
-    // Simply try to retreat the stepIndex in popup.
-    // Returns true if we moved back, false if already at first step.
-    return menu::retreatPopup(popup);
+    // retreat one step
+    bool ok = retreatPopup(state.popup);
+    if (ok)
+    {
+        auto mode = getCurrentPopupMode(state.popup);
+        if (isListPopup(mode))
+        {
+            // repopulate listItems on re-entering a list step
+            if (mode == PopupMode::LoadVoiceList ||
+                mode == PopupMode::SaveVoiceList)
+            {
+                state.popup.listItems = paramStore.listVoiceNames();
+            }
+            else
+            {
+                state.popup.listItems = paramStore.listProjectNames();
+            }
+            state.popup.slotIndex = 0;
+        }
+    }
+    return ok;
 }
