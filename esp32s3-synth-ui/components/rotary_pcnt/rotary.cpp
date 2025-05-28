@@ -99,48 +99,42 @@ void Rotary::startTask()
 
 void Rotary::processEvents()
 {
-    int event_count = 0;
-    int rawCount = 0;
-    int prevCount = 0;
+    int event_count = 0, rawCount = 0, prevCount = 0;
 
     while (true)
     {
-        // Block until ISR signals a delta (+increment or -increment)
         if (xQueueReceive(eventQueue, &event_count, portMAX_DELAY) == pdTRUE)
         {
             vTaskDelay(pdMS_TO_TICKS(10));
-            // Read raw count and convert to detents
             pcnt_unit_get_count(unit, &rawCount);
             int detents = rawCount / STEPS_PER_INDENT;
 
-            // Only proceed if changed
             if (detents != prevCount)
             {
                 int delta = detents - prevCount;
                 prevCount = detents;
 
-                // Forward rotation: +increment
-                if (delta > 0 && position < config.maxValue)
+                int next = static_cast<int>(position) + (delta > 0 ? config.increment : -static_cast<int>(config.increment));
+
+                if (config.wrapAround)
                 {
-                    int newPos = std::clamp(
-                        static_cast<int>(position) + static_cast<int>(config.increment),
-                        static_cast<int>(config.minValue),
-                        static_cast<int>(config.maxValue));
-                    position = static_cast<uint8_t>(newPos);
-                    if (callback)
-                        callback(config.id, position);
+                    // wrap behavior
+                    if (next > static_cast<int>(config.maxValue))
+                        position = config.minValue;
+                    else if (next < static_cast<int>(config.minValue))
+                        position = config.maxValue;
+                    else
+                        position = static_cast<int16_t>(next);
                 }
-                // Backward rotation: -increment
-                else if (delta < 0 && position > config.minValue)
+                else
                 {
-                    int newPos = std::clamp(
-                        static_cast<int>(position) - static_cast<int>(config.increment),
-                        static_cast<int>(config.minValue),
-                        static_cast<int>(config.maxValue));
-                    position = static_cast<uint8_t>(newPos);
-                    if (callback)
-                        callback(config.id, position);
+                    // clamp behavior
+                    next = std::clamp(next, static_cast<int>(config.minValue), static_cast<int>(config.maxValue));
+                    position = static_cast<int16_t>(next);
                 }
+
+                if (callback)
+                    callback(config.id, position);
             }
         }
     }

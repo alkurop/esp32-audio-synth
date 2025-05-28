@@ -179,8 +179,9 @@ namespace menu
     /// Simple [min,max] for an encoder knob.
     struct EncoderRange
     {
-        uint8_t min;
-        uint8_t max;
+        int16_t min;
+        int16_t max;
+        int16_t value = 0;
     };
     /**
      * Holds the full menu state for UI callbacks.

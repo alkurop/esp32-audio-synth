@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include "param_struct.hpp"
 
 namespace menu
 {
@@ -110,7 +111,7 @@ namespace menu
         uint8_t stepIndex = 0;                    ///< 0..stepCount-1
         uint8_t slotIndex = 0;                    ///< voice/project slot cursor
         char editName[5] = {'\0'};                ///< 4-char rename buffer
-        std::vector<std::string> listItems;       ///< current list of names
+        std::vector<NameEntry> listItems;       ///< current list of names
     };
 
     static constexpr char nameAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

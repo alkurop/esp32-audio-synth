@@ -148,32 +148,6 @@ namespace menu
         return entry;
     }
 
-    std::vector<std::string> ParamStore::listProjectNames() const
-    {
-        std::vector<std::string> names;
-        nvs_handle handle;
-        if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK)
-            return names;
-        int32_t count = 0;
-        if (nvs_get_i32(handle, KEY_PROJ_COUNT, &count) == ESP_OK && count > 0)
-        {
-            for (int i = 0; i < count && i < maxProjects; ++i)
-            {
-                char key[32];
-                size_t len = 0;
-                std::snprintf(key, sizeof(key), "%s%d", KEY_PROJ_NAME, i);
-                if (nvs_get_str(handle, key, nullptr, &len) == ESP_OK)
-                {
-                    std::string name(len, '\0');
-                    nvs_get_str(handle, key, &name[0], &len);
-                    names.push_back(name);
-                }
-            }
-        }
-        nvs_close(handle);
-        return names;
-    }
-
     uint8_t ParamStore::getCurrentProjectIndex() const
     {
         return currentProjectIndex;
@@ -332,30 +306,96 @@ namespace menu
         return entry;
     }
 
-    std::vector<std::string> ParamStore::listVoiceNames() const
+    // List project names along with a "loaded" flag and sensible defaults for each slot
+    std::vector<NameEntry> ParamStore::listProjectNames() const
     {
-        std::vector<std::string> names;
+        std::vector<NameEntry> entries(maxProjects);
+        // Initialize with default names and loaded=false
+        for (uint8_t i = 0; i < maxProjects; ++i)
+        {
+            entries[i].name = makeDisplayName(i, std::nullopt);
+            entries[i].loaded = false;
+        }
+
         nvs_handle handle;
         if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK)
-            return names;
-        int32_t count = 0;
-        if (nvs_get_i32(handle, KEY_VOICE_COUNT, &count) == ESP_OK && count > 0)
         {
-            for (int i = 0; i < count && i < maxVoices; ++i)
+            return entries;
+        }
+
+        int32_t storedCount = 0;
+        if (nvs_get_i32(handle, KEY_PROJ_COUNT, &storedCount) != ESP_OK || storedCount <= 0)
+        {
+            nvs_close(handle);
+            return entries;
+        }
+
+        // For each saved slot, overwrite name and mark loaded
+        for (uint8_t i = 0; i < entries.size() && i < static_cast<uint8_t>(storedCount); ++i)
+        {
+            char key[32];
+            size_t len = 0;
+            std::snprintf(key, sizeof(key), "%s%u", KEY_PROJ_NAME, i);
+            if (nvs_get_str(handle, key, nullptr, &len) == ESP_OK)
             {
-                char key[32];
-                size_t len = 0;
-                std::snprintf(key, sizeof(key), "%s%d", KEY_VOICE_NAME, i);
-                if (nvs_get_str(handle, key, nullptr, &len) == ESP_OK)
+                std::string name(len, '\0');
+                nvs_get_str(handle, key, &name[0], &len);
+                if (!name.empty())
                 {
-                    std::string name(len, '\0');
-                    nvs_get_str(handle, key, &name[0], &len);
-                    names.push_back(name);
+                    entries[i].name = name;
                 }
+                entries[i].loaded = true;
             }
         }
+
         nvs_close(handle);
-        return names;
+        return entries;
+    }
+
+    // List voice names along with a "loaded" flag and sensible defaults for each slot
+    std::vector<NameEntry> ParamStore::listVoiceNames() const
+    {
+        std::vector<NameEntry> entries(maxVoices);
+        // Initialize with default names and loaded=false
+        for (uint8_t i = 0; i < maxVoices; ++i)
+        {
+            entries[i].name = makeDisplayName(i, std::nullopt);
+            entries[i].loaded = false;
+        }
+
+        nvs_handle handle;
+        if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK)
+        {
+            return entries;
+        }
+
+        int32_t storedCount = 0;
+        if (nvs_get_i32(handle, KEY_VOICE_COUNT, &storedCount) != ESP_OK || storedCount <= 0)
+        {
+            nvs_close(handle);
+            return entries;
+        }
+
+        // For each saved slot, overwrite name and mark loaded
+        for (uint8_t i = 0; i < entries.size() && i < static_cast<uint8_t>(storedCount); ++i)
+        {
+            char key[32];
+            size_t len = 0;
+            std::snprintf(key, sizeof(key), "%s%u", KEY_VOICE_NAME, i);
+            if (nvs_get_str(handle, key, nullptr, &len) == ESP_OK)
+            {
+                std::string name(len, '\0');
+                nvs_get_str(handle, key, &name[0], &len);
+                if (!name.empty())
+                {
+                    entries[i].name = name;
+                }
+                entries[i].loaded = true;
+            }
+        }
+
+        nvs_close(handle);
+        return entries;
     }
 
 } // namespace menu

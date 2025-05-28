@@ -20,6 +20,9 @@ using namespace menu;
 
 void SSD1306::renderPopup(const menu::MenuState &st)
 {
+    if (!lvgl_port_lock(0))
+        return;
+
     const auto &ps = st.popup;
     size_t wfIdx = static_cast<size_t>(ps.workflowIndex);
     if (wfIdx >= static_cast<size_t>(Workflow::Count))
@@ -31,9 +34,6 @@ void SSD1306::renderPopup(const menu::MenuState &st)
 
     // 2) Header
     renderPopupHeader(entry);
-
-    // 3) Show container (hides main menu)
-    showPopup();
 
     // 4) Compute layout once
     PopupLayout layout{
@@ -53,10 +53,13 @@ void SSD1306::renderPopup(const menu::MenuState &st)
         lv_obj_align_to(popupContainer, topbar_label,
                         LV_ALIGN_OUT_BOTTOM_LEFT, 0, 4);
     }
-    lv_obj_clean(popupContainer);
+    else
+    {
+        lv_obj_clean(popupContainer);
+    }
 
     // 6) Steps row
-    renderPopupSteps(wf, ps.stepIndex, layout);
+    // renderPopupSteps(wf, ps.stepIndex, layout);
 
     // 7) Body by type
     if (isListPopup(entry.mode))
@@ -65,59 +68,53 @@ void SSD1306::renderPopup(const menu::MenuState &st)
         renderPopupInput(st, layout);
     else
         renderPopupConfirm(st, layout);
-
-    // 8) Trigger LVGL draw
+        
+    showPopup();
     lv_timer_handler();
+    lvgl_port_unlock();
 }
 
 void SSD1306::renderPopupHeader(const menu::PopupEntry &entry)
 {
     lv_label_set_text(topbar_label, entry.title);
-    lv_obj_align(topbar_label, LV_ALIGN_TOP_MID, 0, 0);
-}
-
-void SSD1306::renderPopupSteps(const menu::PopupWorkflow &wf, uint8_t stepIndex, const PopupLayout &L)
-{
-    int step_w = L.get_step_width(wf.stepCount);
-    for (uint8_t i = 0; i < wf.stepCount; ++i)
-    {
-        lv_obj_t *lbl = lv_label_create(popupContainer);
-        lv_obj_set_style_text_font(lbl, &lv_font_montserrat_12, LV_STATE_DEFAULT);
-        lv_label_set_text(lbl, wf.steps[i].title);
-        lv_obj_set_pos(lbl, i * step_w + (step_w - lv_obj_get_width(lbl)) / 2, L.title_bar_height);
-
-        if (i == stepIndex)
-        {
-            lv_obj_t *bar = lv_obj_create(popupContainer);
-            lv_obj_set_size(bar, step_w - 4, 2);
-            lv_obj_set_style_bg_color(bar, lv_color_white(), LV_STATE_DEFAULT);
-            lv_obj_set_pos(bar, i * step_w + 2, L.title_bar_height + L.step_indicator_height - 2);
-        }
-    }
+    lv_obj_align(topbar_label, LV_ALIGN_TOP_LEFT, 0, 0);
 }
 
 void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
 {
     const auto &ps = st.popup;
-    const auto &wf = popupWorkflows[static_cast<size_t>(ps.workflowIndex)];
-    const auto &entry = wf.steps[ps.stepIndex];
+    const auto &entries = ps.listItems;
 
-    // Choose voice vs. project names
-    const auto &names = st.popup.listItems;
+    // 2) Make sure this container scrolls vertically
+    lv_obj_set_scrollbar_mode(popupContainer, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_dir(popupContainer, LV_DIR_VER);
 
-    // Draw up to 4 items starting at L.body_start_y
-    for (size_t i = 0; i < names.size() && i < 4; ++i)
+    // 3) Create one label per entry, and style the selected one
+    static constexpr int ITEM_HEIGHT = 14;
+    lv_obj_t *selected_lbl = nullptr;
+
+    for (size_t i = 0; i < entries.size(); ++i)
     {
         lv_obj_t *lbl = lv_label_create(popupContainer);
-        lv_label_set_text(lbl, names[i].c_str());
-        lv_obj_set_pos(lbl, 4, L.body_start_y + i * 14);
+        lv_label_set_text(lbl, entries[i].name.c_str());
+        lv_obj_set_width(lbl, L.container_width);
+        lv_obj_set_y(lbl, int(i) * ITEM_HEIGHT);
 
         if (i == ps.slotIndex)
         {
-            // invert colors for the selected item
-            lv_obj_set_style_text_color(lbl, lv_color_white(), LV_STATE_DEFAULT);
-            lv_obj_set_style_bg_color(lbl, lv_color_black(), LV_STATE_DEFAULT);
+            // apply the “checked” style
+            lv_obj_add_state(lbl, LV_STATE_CHECKED);
+            lv_obj_set_style_bg_opa(lbl, LV_OPA_COVER, LV_STATE_CHECKED);
+            lv_obj_set_style_bg_color(lbl, lv_color_black(), LV_STATE_CHECKED);
+            lv_obj_set_style_text_color(lbl, lv_color_white(), LV_STATE_CHECKED);
+            selected_lbl = lbl;
         }
+    }
+
+    // 4) Scroll the selected label into view (if any)
+    if (selected_lbl)
+    {
+        lv_obj_scroll_to_view(selected_lbl, LV_ANIM_OFF);
     }
 }
 
@@ -157,20 +154,4 @@ void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L
     lv_obj_t *lbl = lv_label_create(popupContainer);
     lv_label_set_text(lbl, "Done!");
     lv_obj_set_pos(lbl, (L.container_width - lv_obj_get_width(lbl)) / 2, L.body_start_y + (L.container_height - L.body_start_y) / 2);
-}
-
-void SSD1306::showPopup()
-{
-    if (menuContainer)
-    {
-        lv_obj_add_flag(menuContainer, LV_OBJ_FLAG_HIDDEN);
-    }
-    if (pageContainer)
-    {
-        lv_obj_add_flag(pageContainer, LV_OBJ_FLAG_HIDDEN);
-    }
-    if (popupContainer)
-    {
-        lv_obj_clear_flag(popupContainer, LV_OBJ_FLAG_HIDDEN);
-    }
 }

@@ -12,7 +12,7 @@
 static const char *TAG = "Menu";
 using namespace menu;
 
-void Menu::changeValuePopup(uint8_t knob, int8_t pos)
+void Menu::changeValuePopup(uint8_t knob, uint8_t pos)
 {
     auto &ps = state.popup;
     // grab the current mode via helper
@@ -23,8 +23,7 @@ void Menu::changeValuePopup(uint8_t knob, int8_t pos)
         // only encoder 0 matters: selects slotIndex in the list
         if (knob == 0)
         {
-            int maxIdx = ps.listItems.empty() ? 0 : int(ps.listItems.size()) - 1;
-            ps.slotIndex = std::clamp<int>(pos, 0, maxIdx);
+            ps.slotIndex = pos;
         }
     }
     else if (isInputPopup(mode))

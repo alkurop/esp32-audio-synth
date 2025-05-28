@@ -14,8 +14,6 @@
 namespace menu
 {
 
-    
-
     using DisplayCallback = std::function<void(const MenuState &state)>;
 
     /**
@@ -31,7 +29,7 @@ namespace menu
         void exitMenuPage();
         void closePopup();
         void enterPopup();
-        void rotateKnob(uint8_t knob, int8_t value);
+        void rotateKnob(uint8_t knob, uint8_t value);
 
     private:
         /// Notify the display callback of the current cached state.
@@ -41,9 +39,9 @@ namespace menu
         std::array<EncoderRange, 4> calcEncoderRanges();
 
         /// Handlers for knob changes in each mode
-        void changeValueMenuList(uint8_t knob, int8_t value);
-        void changeValuePage(uint8_t knob, int8_t value);
-        void changeValuePopup(uint8_t knob, int8_t value);
+        void changeValueMenuList(uint8_t knob, uint8_t value);
+        void changeValuePage(uint8_t knob, uint8_t value);
+        void changeValuePopup(uint8_t knob, uint8_t value);
 
         /// Advance or retreat in a popup workflow
         bool updatePopupStateForward();
@@ -54,7 +52,8 @@ namespace menu
         void saveVoice(uint8_t slotIndex, const std::string &name);
         void loadProject(uint8_t slotIndex);
         void saveProject(uint8_t slotIndex, const std::string &name);
-
+        void updateFieldValuesFromCache();
+        
         uint8_t voiceCount;
         ParamCache cache;
         ParamStore paramStore;

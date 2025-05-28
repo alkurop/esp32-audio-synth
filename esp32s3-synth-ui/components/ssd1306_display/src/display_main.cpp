@@ -70,6 +70,8 @@ void SSD1306::initMenuList(lv_obj_t *scr)
 
 void SSD1306::renderMenuList(const menu::MenuState &st)
 {
+    if (!lvgl_port_lock(0))
+        return;
 
     lv_obj_t *scr = lv_scr_act();
     // Update title bar
@@ -83,6 +85,7 @@ void SSD1306::renderMenuList(const menu::MenuState &st)
     // Show menu and highlight
     showMenuList(st.menuItemIndex);
     lv_timer_handler();
+    lvgl_port_unlock();
 }
 
 void SSD1306::showMenuList(uint8_t page)
@@ -105,6 +108,8 @@ void SSD1306::showMenuList(uint8_t page)
 
 void SSD1306::renderMenuPage(const menu::MenuState &st)
 {
+    if (!lvgl_port_lock(0))
+        return;
 
     lv_obj_t *scr = lv_scr_act();
 
@@ -182,6 +187,7 @@ void SSD1306::renderMenuPage(const menu::MenuState &st)
 
     // Refresh & unlock
     lv_timer_handler();
+    lvgl_port_unlock();
 }
 
 void SSD1306::showPage()
@@ -241,4 +247,18 @@ void SSD1306::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
     lv_obj_invalidate(topbar_label);
 };
 
-
+void SSD1306::showPopup()
+{
+    if (menuContainer)
+    {
+        lv_obj_add_flag(menuContainer, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (pageContainer)
+    {
+        lv_obj_add_flag(pageContainer, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (popupContainer)
+    {
+        lv_obj_clear_flag(popupContainer, LV_OBJ_FLAG_HIDDEN);
+    }
+}

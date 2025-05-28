@@ -81,7 +81,7 @@ void Menu::exitMenuPage()
     notify();
 }
 
-void Menu::rotateKnob(uint8_t knob, int8_t pos)
+void Menu::rotateKnob(uint8_t knob, uint8_t pos)
 {
     switch (state.mode)
     {
@@ -97,7 +97,7 @@ void Menu::rotateKnob(uint8_t knob, int8_t pos)
     }
 }
 
-void Menu::changeValueMenuList(uint8_t knob, int8_t pos)
+void Menu::changeValueMenuList(uint8_t knob, uint8_t pos)
 {
     switch (knob)
     {
@@ -125,7 +125,7 @@ void Menu::changeValueMenuList(uint8_t knob, int8_t pos)
     notify();
 }
 
-void Menu::changeValuePage(uint8_t knob, int8_t pos)
+void Menu::changeValuePage(uint8_t knob, uint8_t pos)
 {
     const auto &pi = menuPages[state.menuItemIndex];
     if (knob >= pi.fieldCount)
@@ -158,9 +158,9 @@ std::array<EncoderRange, 4> Menu::calcEncoderRanges()
     switch (state.mode)
     {
     case AppMode::MenuList:
-        return getEncoderRangesMenuList(voiceCount);
+        return getEncoderRangesMenuList(voiceCount, state);
     case AppMode::Page:
-        return getEncoderRangesPage(itemToPage(state.menuItemIndex));
+        return getEncoderRangesPage(itemToPage(state.menuItemIndex), state);
     case AppMode::Popup:
         return getEncoderRangesPopup(state.popup);
     default:
@@ -173,4 +173,19 @@ void Menu::notify()
     if (!displayCallback)
         return;
     displayCallback(state);
+}
+
+void Menu::updateFieldValuesFromCache()
+{
+    // Figure out which page we’re on
+    auto page = itemToPage(state.menuItemIndex);
+
+    // How many knobs/fields does that page have?
+    uint8_t count = menuPages[size_t(page)].fieldCount;
+
+    // Pull each one from the cache…
+    for (uint8_t knob = 0; knob < count; ++knob)
+    {
+        state.fieldValues[knob] = cache.get(state.voice, page, knob);
+    }
 }

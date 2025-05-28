@@ -92,7 +92,6 @@ namespace ui
         void selectMenuItem(uint8_t page);
 
         void renderPopupHeader(const menu::PopupEntry &entry);
-        void renderPopupSteps(const menu::PopupWorkflow &wf, uint8_t stepIndex, const PopupLayout &layout);
         void renderPopupList(const menu::MenuState &st, const PopupLayout &layout);
         void renderPopupInput(const menu::MenuState &st, const PopupLayout &layout);
         void renderPopupConfirm(const menu::MenuState &st, const PopupLayout &layout);

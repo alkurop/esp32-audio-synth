@@ -8,6 +8,7 @@
 #include "ssd1306.hpp"
 #include "menu.hpp"
 #include "encoder_range.hpp"
+#include "mapping.hpp"
 
 #define B0 GPIO_NUM_9
 #define B1 GPIO_NUM_10
@@ -115,8 +116,7 @@ static void render_task(void *arg)
         {
             for (int i = 0; i < ENCODER_COUNT; i++)
             {
-                auto range = st.encoderRanges[i];
-                encoders[i]->setRange(range.min, range.max);
+                updateEncoder(encoders[i], st.encoderRanges[i]);
             }
             // draw according to mode
             switch (st.mode)

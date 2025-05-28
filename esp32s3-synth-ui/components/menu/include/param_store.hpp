@@ -39,7 +39,7 @@ namespace menu
         /**
          * List all stored project names (most-recent first).
          */
-        std::vector<std::string> listProjectNames() const;
+        std::vector<NameEntry> listProjectNames() const;
 
         /**
          * Get the index of the currently loaded project, or -1.
@@ -77,7 +77,7 @@ namespace menu
         /**
          * List all stored voice names (most-recent first).
          */
-        std::vector<std::string> listVoiceNames() const;
+        std::vector<NameEntry> listVoiceNames() const;
 
     private:
         uint8_t maxProjects;

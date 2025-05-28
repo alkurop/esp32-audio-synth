@@ -33,7 +33,7 @@ namespace menu
     {
         uint8_t index;                   ///< Slot index (0-based)
         std::optional<std::string> name; ///< Optional 4-char name
-        std::vector<int16_t> params;      ///< Flat parameter array [page][field]
+        std::vector<int16_t> params;     ///< Flat parameter array [page][field]
 
         /**
          * Get the display name: explicit name or fallback "Vn".
@@ -61,6 +61,12 @@ namespace menu
         {
             return makeDisplayName(index, name);
         }
+    };
+
+    struct NameEntry
+    {
+        std::string name; ///< The stored name (may be empty)
+        bool loaded;      ///< true if this slot was present in NVS
     };
 
 }

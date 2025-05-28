@@ -18,10 +18,11 @@ namespace ui
         gpio_num_t pin_clk; ///< GPIO number for encoder CLK pin
         gpio_num_t pin_dt;  ///< GPIO number for encoder DT pin
 
-        uint8_t minValue = 0;   ///< Minimum allowed encoder value
-        uint8_t maxValue = 127; ///< Maximum allowed encoder value
+        int16_t minValue = 0;   ///< Minimum allowed encoder value
+        int16_t maxValue = 127; ///< Maximum allowed encoder value
         uint8_t increment = 1;
         uint16_t glitchFilterNs = 100;
+        bool wrapAround = true;
     };
 
     /**
@@ -53,7 +54,7 @@ namespace ui
          *          * @param maxValue  Upper bound for the encoder value
 
          */
-        inline void setRange(uint8_t minValue, uint8_t maxValue)
+        inline void setRange(int16_t minValue, int16_t maxValue)
         {
             config.minValue = minValue;
             config.maxValue = maxValue;
@@ -63,18 +64,27 @@ namespace ui
          * @brief Force the current position (will invoke callback)
          * @param value  New position to set
          */
-        inline void setPosition(uint8_t value)
+        inline void setPosition(int16_t value, bool send = false)
         {
             position = value;
-            if (callback)
+            if (send && callback)
             {
                 callback(config.id, position);
             }
         }
 
+        /**
+         * @brief Force the current position (will invoke callback)
+         * @param value  New position to set
+         */
+        inline void setWrapAround(bool wrapAround)
+        {
+            config.wrapAround = wrapAround;
+        }
+
     private:
         RotaryCallback callback = nullptr;
-        uint8_t position = 0;
+        int16_t position = 0;
 
         pcnt_unit_handle_t unit = nullptr;
         void initGPIOInterrupt();

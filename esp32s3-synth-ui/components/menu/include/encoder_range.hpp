@@ -3,35 +3,52 @@
 #include "menu_struct.hpp"
 #include "param_store.hpp"
 
+#define MENU_POSITION_LIST 0
+#define MENU_POSITION_VOICE 1
+#define MENU_POSITION_CH 2
+#define MENU_POSITION_VOL 3
+
 namespace menu
 {
 
     static inline std::array<EncoderRange, 4> getEncoderRangesMenuList(
-        uint8_t voiceCount)
+        uint8_t voiceCount,
+        const MenuState &state)
     {
         std::array<EncoderRange, 4> R;
 
         // page selector
-        R[0] = {0, static_cast<uint8_t>(menuItemCnt - 1)};
-        // voice selector
-        R[1] = {0, static_cast<uint8_t>(voiceCount - 1)};
+        R[MENU_POSITION_LIST] = {
+            min : 0,
+            max : static_cast<uint8_t>(menuItemCnt - 1),
+            value : state.menuItemIndex
+        };
 
-        // channel on Channel page
-        const auto &ci = menuPages[size_t(Page::Channel)];
+        // voice selector
+        R[MENU_POSITION_VOICE] = {
+            min : 0,
+            max : static_cast<uint8_t>(voiceCount - 1),
+            value : state.volume
+        };
+
+        // channel on Main List (always numeric)
         {
-            const auto &fi = ci.fields[size_t(ChannelField::Chan)];
-            if (fi.type == FieldType::Range)
-                R[2] = EncoderRange{static_cast<uint8_t>(fi.min), static_cast<uint8_t>(fi.max)};
-            else
-                R[2] = EncoderRange{0, static_cast<uint8_t>(fi.optCount - 1)};
+            const auto &fi = menuPages[size_t(Page::Channel)].fields[size_t(ChannelField::Chan)];
+            R[MENU_POSITION_CH] = {
+                min : static_cast<int16_t>(fi.min),
+                max : static_cast<int16_t>(fi.max),
+                value : state.channel
+            };
         }
-        // volume on Channel page
+
+        // volume on Main List (always numeric)
         {
-            const auto &fi = ci.fields[size_t(ChannelField::Vol)];
-            if (fi.type == FieldType::Range)
-                R[3] = EncoderRange{static_cast<uint8_t>(fi.min), static_cast<uint8_t>(fi.max)};
-            else
-                R[3] = EncoderRange{0, static_cast<uint8_t>(fi.optCount - 1)};
+            const auto &fi = menuPages[size_t(Page::Channel)].fields[size_t(ChannelField::Vol)];
+            R[MENU_POSITION_VOL] = {
+                min : static_cast<int16_t>(fi.min),
+                max : static_cast<int16_t>(fi.max),
+                value : state.volume
+            };
         }
 
         return R;
@@ -39,7 +56,8 @@ namespace menu
 
     /// Edit‐page ranges: knob0–3 map directly to the current page’s fields
     static inline std::array<EncoderRange, 4> getEncoderRangesPage(
-        const Page &page)
+        const Page &page,
+        const MenuState &state)
     {
         std::array<EncoderRange, 4> R;
         const auto &pi = menuPages[size_t(page)];
@@ -50,62 +68,73 @@ namespace menu
             {
                 const auto &fi = pi.fields[k];
                 if (fi.type == FieldType::Range)
-                    R[k] = EncoderRange{static_cast<uint8_t>(fi.min), static_cast<uint8_t>(fi.max)};
+                    R[k] = EncoderRange{
+                        min : static_cast<int16_t>(fi.min),
+                        max : static_cast<int16_t>(fi.max),
+                        value : state.fieldValues[k]
+                    };
                 else
-                    R[k] = EncoderRange{0, static_cast<uint8_t>(fi.optCount - 1)};
+                    R[k] = EncoderRange{
+                        min : 0,
+                        max : static_cast<int16_t>(fi.optCount - 1),
+                        value : state.fieldValues[k]
+                    };
             }
             else
             {
-                R[k] = EncoderRange{0, 0};
+                R[k] = EncoderRange{min : 0, max : 0, value : 0};
             }
         }
         return R;
     }
 
     static inline std::array<EncoderRange, 4> getEncoderRangesPopup(
-        const PopupState &popupState)
+        const PopupState &st)
     {
-        using namespace menu;
-        std::array<EncoderRange, 4> R{}; // all {0,0}
+        std::array<EncoderRange, 4> R{};
 
-        // 1) Validate workflow + step
-        size_t wfIdx = static_cast<size_t>(popupState.workflowIndex);
-        if (wfIdx >= workflowCnt)
-            return R;
-        const auto &wf = popupWorkflows[wfIdx];
-
-        uint8_t step = popupState.stepIndex;
-        if (step >= wf.stepCount)
-            return R;
-        const auto &entry = wf.steps[step];
-
-        // 2) Dispatch by layout type
-        if (isListPopup(entry.mode))
+        // 0) Step selector
         {
-            // pick voice vs project list
-            size_t n;
-            switch (entry.mode)
-            {
-            case PopupMode::LoadVoiceList:
-            case PopupMode::SaveVoiceList:
-                n = popupState.listItems.size();
-                break;
-            default:
-                n = popupState.listItems.size();
-                break;
-            }
-            uint8_t max = n > 0 ? uint8_t(n - 1) : 0;
-            R[0] = {0, max};
+            size_t wf = size_t(st.workflowIndex);
+            const auto &wk = (wf < workflowCnt ? popupWorkflows[wf] : popupWorkflows[0]);
+            R[0] = {0,
+                    static_cast<uint8_t>(wk.stepCount - 1),
+                    st.stepIndex};
         }
-        else if (isInputPopup(entry.mode))
+
+        // 1) Slot selector
         {
-            // all four encoders cycle through the alphabet
-            for (int i = 0; i < 4; ++i)
-            {
-                R[i] = {0, uint8_t(nameAlphabetSize - 1)};
-            }
+            uint8_t maxSlot = st.listItems.empty() ? 0 : static_cast<uint8_t>(st.listItems.size() - 1);
+            R[1] = {min : 0,
+                    max : maxSlot,
+                    value : std::clamp<uint8_t>(st.slotIndex, 0, maxSlot)};
         }
-        // else confirmation or others: leave all at {0,0}
+
+        // 2) Character‐index selector (0..3 for a 4‐char name)
+        {
+            constexpr uint8_t maxCharPos = sizeof(st.editName) / sizeof(*st.editName) - 1;
+            // You might want a separate `charIndex` in PopupState; if not, reuse slotIndex
+            uint8_t pos = std::clamp<uint8_t>(st.slotIndex, 0, maxCharPos);
+            R[2] = {min : 0, max : maxCharPos, value : pos};
+        }
+
+        // 3) Character‐value selector using nameAlphabet[]
+        {
+            constexpr size_t alphaLen = sizeof(nameAlphabet) - 1; // minus trailing '\0'
+
+            // Determine current letter index
+            char cur = st.editName[std::clamp<uint8_t>(st.slotIndex, 0, alphaLen - 1)];
+            auto it = std::find(nameAlphabet,
+                                nameAlphabet + alphaLen,
+                                cur);
+            uint8_t idx = (it != nameAlphabet + alphaLen)
+                              ? static_cast<uint8_t>(it - nameAlphabet)
+                              : 0;
+
+            R[3] = {0,
+                    static_cast<uint8_t>(alphaLen - 1),
+                    idx};
+        }
 
         return R;
     }
