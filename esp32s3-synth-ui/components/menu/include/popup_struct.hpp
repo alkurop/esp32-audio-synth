@@ -108,7 +108,7 @@ namespace menu
     {
         Workflow workflowIndex = Workflow::Count; ///< invalid until set
         uint8_t stepIndex = 0;                    ///< 0..stepCount-1
-        int8_t slotIndex = -1;                    ///< voice/project slot cursor
+        uint8_t slotIndex = 0;                    ///< voice/project slot cursor
         char editName[5] = {'\0'};                ///< 4-char rename buffer
         std::vector<std::string> listItems;       ///< current list of names
     };

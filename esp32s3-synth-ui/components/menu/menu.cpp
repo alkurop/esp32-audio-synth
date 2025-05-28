@@ -27,9 +27,9 @@ Menu::Menu(uint8_t voiceCount)
     // popup already default‐constructed (invalid workflowIndex)
 }
 
-void Menu::init(DisplayCallback displayCallback)
+void Menu::init(EventCallback eventCallback)
 {
-    displayCb = std::move(displayCallback);
+    eventCb = std::move(eventCallback);
     // prime the encoder ranges & draw initial screen
     state.encoderRanges = calcEncoderRanges();
     notify();
@@ -170,7 +170,7 @@ std::array<EncoderRange, 4> Menu::calcEncoderRanges()
 
 void Menu::notify()
 {
-    if (!displayCb)
+    if (!eventCb)
         return;
-    displayCb(state);
+    eventCb(DisplayEvent{state});
 }

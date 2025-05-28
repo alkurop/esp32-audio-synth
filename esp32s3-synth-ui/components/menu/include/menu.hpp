@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include <array>
+#include <variant>
 #include "menu_struct.hpp"
 #include "encoder_range.hpp"
 #include "param_cache.hpp"
@@ -17,6 +18,40 @@ namespace menu
     // Total number of pages
     static constexpr uint8_t PageCount = static_cast<uint8_t>(Page::_Count);
 
+    struct DisplayEvent
+    {
+        MenuState state;
+    };
+    struct SaveVoiceEvent
+    {
+        uint8_t slotIndex;
+        std::string name;
+    };
+    struct SaveProjectEvent
+    {
+        uint8_t slotIndex;
+        std::string name;
+    };
+
+    struct LoadVoiceEvent
+    {
+        uint8_t slotIndex;
+    };
+    struct LoadProjectEvent
+    {
+        uint8_t slotIndex;
+    };
+    using MenuEvent = std::variant<DisplayEvent, SaveVoiceEvent, SaveProjectEvent, LoadVoiceEvent, LoadProjectEvent>;
+
+    using EventCallback = std::function<void(const MenuEvent &)>;
+
+    template <class... Ts>
+    struct overloaded : Ts...
+    {
+        using Ts::operator()...;
+    };
+    template <class... Ts>
+    overloaded(Ts...) -> overloaded<Ts...>;
     /**
      * Menu controller: handles navigation and integrates
      * with ParameterStore for persistent values and presets.
@@ -25,9 +60,9 @@ namespace menu
     class Menu
     {
     public:
-        using DisplayCallback = std::function<void(const MenuState &state)>;
+        using EventCallback = std::function<void(const MenuEvent &)>;
         explicit Menu(uint8_t voiceCount);
-        void init(DisplayCallback displayCallback);
+        void init(EventCallback eventCallback);
         void enterMenuPage();
         void exitMenuPage();
         void closePopup();
@@ -51,8 +86,7 @@ namespace menu
         uint8_t voice = 0; // zero-based index internally
         MenuState state;
 
-        DisplayCallback displayCb;
+        EventCallback eventCb;
     };
-    
 
 } // namespace menu

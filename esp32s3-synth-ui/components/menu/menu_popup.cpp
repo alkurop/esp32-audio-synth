@@ -98,27 +98,54 @@ void Menu::closePopup()
 
 bool Menu::updatePopupStateForward()
 {
-    // advance one step
-    bool ok = advancePopup(state.popup);
-    if (ok)
+    // 1) Advance to the next step
+    bool didAdvance = advancePopup(state.popup);
+    if (!didAdvance)
+        return false;
+
+    // 2) What mode did we land on?
+    auto mode = getCurrentPopupMode(state.popup);
+
+    // 3) Fire off any “confirm” events
+    switch (mode)
     {
-        auto mode = getCurrentPopupMode(state.popup);
-        if (isListPopup(mode))
-        {
-            // repopulate listItems on entering a list step
-            if (mode == PopupMode::LoadVoiceList ||
-                mode == PopupMode::SaveVoiceList)
-            {
-                state.popup.listItems = paramStore.listVoiceNames();
-            }
-            else
-            {
-                state.popup.listItems = paramStore.listProjectNames();
-            }
-            state.popup.slotIndex = 0;
-        }
+    case PopupMode::LoadVoiceConfirm:
+    {
+        eventCb(LoadVoiceEvent{state.popup.slotIndex});
+        break;
     }
-    return ok;
+
+    case PopupMode::LoadProjectConfirm:
+    {
+        eventCb(LoadProjectEvent{state.popup.slotIndex});
+        break;
+    }
+
+    case PopupMode::SaveVoiceConfirm:
+    {
+        // grab the 4-char name as std::string
+        std::string name(state.popup.editName, state.popup.editName + 4);
+        eventCb(SaveVoiceEvent{
+            state.popup.slotIndex,
+            name});
+        break;
+    }
+
+    case PopupMode::SaveProjectConfirm:
+    {
+        std::string name(state.popup.editName, state.popup.editName + 4);
+        eventCb(SaveProjectEvent{
+            state.popup.slotIndex,
+            name});
+        break;
+    }
+
+    default:
+        // no event on other steps
+        break;
+    }
+
+    return true;
 }
 
 bool Menu::updatePopupStateBack()
