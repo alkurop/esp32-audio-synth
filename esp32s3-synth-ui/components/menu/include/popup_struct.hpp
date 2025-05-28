@@ -2,6 +2,9 @@
 #include <cstdint>
 #include <cstddef>
 #include <limits>
+#include <vector>
+#include <algorithm>
+#include <string>
 
 namespace menu
 {
@@ -35,6 +38,38 @@ namespace menu
         SaveProjectConfirm,
         Count
     };
+
+    // 2) Three arrays, one per layout type
+    static constexpr std::array<PopupMode, 4> listModes =
+        {{PopupMode::LoadVoiceList,
+          PopupMode::SaveVoiceList,
+          PopupMode::LoadProjectList,
+          PopupMode::SaveProjectList}};
+    static constexpr std::array<PopupMode, 2> inputModes =
+        {{PopupMode::SaveVoiceRename,
+          PopupMode::SaveProjectRename}};
+    static constexpr std::array<PopupMode, 4> confirmModes =
+        {{PopupMode::LoadVoiceConfirm,
+          PopupMode::SaveVoiceConfirm,
+          PopupMode::LoadProjectConfirm,
+          PopupMode::SaveProjectConfirm}};
+
+    // 3) Predicates
+    inline bool isListPopup(PopupMode m)
+    {
+        return std::any_of(listModes.begin(), listModes.end(), [m](auto x)
+                           { return x == m; });
+    }
+    inline bool isInputPopup(PopupMode m)
+    {
+        return std::any_of(inputModes.begin(), inputModes.end(), [m](auto x)
+                           { return x == m; });
+    }
+    inline bool isConfirmPopup(PopupMode m)
+    {
+        return std::any_of(confirmModes.begin(), confirmModes.end(), [m](auto x)
+                           { return x == m; });
+    }
 
     struct PopupEntry
     {
@@ -75,7 +110,7 @@ namespace menu
         uint8_t stepIndex = 0;                    ///< 0..stepCount-1
         int8_t slotIndex = -1;                    ///< voice/project slot cursor
         char editName[5] = {'\0'};                ///< 4-char rename buffer
-        bool nameEditing = false;                 ///< are we editing text?
+        std::vector<std::string> listItems;       ///< current list of names
     };
 
     static constexpr char nameAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

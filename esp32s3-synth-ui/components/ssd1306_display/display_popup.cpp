@@ -20,111 +20,143 @@ using namespace menu;
 
 void SSD1306::renderPopup(const menu::MenuState &st)
 {
-    using namespace menu;
     const auto &ps = st.popup;
-
-    // 1) Validate workflow index
-    auto wfIdx = static_cast<size_t>(ps.workflowIndex);
+    size_t wfIdx = static_cast<size_t>(ps.workflowIndex);
     if (wfIdx >= static_cast<size_t>(Workflow::Count))
         return;
 
-    // 2) Grab the workflow & current step entry
+    // 1) Lookup workflow & entry
     const auto &wf = popupWorkflows[wfIdx];
     const auto &entry = wf.steps[ps.stepIndex];
 
-    // 3) Update top‐bar with the step’s title
-    lv_label_set_text(topbar_label, entry.title);
-    lv_obj_align(topbar_label, LV_ALIGN_TOP_MID, 0, 0);
+    // 2) Header
+    renderPopupHeader(entry);
 
-    // 4) Show the popup container (hides main menu)
+    // 3) Show container (hides main menu)
     showPopup();
 
-    // 5) Layout constants
-    int container_w = cfg.width - 8;
-    int container_h = cfg.height - 18;
-    int title_h = 12;
-    int step_h = 10;
-    int body_y = title_h + step_h + 4;
+    // 4) Compute layout once
+    PopupLayout layout{
+        /*container_width*/ cfg.width - 8,
+        /*container_height*/ cfg.height - 18,
+        /*title_bar_height*/ 12,
+        /*step_indicator_height*/ 10,
+        /*body_start_y*/ 12 + 10 + 4};
 
-    // 6) (Re)create & clear the container
+    // 5) (Re)create & clear container
     if (!popupContainer)
     {
         popupContainer = lv_obj_create(lv_scr_act());
-        lv_obj_set_size(popupContainer, container_w, container_h);
-        lv_obj_align_to(popupContainer, topbar_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 4);
+        lv_obj_set_size(popupContainer,
+                        layout.container_width,
+                        layout.container_height);
+        lv_obj_align_to(popupContainer, topbar_label,
+                        LV_ALIGN_OUT_BOTTOM_LEFT, 0, 4);
     }
     lv_obj_clean(popupContainer);
 
-    // 7) Draw the step‐indicator bar & labels
-    int step_w = container_w / wf.stepCount;
-    for (size_t i = 0; i < wf.stepCount; ++i)
+    // 6) Steps row
+    renderPopupSteps(wf, ps.stepIndex, layout);
+
+    // 7) Body by type
+    if (isListPopup(entry.mode))
+        renderPopupList(st, layout);
+    else if (isInputPopup(entry.mode))
+        renderPopupInput(st, layout);
+    else
+        renderPopupConfirm(st, layout);
+
+    // 8) Trigger LVGL draw
+    lv_timer_handler();
+}
+
+void SSD1306::renderPopupHeader(const menu::PopupEntry &entry)
+{
+    lv_label_set_text(topbar_label, entry.title);
+    lv_obj_align(topbar_label, LV_ALIGN_TOP_MID, 0, 0);
+}
+
+void SSD1306::renderPopupSteps(const menu::PopupWorkflow &wf, uint8_t stepIndex, const PopupLayout &L)
+{
+    int step_w = L.get_step_width(wf.stepCount);
+    for (uint8_t i = 0; i < wf.stepCount; ++i)
     {
-        // step label
         lv_obj_t *lbl = lv_label_create(popupContainer);
         lv_obj_set_style_text_font(lbl, &lv_font_montserrat_12, LV_STATE_DEFAULT);
         lv_label_set_text(lbl, wf.steps[i].title);
-        lv_obj_set_pos(lbl,
-                       i * step_w + (step_w - lv_obj_get_width(lbl)) / 2,
-                       title_h);
+        lv_obj_set_pos(lbl, i * step_w + (step_w - lv_obj_get_width(lbl)) / 2, L.title_bar_height);
 
-        // highlight current step
-        if (i == ps.stepIndex)
+        if (i == stepIndex)
         {
             lv_obj_t *bar = lv_obj_create(popupContainer);
             lv_obj_set_size(bar, step_w - 4, 2);
             lv_obj_set_style_bg_color(bar, lv_color_white(), LV_STATE_DEFAULT);
-            lv_obj_set_pos(bar, i * step_w + 2, title_h + step_h - 2);
+            lv_obj_set_pos(bar, i * step_w + 2, L.title_bar_height + L.step_indicator_height - 2);
         }
     }
+}
 
-    // 8) Render the step’s content
-    switch (entry.mode)
-    {
-    case PopupMode::SaveVoiceRename:
-    case PopupMode::SaveProjectRename:
-    {
-        // draw the 4-char edit buffer + cursor
-        char buf[5] = {};
-        std::memcpy(buf, ps.editName, 4);
-        for (int i = 0; i < 4; ++i)
-            if (buf[i] == '\0')
-                buf[i] = '_';
+void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
+{
+    const auto &ps = st.popup;
+    const auto &wf = popupWorkflows[static_cast<size_t>(ps.workflowIndex)];
+    const auto &entry = wf.steps[ps.stepIndex];
 
-        int cell = container_w / 4;
-        for (int i = 0; i < 4; ++i)
+    // Choose voice vs. project names
+    const auto &names = st.popup.listItems;
+
+    // Draw up to 4 items starting at L.body_start_y
+    for (size_t i = 0; i < names.size() && i < 4; ++i)
+    {
+        lv_obj_t *lbl = lv_label_create(popupContainer);
+        lv_label_set_text(lbl, names[i].c_str());
+        lv_obj_set_pos(lbl, 4, L.body_start_y + i * 14);
+
+        if (i == ps.slotIndex)
         {
-            lv_obj_t *c = lv_label_create(popupContainer);
-            lv_obj_set_style_text_font(c, &lv_font_montserrat_14, LV_STATE_DEFAULT);
-            char ch[2] = {buf[i], '\0'};
-            lv_label_set_text(c, ch);
-            int x = i * cell + (cell - 8) / 2;
-            lv_obj_set_pos(c, x, body_y);
-
-            // cursor under current slotIndex
-            if (i == ps.slotIndex)
-            {
-                lv_obj_t *cur = lv_obj_create(popupContainer);
-                lv_obj_set_size(cur, 8, 2);
-                lv_obj_set_style_bg_color(cur, lv_color_white(), LV_STATE_DEFAULT);
-                lv_obj_set_pos(cur, x, body_y + 14);
-            }
+            // invert colors for the selected item
+            lv_obj_set_style_text_color(lbl, lv_color_white(), LV_STATE_DEFAULT);
+            lv_obj_set_style_bg_color(lbl, lv_color_black(), LV_STATE_DEFAULT);
         }
-        break;
     }
+}
 
-    default:
+void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
+{
+    const auto &ps = st.popup;
+    char buf[5] = {};
+    std::memcpy(buf, ps.editName, 4);
+    for (int i = 0; i < 4; ++i)
+        if (buf[i] == '\0')
+            buf[i] = '_';
+
+    int cell = L.container_width / 4;
+    for (int i = 0; i < 4; ++i)
     {
-        // generic content: e.g. show slotIndex or a checkmark
-        // you can replace this with your actual drawing:
-        lv_obj_t *info = lv_label_create(popupContainer);
-        lv_label_set_text_fmt(info, "Slot %d", ps.slotIndex + 1);
-        lv_obj_align(info, LV_ALIGN_CENTER, 0, 0);
-        break;
-    }
-    }
+        lv_obj_t *c = lv_label_create(popupContainer);
+        lv_obj_set_style_text_font(c, &lv_font_montserrat_14, LV_STATE_DEFAULT);
+        char ch[2] = {buf[i], '\0'};
+        lv_label_set_text(c, ch);
 
-    // 9) Trigger LVGL refresh
-    lv_timer_handler();
+        int x = i * cell + (cell - 8) / 2;
+        lv_obj_set_pos(c, x, L.body_start_y);
+
+        if (i == ps.slotIndex)
+        {
+            lv_obj_t *cur = lv_obj_create(popupContainer);
+            lv_obj_set_size(cur, 8, 2);
+            lv_obj_set_style_bg_color(cur, lv_color_white(), LV_STATE_DEFAULT);
+            lv_obj_set_pos(cur, x, L.body_start_y + 14);
+        }
+    }
+}
+
+void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L)
+{
+    // simple “Done” confirmation, centered
+    lv_obj_t *lbl = lv_label_create(popupContainer);
+    lv_label_set_text(lbl, "Done!");
+    lv_obj_set_pos(lbl, (L.container_width - lv_obj_get_width(lbl)) / 2, L.body_start_y + (L.container_height - L.body_start_y) / 2);
 }
 
 void SSD1306::showPopup()

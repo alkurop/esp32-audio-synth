@@ -30,6 +30,24 @@ namespace ui
         uint8_t i2c_addr = 0x3C;      ///< SSD1306 I2C address
     };
 
+    struct PopupLayout
+    {
+        int container_width;       // total width of the popup area
+        int container_height;      // total height of the popup area
+        int title_bar_height;      // height reserved for the title bar
+        int step_indicator_height; // height reserved for the step-indicator row
+        int body_start_y;          // y-coordinate where the main body content begins
+
+        /**
+         * Compute how wide each step-indicator cell should be,
+         * given the total number of steps in this workflow.
+         */
+        int get_step_width(uint8_t step_count) const
+        {
+            return container_width / step_count;
+        }
+    };
+
     /**
      * Wrapper for SSD1306-based UI using LVGL
      */
@@ -72,6 +90,12 @@ namespace ui
         // Menu building and selection
         void initMenuList(lv_obj_t *scr);
         void selectMenuItem(uint8_t page);
+
+        void renderPopupHeader(const menu::PopupEntry &entry);
+        void renderPopupSteps(const menu::PopupWorkflow &wf, uint8_t stepIndex, const PopupLayout &layout);
+        void renderPopupList(const menu::MenuState &st, const PopupLayout &layout);
+        void renderPopupInput(const menu::MenuState &st, const PopupLayout &layout);
+        void renderPopupConfirm(const menu::MenuState &st, const PopupLayout &layout);
     };
 
 } // namespace ui

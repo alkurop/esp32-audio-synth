@@ -135,7 +135,7 @@ std::array<EncoderRange, 4> Menu::calcEncoderRanges()
     case AppMode::Page:
         return getEncoderRangesPage(itemToPage(itemIndex));
     case AppMode::Popup:
-        return getEncoderRangesPopup(popup, &paramStore);
+        return getEncoderRangesPopup(popup);
     default:
         return {};
     }

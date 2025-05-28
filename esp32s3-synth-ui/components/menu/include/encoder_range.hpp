@@ -63,63 +63,49 @@ namespace menu
     }
 
     static inline std::array<EncoderRange, 4> getEncoderRangesPopup(
-        const PopupState &popupState,
-        const ParamStore *paramStore)
+        const PopupState &popupState)
     {
-        std::array<EncoderRange, 4> R{};
+        using namespace menu;
+        std::array<EncoderRange, 4> R{}; // all {0,0}
 
-        // 1) Bounds‐check the workflow index
+        // 1) Validate workflow + step
         size_t wfIdx = static_cast<size_t>(popupState.workflowIndex);
         if (wfIdx >= workflowCnt)
-        {
-            // leave all zeros
             return R;
-        }
-
-        // 2) Grab the current step entry
         const auto &wf = popupWorkflows[wfIdx];
+
         uint8_t step = popupState.stepIndex;
         if (step >= wf.stepCount)
-        {
             return R;
-        }
         const auto &entry = wf.steps[step];
 
-        // 3) Dispatch just like before, but on entry.mode
-        switch (entry.mode)
+        // 2) Dispatch by layout type
+        if (isListPopup(entry.mode))
         {
-        case PopupMode::LoadVoiceList:
-        case PopupMode::SaveVoiceList:
-        {
-            auto n = paramStore->listVoiceNames().size();
-            // guard against empty list
-            uint8_t max = n > 0 ? static_cast<uint8_t>(n - 1) : 0;
+            // pick voice vs project list
+            size_t n;
+            switch (entry.mode)
+            {
+            case PopupMode::LoadVoiceList:
+            case PopupMode::SaveVoiceList:
+                n = popupState.listItems.size();
+                break;
+            default:
+                n = popupState.listItems.size();
+                break;
+            }
+            uint8_t max = n > 0 ? uint8_t(n - 1) : 0;
             R[0] = {0, max};
-            // rest stay at {0,0}
-            break;
         }
-        case PopupMode::LoadProjectList:
-        case PopupMode::SaveProjectList:
-        {
-            auto n = paramStore->listProjectNames().size();
-            uint8_t max = n > 0 ? static_cast<uint8_t>(n - 1) : 0;
-            R[0] = {0, max};
-            break;
-        }
-        case PopupMode::SaveVoiceRename:
-        case PopupMode::SaveProjectRename:
+        else if (isInputPopup(entry.mode))
         {
             // all four encoders cycle through the alphabet
             for (int i = 0; i < 4; ++i)
             {
-                R[i] = {0, static_cast<uint8_t>(nameAlphabetSize - 1)};
+                R[i] = {0, uint8_t(nameAlphabetSize - 1)};
             }
-            break;
         }
-        default:
-            // leave all at {0,0}
-            break;
-        }
+        // else confirmation or others: leave all at {0,0}
 
         return R;
     }
