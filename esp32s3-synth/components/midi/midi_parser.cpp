@@ -9,7 +9,7 @@ void MidiParser::feed(const uint8_t packet[4])
 {
     uint8_t status = packet[1];
     uint8_t type = status & 0xF0;
-    uint8_t channel = status & 0x0F;
+    // uint8_t channel = status & 0x0F;  // we are not checking for channel here, but inside parse note, controller, etc
 
     MidiMessageType message = static_cast<MidiMessageType>(status);
     MidiMessageType baseType = static_cast<MidiMessageType>(type);
