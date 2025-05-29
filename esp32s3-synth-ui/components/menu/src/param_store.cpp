@@ -12,7 +12,6 @@ static constexpr char KEY_PROJ_COUNT[] = "proj_count";
 static constexpr char KEY_PROJ_NAME[] = "proj_name_";
 static constexpr char KEY_PROJ_DATA[] = "proj_data_";
 static constexpr char KEY_GLOB_FIELD[] = "glob_field_";
-static constexpr char KEY_VOICE_COUNT[] = "voice_count";
 static constexpr char KEY_VOICE_NAME[] = "voice_name_";
 static constexpr char KEY_VOICE_DATA[] = "voice_data_";
 static constexpr char KEY_PROJ_VOICE_COUNT[] = "proj_voice_count_"; // + project slot
@@ -249,13 +248,15 @@ void ParamStore::saveVoice(const VoiceStoreEntry &entry)
     // 1) Open NVS for read/write
     nvs_handle handle;
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle);
-    if (err != ESP_OK) {
+    if (err != ESP_OK)
+    {
         ESP_LOGE(TAG, "saveVoice: nvs_open RW failed (%d)", err);
         return;
     }
 
     uint8_t slot = entry.index;
-    if (slot >= maxVoices) {
+    if (slot >= maxVoices)
+    {
         ESP_LOGW(TAG, "saveVoice: slot %u out of range", slot);
         nvs_close(handle);
         return;
@@ -271,7 +272,8 @@ void ParamStore::saveVoice(const VoiceStoreEntry &entry)
              entry.name ? entry.name->c_str() : "<empty>");
     rc = nvs_set_str(handle, key,
                      entry.name ? entry.name->c_str() : "");
-    if (rc != ESP_OK) {
+    if (rc != ESP_OK)
+    {
         ESP_LOGE(TAG, "  nvs_set_str(%s) failed (%d)", key, rc);
     }
 
@@ -287,35 +289,19 @@ void ParamStore::saveVoice(const VoiceStoreEntry &entry)
                       key,
                       entry.params.data(),
                       blobSize);
-    if (rc != ESP_OK) {
+    if (rc != ESP_OK)
+    {
         ESP_LOGE(TAG, "  nvs_set_blob(%s) failed (%d)", key, rc);
-    }
-
-    // --- update voice_count if this slot is past the old count ---
-    int32_t oldCount = 0;
-    nvs_get_i32(handle, KEY_VOICE_COUNT, &oldCount);
-    int32_t newCount = std::max<int32_t>(oldCount, slot + 1);
-    ESP_LOGI(TAG,
-             "saveVoice: updating %s from %d to %d",
-             KEY_VOICE_COUNT,
-             static_cast<int>(oldCount),
-             static_cast<int>(newCount));
-    rc = nvs_set_i32(handle, KEY_VOICE_COUNT, newCount);
-    if (rc != ESP_OK) {
-        ESP_LOGE(TAG,
-                 "  nvs_set_i32(%s) failed (%d)",
-                 KEY_VOICE_COUNT,
-                 rc);
     }
 
     // --- commit and close ---
     rc = nvs_commit(handle);
-    if (rc != ESP_OK) {
+    if (rc != ESP_OK)
+    {
         ESP_LOGE(TAG, "  nvs_commit failed (%d)", rc);
     }
     nvs_close(handle);
 }
-
 
 VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
 {
@@ -353,7 +339,6 @@ VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
             std::string name(len, '\0');
             nvs_get_str(handle, nameKey, &name[0], &len);
             entry.name = name;
-            ESP_LOGI(TAG, "  Loaded name='%s' for slot %u", name.c_str(), index);
         }
     }
 
@@ -361,7 +346,6 @@ VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
     {
         char dataKey[32];
         std::snprintf(dataKey, sizeof(dataKey), "%s%u", KEY_VOICE_DATA, index);
-        ESP_LOGI(TAG, "loadVoice: dataKey='%s'", dataKey);
 
         // Probe the blob length
         size_t blobLen = 0;
@@ -387,28 +371,6 @@ VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
     }
 
     nvs_close(handle);
-
-    // 5) Dump each defined field
-    size_t pageCount = entry.params.size() / MAX_FIELDS;
-    ESP_LOGI(TAG, "loadVoice: total pages=%u, fields/page(max)=%u",
-             (unsigned)pageCount, (unsigned)MAX_FIELDS);
-
-    for (size_t p = 0; p < pageCount && p < menu::PageCount; ++p)
-    {
-        const auto &pi = menu::menuPages[p];
-        size_t fields = pi.fieldCount;
-        ESP_LOGI(TAG, "  Page %2u (%s), defined fields=%u",
-                 (unsigned)p, pi.title, (unsigned)fields);
-
-        for (size_t f = 0; f < fields; ++f)
-        {
-            size_t idx = p * MAX_FIELDS + f;
-            int16_t v = entry.params[idx];
-            ESP_LOGI(TAG, "    Field %2u (%s) = %d",
-                     (unsigned)f, pi.fields[f].label, v);
-        }
-    }
-
     return entry;
 }
 

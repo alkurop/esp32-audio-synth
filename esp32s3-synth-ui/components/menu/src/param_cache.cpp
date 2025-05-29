@@ -7,7 +7,7 @@ namespace menu
 {
 
     ParamCache::ParamCache(uint8_t voiceCount)
-        : data(voiceCount, VoiceCache(PageCount, PageCache{})),
+        : data(voiceCount, VoiceCache(PageCount -1, PageCache{})),
           globalData{} // zero‐initialize
     {
     }
