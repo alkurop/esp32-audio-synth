@@ -225,26 +225,44 @@ void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
     // if cur == popupLastSelected, do nothing
 }
 
-void SSD1306::initPopupList(const menu::MenuState &st, const PopupLayout &L)
+ void SSD1306::initPopupList(const menu::MenuState &st, const PopupLayout &L)
 {
     // 1) wipe out any old children
     lv_obj_clean(popupContainer);
 
-    // 2) rebuild the labels vector
+    // 2) rebuild the labels & icons
     popupLabels.clear();
+    // (optional) popupIcons.clear(); if you want to track the icons too
     popupLabels.reserve(st.popup.listItems.size());
 
     for (size_t i = 0; i < st.popup.listItems.size(); ++i)
     {
+        const auto &item = st.popup.listItems[i];
+        int y = int(i) * ITEM_HEIGHT;
+
+        // 2a) create the name label
         auto *lbl = lv_label_create(popupContainer);
-        lv_label_set_text(lbl, st.popup.listItems[i].name.c_str());
-        lv_obj_set_width(lbl, L.container_width);
-        lv_obj_set_y(lbl, int(i) * ITEM_HEIGHT);
+        lv_label_set_text(lbl, item.name.c_str());
+        lv_obj_set_width(lbl, L.container_width - 16); // leave space for the icon
+        lv_obj_set_pos(lbl, 0, y);
         popupLabels.push_back(lbl);
+
+        // 2b) create the "loaded" indicator
+        auto *icon = lv_label_create(popupContainer);
+        lv_label_set_text(icon, "X");       // or "*" or even an image
+        lv_obj_set_style_text_font(icon, &lv_font_montserrat_14, 0);
+        // position it right‐aligned in that row:
+        lv_obj_align_to(icon, lbl, LV_ALIGN_OUT_RIGHT_MID, 4, 0);
+
+        // show or hide it
+        if (!item.loaded) {
+            lv_obj_add_flag(icon, LV_OBJ_FLAG_HIDDEN);
+        }
+        // (optional) store icons if you need to update them later:
+        // popupIcons.push_back(icon);
     }
 
-    // 3) set the last‐selected to an invalid so selectPopupItem will
-    //    treat this as “first time” on the newly built list
+    // 3) reset selection so selectPopupItem will redraw it
     listPopupItemLastSelected = -1;
 
     // 4) highlight & scroll into view
