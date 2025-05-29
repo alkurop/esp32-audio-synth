@@ -12,7 +12,7 @@
 #include "config.hpp"
 
 using namespace ui;
-using namespace menu; 
+using namespace menu;
 
 SSD1306 display = SSD1306(displayConfig);
 
@@ -110,6 +110,11 @@ void createMenuRenderTask()
     configASSERT(ok == pdPASS);
 }
 
+auto updateCallback = [](Page page, uint8_t field, int16_t value)
+{
+    ESP_LOGI(TAG, "Send page %d value %d", static_cast<int16_t>(page), value);
+};
+
 extern "C" void app_main()
 {
     rotary0.init(rotaryCallback);
@@ -132,5 +137,5 @@ extern "C" void app_main()
     menuHolder.init([](const MenuState &state)
                     {
         // overwrite any pending state so we only keep the latest
-        xQueueOverwrite(menuRenderQueue, &state); });
+        xQueueOverwrite(menuRenderQueue, &state); }, updateCallback);
 }

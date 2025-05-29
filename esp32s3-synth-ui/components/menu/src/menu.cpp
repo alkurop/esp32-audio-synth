@@ -23,13 +23,13 @@ Menu::Menu(uint8_t voiceCount)
     // channel & volume come from cache:
     state.channel = cache.get(0, Page::Channel, 0);
     state.volume = cache.get(0, Page::Channel, 1);
-    // fieldValues already zero
     // popup already default‐constructed (invalid workflowIndex)
 }
 
-void Menu::init(DisplayCallback displayCb)
+void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
 {
     displayCallback = std::move(displayCb);
+    cache.setCallback(updateCb);
     // prime the encoder ranges & draw initial screen
     state.encoderRanges = calcEncoderRanges();
     notify();

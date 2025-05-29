@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include "menu_struct.hpp"
+#include <functional>
 
 namespace menu
 {
@@ -12,11 +13,15 @@ namespace menu
      * Maximum number of fields per page (knobs 0..3)
      */
     static constexpr uint8_t MAX_FIELDS = 4;
+    using UpdateCallback = std::function<void(Page page, uint8_t field, int16_t value)>;
 
     /**
      * In-memory cache of all voices' parameter values.
      * Dimensions: [voiceCount][Page::_Count][MAX_FIELDS]
      */
+    using PageCache = std::array<int16_t, MAX_FIELDS>;
+    using VoiceCache = std::vector<PageCache>;
+
     class ParamCache
     {
     public:
@@ -49,14 +54,16 @@ namespace menu
         bool isGlobal(Page page) const
         {
             // only BPM is global for now
-            return page == Page::BPM;
+            return page == Page::Global;
         }
 
+        const std::vector<VoiceCache> &getVoiceData() const { return data; }
+        void setCallback(UpdateCallback callback) { this->callback = std::move(callback); }
+
     private:
-        using PageCache = std::array<uint8_t, MAX_FIELDS>;
-        using VoiceCache = std::vector<PageCache>;
         std::vector<VoiceCache> data;
         std::array<PageCache, PageCount> globalData; // [page][field]
+        UpdateCallback callback;
     };
 
 } // namespace menu

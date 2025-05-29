@@ -8,37 +8,87 @@
 
 #include "menu.hpp"
 #include "menu_struct.hpp"
+#include "load_save_mapper.hpp"
 
 static const char *TAG = "Menu";
 using namespace menu;
 
-// … all your other Menu method definitions …
-
-// Called when the user confirms “Load Voice”
 void Menu::loadVoice(uint8_t slotIndex)
 {
-    // TODO: actually load voice number `slotIndex` from storage
-    ESP_LOGI(TAG, "loadVoice(%d) called", slotIndex);
+    const auto voiceEntry = paramStore.loadVoice(slotIndex);
+    const auto &flat = voiceEntry.params;
+    if (flat.empty())
+        return;
+    size_t pageCount = flat.size() / MAX_FIELDS;
+    for (size_t p = 0; p < pageCount; ++p)
+    {
+        for (size_t f = 0; f < MAX_FIELDS; ++f)
+        {
+            size_t idx = p * MAX_FIELDS + f;
+            if (idx >= flat.size())
+                break;
+            int16_t value = flat[idx];
+            cache.set(slotIndex, static_cast<menu::Page>(p), static_cast<uint8_t>(f), value);
+        }
+    }
 }
 
 // Called when the user confirms “Save Voice”
 void Menu::saveVoice(uint8_t slotIndex, const std::string &name)
 {
-    // TODO: actually save `name` into voice slot `slotIndex` in storage
-    ESP_LOGI(TAG, "saveVoice(slot=%d, name=%s)", slotIndex, name.c_str());
+    const auto &voiceCache = cache.getVoiceData();
+    const auto &vc = voiceCache.at(slotIndex); // PageCache vector for that voice
+    auto flatParams = flattenVoiceParams(vc);
+    VoiceStoreEntry entry = {
+        .index = slotIndex,
+        .name = name,
+        .params = flatParams};
+
+    paramStore.saveVoice(entry);
 }
 
 // Called when the user confirms “Load Project”
 void Menu::loadProject(uint8_t slotIndex)
 {
-    // TODO: actually load project number `slotIndex` from storage
-    ESP_LOGI(TAG, "loadProject(%d) called", slotIndex);
+    const auto projectEntry = paramStore.loadProject(slotIndex);
+    for (const auto &ve : projectEntry.voices)
+    {
+        const auto &flat = ve.params;
+        size_t pageCount = flat.size() / MAX_FIELDS;
+        for (size_t p = 0; p < pageCount; ++p)
+        {
+            for (size_t f = 0; f < MAX_FIELDS; ++f)
+            {
+                size_t idx = p * MAX_FIELDS + f;
+                int16_t value = flat[idx];
+                cache.set(ve.index, static_cast<menu::Page>(p), static_cast<uint8_t>(f), value);
+            }
+        }
+    }
 }
 
-// Called when the user confirms “Save Project”
 void Menu::saveProject(uint8_t slotIndex, const std::string &name)
 {
-    // TODO: actually save `name` into project slot `slotIndex` in storage
-    ESP_LOGI(TAG, "saveProject(slot=%d, name=%s)", slotIndex, name.c_str());
+    ProjectStoreEntry entry{
+        .index = slotIndex,
+        .name = name,
+        .voices = {}
+    };
 
-} // namespace menu
+    const auto &voiceData = cache.getVoiceData();
+    entry.voices.reserve(voiceData.size());
+    for (size_t i = 0; i < voiceData.size(); ++i)
+    {
+        const VoiceCache &vc = voiceData[i];
+        auto flatParams = flattenVoiceParams(vc);
+
+        VoiceStoreEntry ve{
+            .index = static_cast<uint8_t>(i),
+            .name = std::nullopt,
+            .params = std::move(flatParams)};
+        entry.voices.push_back(std::move(ve));
+    }
+
+    // 5) Save it
+    paramStore.saveProject(entry);
+}

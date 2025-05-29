@@ -23,36 +23,32 @@ namespace menu
 
         // page selector
         R[MENU_POSITION_LIST] = {
-            min : 0,
-            max : static_cast<uint8_t>(menuItemCnt - 1),
-            value : state.menuItemIndex
-        };
+            .min = 0,
+            .max = static_cast<int16_t>(menuItemCnt - 1),
+            .value = state.menuItemIndex};
 
         // voice selector
         R[MENU_POSITION_VOICE] = {
-            min : 0,
-            max : static_cast<uint8_t>(voiceCount - 1),
-            value : state.volume
-        };
+            .min = 0,
+            .max = static_cast<int16_t>(voiceCount - 1),
+            .value = state.voice};
 
         // channel on Main List (always numeric)
         {
             const auto &fi = menuPages[size_t(Page::Channel)].fields[size_t(ChannelField::Chan)];
             R[MENU_POSITION_CH] = {
-                min : static_cast<int16_t>(fi.min),
-                max : static_cast<int16_t>(fi.max),
-                value : state.channel
-            };
+                .min = static_cast<int16_t>(fi.min),
+                .max = static_cast<int16_t>(fi.max),
+                .value = state.channel};
         }
 
         // volume on Main List (always numeric)
         {
             const auto &fi = menuPages[size_t(Page::Channel)].fields[size_t(ChannelField::Vol)];
             R[MENU_POSITION_VOL] = {
-                min : static_cast<int16_t>(fi.min),
-                max : static_cast<int16_t>(fi.max),
-                value : state.volume
-            };
+                .min = static_cast<int16_t>(fi.min),
+                .max = static_cast<int16_t>(fi.max),
+                .value = state.volume};
         }
 
         return R;
@@ -96,15 +92,16 @@ namespace menu
 
         // clear all knobs
         for (int k = 0; k < KNOB_COUNT; ++k)
-            R[k] = {.min = 0, .max = 0, .value = 0};
+            R[k] = EncoderRange{.min = 0, .max = 0, .value = 0};
 
         // only knob 0 is used here
         uint8_t maxSlot = st.listItems.empty()
                               ? 0
-                              : static_cast<uint8_t>(st.listItems.size() - 1);
-        R[0] = {.min = 0,
-                .max = maxSlot,
-                .value = std::clamp<uint8_t>(st.slotIndex, 0, maxSlot)};
+                              : static_cast<int8_t>(st.listItems.size() - 1);
+        R[0] = EncoderRange{
+            .min = 0,
+            .max = maxSlot,
+            .value = std::clamp<int8_t>(st.slotIndex, 0, maxSlot)};
 
         return R;
     }
@@ -114,19 +111,19 @@ namespace menu
     {
         std::array<EncoderRange, KNOB_COUNT> R{};
         constexpr size_t ALPHA_LEN = sizeof(nameAlphabet) - 1;
-        constexpr uint8_t MAX_IDX = static_cast<uint8_t>(ALPHA_LEN - 1);
+        constexpr int8_t MAX_IDX = static_cast<int8_t>(ALPHA_LEN - 1);
 
         // each knob edits one letter
         for (int k = 0; k < KNOB_COUNT; ++k)
         {
             char cur = st.editName[k];
             auto it = std::find(nameAlphabet, nameAlphabet + ALPHA_LEN, cur);
-            uint8_t val = (it != nameAlphabet + ALPHA_LEN)
-                              ? static_cast<uint8_t>(it - nameAlphabet)
-                              : 0;
-            R[k] = {.min = 0,
-                    .max = MAX_IDX,
-                    .value = val};
+            int8_t val = (it != nameAlphabet + ALPHA_LEN)
+                             ? static_cast<int8_t>(it - nameAlphabet)
+                             : 0;
+            R[k] = EncoderRange{.min = 0,
+                                .max = MAX_IDX,
+                                .value = val};
         }
 
         return R;
@@ -139,12 +136,12 @@ namespace menu
 
         // clear all knobs
         for (int k = 0; k < KNOB_COUNT; ++k)
-            R[k] = {.min = 0, .max = 0, .value = 0};
+            R[k] = EncoderRange{.min = 0, .max = 0, .value = 0};
 
         // only knob 0 matters
-        R[0] = {.min = 0,
-                .max = 1,
-                .value = std::clamp<uint8_t>(st.slotIndex, 0, 1)};
+        R[0] = EncoderRange{.min = 0,
+                            .max = 1,
+                            .value = std::clamp<int8_t>(st.slotIndex, 0, 1)};
 
         return R;
     }
@@ -163,7 +160,7 @@ namespace menu
         // default no knobs
         std::array<EncoderRange, KNOB_COUNT> empty{};
         for (auto &e : empty)
-            e = {.min = 0, .max = 0, .value = 0};
+            e = EncoderRange{.min = 0, .max = 0, .value = 0};
         return empty;
     }
 

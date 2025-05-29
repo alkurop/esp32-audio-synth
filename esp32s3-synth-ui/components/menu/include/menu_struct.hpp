@@ -22,7 +22,7 @@ namespace menu
         Tuning,
         FilterLFO,
         DetuneLFO,
-        BPM, ///< Global BPM settings page
+        Global, ///< Global BPM settings page
         _Count
     };
 
@@ -72,7 +72,7 @@ namespace menu
         Depth,
         _Count
     };
-    enum class BPMField : uint8_t
+    enum class GlobalField : uint8_t
     {
         SyncMode,
         ManualBPM,
@@ -83,7 +83,8 @@ namespace menu
     enum class FieldType
     {
         Range,
-        Options
+        Options,
+        Autosave
     };
 
     struct FieldInfo
@@ -146,10 +147,11 @@ namespace menu
         {"Dept", FieldType::Range, 0, 31, nullptr, 0},
     };
 
-    // BPM fields
-    static constexpr FieldInfo bpmInfo[] = {
-        {"Sync", FieldType::Options, 0, 0, yesNo, 2},
+    // Global fields
+    static constexpr FieldInfo globalInfo[] = {
+        {"BpmSync", FieldType::Options, 0, 0, yesNo, 2},
         {"BPM", FieldType::Range, 30, 300, nullptr, 0},
+        {"AutoSave", FieldType::Options, 0, 0, yesNo, 2},
     };
 
     struct PageInfo
@@ -167,7 +169,7 @@ namespace menu
         {"Tuning", tuningInfo, sizeof(tuningInfo) / sizeof(FieldInfo)},
         {"Filter LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"Detune LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
-        {"Global BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
+        {"Global BPM", globalInfo, sizeof(globalInfo) / sizeof(FieldInfo)},
     };
 
     // Total number of pages

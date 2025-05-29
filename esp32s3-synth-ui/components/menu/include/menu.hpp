@@ -24,7 +24,7 @@ namespace menu
     {
     public:
         explicit Menu(uint8_t voiceCount);
-        void init(DisplayCallback displayCallback);
+        void init(DisplayCallback displayCallback, UpdateCallback updateCallback);
         void enterMenuPage();
         void exitPage();
         void closePopup();
@@ -53,7 +53,7 @@ namespace menu
         void loadProject(uint8_t slotIndex);
         void saveProject(uint8_t slotIndex, const std::string &name);
         void updatePageFromCache();
-        
+
         uint8_t voiceCount;
         ParamCache cache;
         ParamStore paramStore;
