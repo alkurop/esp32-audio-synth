@@ -20,4 +20,23 @@ namespace menu
         }
         return flat;
     }
+
+    /// Reverse: take a flat vector<int16_t> and rebuild a VoiceCache
+    inline VoiceCache unflattenVoiceParams(const std::vector<int16_t> &flat)
+    {
+        // Determine how many pages we have
+        size_t pageCount = flat.size() / MAX_FIELDS;
+        VoiceCache vc(pageCount);
+
+        for (size_t p = 0; p < pageCount; ++p)
+        {
+            for (size_t f = 0; f < MAX_FIELDS; ++f)
+            {
+                // Copy back into the signed PageCache
+                vc[p][f] = flat[p * MAX_FIELDS + f];
+            }
+        }
+
+        return vc;
+    }
 }

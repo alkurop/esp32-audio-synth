@@ -248,6 +248,7 @@ namespace menu
         nvs_handle handle;
         if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle) != ESP_OK)
             return;
+
         uint8_t slot = entry.index;
         if (slot >= maxVoices)
         {
@@ -255,12 +256,22 @@ namespace menu
             return;
         }
 
+        // --- save the name ---
         char key[32];
         std::snprintf(key, sizeof(key), "%s%u", KEY_VOICE_NAME, slot);
         nvs_set_str(handle, key, entry.name ? entry.name->c_str() : "");
 
+        // --- save the blob ---
         std::snprintf(key, sizeof(key), "%s%u", KEY_VOICE_DATA, slot);
-        nvs_set_blob(handle, key, entry.params.data(), entry.params.size() * sizeof(entry.params[0]));
+        nvs_set_blob(handle, key,
+                     entry.params.data(),
+                     entry.params.size() * sizeof(entry.params[0]));
+
+        // --- update voice_count if this slot is past the old count ---
+        int32_t oldCount = 0;
+        nvs_get_i32(handle, KEY_VOICE_COUNT, &oldCount);
+        int32_t newCount = std::max<int32_t>(oldCount, slot + 1);
+        nvs_set_i32(handle, KEY_VOICE_COUNT, newCount);
 
         nvs_commit(handle);
         nvs_close(handle);
@@ -352,11 +363,9 @@ namespace menu
         return entries;
     }
 
-    // List voice names along with a "loaded" flag and sensible defaults for each slot
     std::vector<NameEntry> ParamStore::listVoiceNames() const
     {
         std::vector<NameEntry> entries(maxVoices);
-        // Initialize with default names and loaded=false
         for (uint8_t i = 0; i < maxVoices; ++i)
         {
             entries[i].name = makeDisplayName(i, std::nullopt);
@@ -365,31 +374,18 @@ namespace menu
 
         nvs_handle handle;
         if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK)
-        {
             return entries;
-        }
 
-        int32_t storedCount = 0;
-        if (nvs_get_i32(handle, KEY_VOICE_COUNT, &storedCount) != ESP_OK || storedCount <= 0)
+        char key[32];
+        for (uint8_t i = 0; i < maxVoices; ++i)
         {
-            nvs_close(handle);
-            return entries;
-        }
-
-        // For each saved slot, overwrite name and mark loaded
-        for (uint8_t i = 0; i < entries.size() && i < static_cast<uint8_t>(storedCount); ++i)
-        {
-            char key[32];
             size_t len = 0;
             std::snprintf(key, sizeof(key), "%s%u", KEY_VOICE_NAME, i);
-            if (nvs_get_str(handle, key, nullptr, &len) == ESP_OK)
+            if (nvs_get_str(handle, key, nullptr, &len) == ESP_OK && len > 1)
             {
                 std::string name(len, '\0');
                 nvs_get_str(handle, key, &name[0], &len);
-                if (!name.empty())
-                {
-                    entries[i].name = name;
-                }
+                entries[i].name = name;
                 entries[i].loaded = true;
             }
         }

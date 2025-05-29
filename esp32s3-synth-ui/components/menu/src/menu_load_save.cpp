@@ -31,6 +31,16 @@ void Menu::loadVoice(uint8_t slotIndex)
             cache.set(slotIndex, static_cast<menu::Page>(p), static_cast<uint8_t>(f), value);
         }
     }
+    auto voiceData = unflattenVoiceParams(voiceEntry.params);
+    auto pageIndex = static_cast<size_t>(menu::Page::Channel);
+    auto chanFieldIndex = static_cast<size_t>(menu::ChannelField::Chan);
+    auto volFieldIndex = static_cast<size_t>(menu::ChannelField::Vol);
+    int16_t channel = voiceData[pageIndex][chanFieldIndex];
+    int16_t volume = voiceData[pageIndex][volFieldIndex];
+    state.channel = channel;
+    state.volume = volume;
+
+    notify();
 }
 
 // Called when the user confirms “Save Voice”
@@ -72,8 +82,7 @@ void Menu::saveProject(uint8_t slotIndex, const std::string &name)
     ProjectStoreEntry entry{
         .index = slotIndex,
         .name = name,
-        .voices = {}
-    };
+        .voices = {}};
 
     const auto &voiceData = cache.getVoiceData();
     entry.voices.reserve(voiceData.size());
