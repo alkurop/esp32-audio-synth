@@ -52,7 +52,7 @@ namespace menu
         void saveVoice(uint8_t slotIndex, const std::string &name);
         void loadProject(uint8_t slotIndex);
         void saveProject(uint8_t slotIndex, const std::string &name);
-        void updateFieldValuesFromCache();
+        void updatePageFromCache();
         
         uint8_t voiceCount;
         ParamCache cache;

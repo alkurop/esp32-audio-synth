@@ -51,6 +51,7 @@ void Menu::enterMenuPage()
         if (isPageItem(state.menuItemIndex))
         {
             state.mode = AppMode::Page;
+            updatePageFromCache();
         }
         else
         {
@@ -175,7 +176,7 @@ void Menu::notify()
     displayCallback(state);
 }
 
-void Menu::updateFieldValuesFromCache()
+void Menu::updatePageFromCache()
 {
     // Figure out which page we’re on
     auto page = itemToPage(state.menuItemIndex);
