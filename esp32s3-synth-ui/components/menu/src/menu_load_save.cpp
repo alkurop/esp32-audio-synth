@@ -15,30 +15,62 @@ using namespace menu;
 
 void Menu::loadVoice(uint8_t slotIndex)
 {
-    const auto voiceEntry = paramStore.loadVoice(slotIndex);
-    const auto &flat = voiceEntry.params;
-    if (flat.empty())
+    // 1) Pull back the stored entry
+    const auto entry = paramStore.loadVoice(slotIndex);
+    ESP_LOGI(TAG, "loadVoice(%u): name=%s, params.size=%u",
+             slotIndex,
+             entry.name ? entry.name->c_str() : "<none>",
+             (unsigned)entry.params.size());
+
+    if (entry.params.empty())
+    {
+        // nothing to restore
         return;
-    size_t pageCount = flat.size() / MAX_FIELDS;
+    }
+
+    // 2) Compute page & field counts
+    size_t totalEntries = entry.params.size();
+    size_t pageCount = totalEntries / MAX_FIELDS;
+    const size_t maxPages = static_cast<size_t>(menu::Page::_Count);
+    pageCount = std::min(pageCount, maxPages);
+
+    // 3) Walk each page
     for (size_t p = 0; p < pageCount; ++p)
     {
-        for (size_t f = 0; f < MAX_FIELDS; ++f)
+        const auto &pi = menu::menuPages[p];
+        size_t fields = pi.fieldCount;
+
+        ESP_LOGI(TAG, "  Page %2u (%s): %u fields",
+                 (unsigned)p, pi.title, (unsigned)fields);
+
+        // 4) Walk each field
+        for (size_t f = 0; f < fields; ++f)
         {
             size_t idx = p * MAX_FIELDS + f;
-            if (idx >= flat.size())
-                break;
-            int16_t value = flat[idx];
-            cache.set(slotIndex, static_cast<menu::Page>(p), static_cast<uint8_t>(f), value);
+            int16_t v = entry.params[idx];
+
+            // a) Log it
+            ESP_LOGI(TAG, "    Field %2u (%s) = %d", (unsigned)f, pi.fields[f].label, v);
+
+            // b) Write into your in-RAM cache
+            cache.set( slotIndex, static_cast<menu::Page>(p), static_cast<uint8_t>(f), v);
+
+            // c) If this is channel/volume, also update your MenuState
+            if (p == static_cast<size_t>(menu::Page::Channel))
+            {
+                if (f == static_cast<size_t>(menu::ChannelField::Chan))
+                    state.channel = static_cast<uint8_t>(v);
+                else if (f == static_cast<size_t>(menu::ChannelField::Vol))
+                    state.volume = static_cast<uint8_t>(v);
+            }
         }
     }
-    auto voiceData = unflattenVoiceParams(voiceEntry.params);
-    auto pageIndex = static_cast<size_t>(menu::Page::Channel);
-    auto chanFieldIndex = static_cast<size_t>(menu::ChannelField::Chan);
-    auto volFieldIndex = static_cast<size_t>(menu::ChannelField::Vol);
-    int16_t channel = voiceData[pageIndex][chanFieldIndex];
-    int16_t volume = voiceData[pageIndex][volFieldIndex];
-    state.channel = channel;
-    state.volume = volume;
+
+    // 5) (Optional) If you want to immediately reflect the loaded voice on-screen:
+    //    enterMenuPage(Page::Channel);
+    //    callbackUpdateKnobs();  // however your UI picks up state.channel/volume
+
+    ESP_LOGI(TAG, "loadVoice(%u): done", slotIndex);
 
     notify();
 }
