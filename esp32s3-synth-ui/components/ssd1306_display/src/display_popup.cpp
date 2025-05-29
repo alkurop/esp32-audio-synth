@@ -17,58 +17,107 @@ using namespace menu;
 
 #define MENU_TRUNCATE_LEN 3
 #define PARAM_TRUNCATE_LEN 4
+static constexpr int ITEM_HEIGHT = 14;
+
+// In display_popup.cpp:
 
 void SSD1306::renderPopup(const menu::MenuState &st)
 {
+    // 0) Try to lock LVGL
     if (!lvgl_port_lock(0))
         return;
 
+    // 1) Grab workflow index and validate it
     const auto &ps = st.popup;
     size_t wfIdx = static_cast<size_t>(ps.workflowIndex);
-    if (wfIdx >= static_cast<size_t>(Workflow::Count))
+    constexpr size_t wfCount = static_cast<size_t>(menu::Workflow::Count);
+    if (wfIdx >= wfCount)
+    {
+        lvgl_port_unlock();
         return;
+    }
 
-    // 1) Lookup workflow & entry
-    const auto &wf = popupWorkflows[wfIdx];
+    // 2) Lookup workflow and step entry
+    const auto &wf = menu::popupWorkflows[wfIdx];
     const auto &entry = wf.steps[ps.stepIndex];
 
-    // 2) Header
+    // 3) Render the common header
     renderPopupHeader(entry);
 
-    // 4) Compute layout once
+    // 4) Compute a concrete layout
     PopupLayout layout{
         /*container_width*/ cfg.width - 8,
         /*container_height*/ cfg.height - 18,
         /*title_bar_height*/ 12,
         /*step_indicator_height*/ 10,
-        /*body_start_y*/ 12 + 10 + 4};
+        /*body_start_y*/ (12 + 10 + 4)};
 
-    // 5) (Re)create & clear container
+    // 5) Create the container on first use
     if (!popupContainer)
     {
         popupContainer = lv_obj_create(lv_scr_act());
         lv_obj_set_size(popupContainer,
                         layout.container_width,
                         layout.container_height);
-        lv_obj_align_to(popupContainer, topbar_label,
-                        LV_ALIGN_OUT_BOTTOM_LEFT, 0, 4);
+        lv_obj_align_to(popupContainer,
+                        topbar_label,
+                        LV_ALIGN_OUT_BOTTOM_LEFT,
+                        0, 4);
+        lastWorkflowIdx = static_cast<size_t>(-1);
+        lastStepIdx = -1;
     }
-    else
+
+    // 6) Decide if we’ve jumped workflow or stepped in/out of a list
+    bool sameWorkflow = (wfIdx == lastWorkflowIdx);
+    bool sameStep = (ps.stepIndex == lastStepIdx);
+
+    bool wasList = false;
+    if (sameWorkflow && lastStepIdx >= 0)
+    {
+        auto &oldStep = menu::popupWorkflows[lastWorkflowIdx]
+                            .steps[lastStepIdx];
+        wasList = isListPopup(oldStep.mode);
+    }
+
+    bool isListNow = isListPopup(entry.mode);
+
+    // 7) Clear & rebuild only when needed
+    if (!sameWorkflow              // brand‐new workflow
+        || !sameStep               // moved step in the same workflow
+        || (wasList != isListNow)) // crossed into or out of a list popup
     {
         lv_obj_clean(popupContainer);
+
+        if (isListNow)
+        {
+            // Build the list once
+            initPopupList(st, layout);
+        }
+    }
+    else if (isListNow)
+    {
+        // still in the same list popup: just move the highlight
+        selectPopupItem(ps.slotIndex);
     }
 
-    // 6) Steps row
-    // renderPopupSteps(wf, ps.stepIndex, layout);
+    // 8) If it’s *not* a list popup, draw the other UIs
+    if (!isListNow)
+    {
+        if (isInputPopup(entry.mode))
+        {
+            renderPopupInput(st, layout);
+        }
+        else
+        {
+            renderPopupConfirm(st, layout);
+        }
+    }
 
-    // 7) Body by type
-    if (isListPopup(entry.mode))
-        renderPopupList(st, layout);
-    else if (isInputPopup(entry.mode))
-        renderPopupInput(st, layout);
-    else
-        renderPopupConfirm(st, layout);
+    // 9) Remember for next frame
+    lastWorkflowIdx = wfIdx;
+    lastStepIdx = ps.stepIndex;
 
+    // 10) Finish up
     showPopup();
     lv_timer_handler();
     lvgl_port_unlock();
@@ -78,44 +127,6 @@ void SSD1306::renderPopupHeader(const menu::PopupEntry &entry)
 {
     lv_label_set_text(topbar_label, entry.title);
     lv_obj_align(topbar_label, LV_ALIGN_TOP_LEFT, 0, 0);
-}
-
-void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
-{
-    const auto &ps = st.popup;
-    const auto &entries = ps.listItems;
-
-    // 2) Make sure this container scrolls vertically
-    lv_obj_set_scrollbar_mode(popupContainer, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scroll_dir(popupContainer, LV_DIR_VER);
-
-    // 3) Create one label per entry, and style the selected one
-    static constexpr int ITEM_HEIGHT = 14;
-    lv_obj_t *selected_lbl = nullptr;
-
-    for (size_t i = 0; i < entries.size(); ++i)
-    {
-        lv_obj_t *lbl = lv_label_create(popupContainer);
-        lv_label_set_text(lbl, entries[i].name.c_str());
-        lv_obj_set_width(lbl, L.container_width);
-        lv_obj_set_y(lbl, int(i) * ITEM_HEIGHT);
-
-        if (i == ps.slotIndex)
-        {
-            // apply the “checked” style
-            lv_obj_add_state(lbl, LV_STATE_CHECKED);
-            lv_obj_set_style_bg_opa(lbl, LV_OPA_COVER, LV_STATE_CHECKED);
-            lv_obj_set_style_bg_color(lbl, lv_color_black(), LV_STATE_CHECKED);
-            lv_obj_set_style_text_color(lbl, lv_color_white(), LV_STATE_CHECKED);
-            selected_lbl = lbl;
-        }
-    }
-
-    // 4) Scroll the selected label into view (if any)
-    if (selected_lbl)
-    {
-        lv_obj_scroll_to_view(selected_lbl, LV_ANIM_OFF);
-    }
 }
 
 void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
@@ -191,4 +202,76 @@ void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L
     lv_obj_t *lbl = lv_label_create(popupContainer);
     lv_label_set_text(lbl, buf);
     lv_obj_align(lbl, LV_ALIGN_CENTER, 0, 0);
+}
+
+/// On each frame/tick, either init or just select
+void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
+{
+    int16_t cur = st.popup.slotIndex;
+
+    // if we haven’t built for this popup, or jumped to a different list entirely:
+    if (listPopupItemLastSelected < 0 ||
+        /* you could also detect a different popup mode here if needed */
+        cur < 0 ||
+        cur >= (int)popupLabels.size())
+    {
+        initPopupList(st, L);
+    }
+    // otherwise just update the highlight
+    else if (cur != listPopupItemLastSelected)
+    {
+        selectPopupItem(cur);
+    }
+    // if cur == popupLastSelected, do nothing
+}
+
+void SSD1306::initPopupList(const menu::MenuState &st, const PopupLayout &L)
+{
+    // 1) wipe out any old children
+    lv_obj_clean(popupContainer);
+
+    // 2) rebuild the labels vector
+    popupLabels.clear();
+    popupLabels.reserve(st.popup.listItems.size());
+
+    for (size_t i = 0; i < st.popup.listItems.size(); ++i)
+    {
+        auto *lbl = lv_label_create(popupContainer);
+        lv_label_set_text(lbl, st.popup.listItems[i].name.c_str());
+        lv_obj_set_width(lbl, L.container_width);
+        lv_obj_set_y(lbl, int(i) * ITEM_HEIGHT);
+        popupLabels.push_back(lbl);
+    }
+
+    // 3) set the last‐selected to an invalid so selectPopupItem will
+    //    treat this as “first time” on the newly built list
+    listPopupItemLastSelected = -1;
+
+    // 4) highlight & scroll into view
+    selectPopupItem(st.popup.slotIndex);
+}
+
+/// Clear the old “checked” state and apply it to the new index
+void SSD1306::selectPopupItem(int16_t newIndex)
+{
+    auto size = popupLabels.size();
+    // // clear previous
+    if (listPopupItemLastSelected >= 0 && listPopupItemLastSelected < size)
+    {
+        lv_obj_clear_state(popupLabels[listPopupItemLastSelected], LV_STATE_CHECKED);
+    }
+
+    // set new
+    if (newIndex >= 0 &&
+        newIndex < size)
+    {
+        auto *lbl = popupLabels[newIndex];
+        lv_obj_add_state(lbl, LV_STATE_CHECKED);
+        lv_obj_set_style_bg_opa(lbl, LV_OPA_COVER, LV_STATE_CHECKED);
+        lv_obj_set_style_bg_color(lbl, lv_color_black(), LV_STATE_CHECKED);
+        lv_obj_set_style_text_color(lbl, lv_color_white(), LV_STATE_CHECKED);
+        lv_obj_scroll_to_view(lbl, LV_ANIM_OFF);
+    }
+
+    listPopupItemLastSelected = newIndex;
 }

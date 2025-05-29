@@ -79,7 +79,12 @@ namespace ui
         lv_obj_t *pageContainer = nullptr;
 
         std::array<lv_obj_t *, menu::menuItemCnt> menuItems{};
-        int8_t lastSelected = -1;
+        int8_t menuLastSelected = -1;
+
+        std::vector<lv_obj_t *> popupLabels;
+        int8_t listPopupItemLastSelected = -1;
+        size_t lastWorkflowIdx = static_cast<size_t>(-1);
+        int16_t lastStepIdx = -1;
 
         // Internal helpers
         esp_err_t configureI2C();
@@ -92,7 +97,11 @@ namespace ui
         void selectMenuItem(uint8_t page);
 
         void renderPopupHeader(const menu::PopupEntry &entry);
+
         void renderPopupList(const menu::MenuState &st, const PopupLayout &layout);
+        void initPopupList(const menu::MenuState &st, const PopupLayout &L);
+        void selectPopupItem(int16_t newIndex);
+
         void renderPopupInput(const menu::MenuState &st, const PopupLayout &layout);
         void renderPopupConfirm(const menu::MenuState &st, const PopupLayout &layout);
     };

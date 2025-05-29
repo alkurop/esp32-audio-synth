@@ -209,9 +209,9 @@ void SSD1306::showPage()
 void SSD1306::selectMenuItem(uint8_t page)
 {
     // clear previous selection
-    if (lastSelected >= 0)
+    if (menuLastSelected >= 0)
     {
-        lv_obj_clear_state(menuItems[lastSelected], LV_STATE_CHECKED);
+        lv_obj_clear_state(menuItems[menuLastSelected], LV_STATE_CHECKED);
     }
     // apply new style
     lv_obj_add_state(menuItems[page], LV_STATE_CHECKED);
@@ -219,7 +219,7 @@ void SSD1306::selectMenuItem(uint8_t page)
     lv_obj_set_style_bg_color(menuItems[page], lv_color_black(), LV_STATE_CHECKED);
     lv_obj_set_style_text_color(menuItems[page], lv_color_white(), LV_STATE_CHECKED);
     lv_obj_scroll_to_view(menuItems[page], LV_ANIM_OFF);
-    lastSelected = page;
+    menuLastSelected = page;
 }
 
 void SSD1306::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
