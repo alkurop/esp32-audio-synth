@@ -96,18 +96,28 @@ void Menu::loadProject(uint8_t slotIndex)
     {
         const auto &flat = ve.params;
         size_t pageCount = flat.size() / MAX_FIELDS;
+
         for (size_t p = 0; p < pageCount; ++p)
         {
-            for (size_t f = 0; f < MAX_FIELDS; ++f)
+            // grab the real number of fields on this page
+            const auto &pi = menu::menuPages[p];
+            size_t fields = pi.fieldCount;
+
+            for (size_t f = 0; f < fields; ++f)
             {
                 size_t idx = p * MAX_FIELDS + f;
+                if (idx >= flat.size())
+                    break;
                 int16_t value = flat[idx];
-                cache.set(ve.index, static_cast<menu::Page>(p), static_cast<uint8_t>(f), value);
+                cache.set(
+                    ve.index,
+                    static_cast<menu::Page>(p),
+                    static_cast<uint8_t>(f),
+                    value);
             }
         }
     }
 }
-
 void Menu::saveProject(uint8_t slotIndex, const std::string &name)
 {
     ProjectStoreEntry entry{

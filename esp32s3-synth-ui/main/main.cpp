@@ -37,12 +37,18 @@ auto rotaryCallback = [](uint8_t id, uint8_t newValue)
 auto left = [](uint8_t number, bool state)
 {
     if (state)
+    {
         menuHolder.exitPage();
+        ESP_LOGI(TAG, "Button left");
+    }
 };
 auto right = [](uint8_t number, bool state)
 {
     if (state)
+    {
         menuHolder.enterMenuPage();
+        ESP_LOGI(TAG, "Button right");
+    }
 };
 auto up = [](uint8_t number, bool state)
 {
@@ -112,7 +118,7 @@ void createMenuRenderTask()
 
 auto updateCallback = [](Page page, uint8_t field, int16_t value)
 {
-    // ESP_LOGI(TAG, "Send page %d value %d", static_cast<int16_t>(page), value);
+    ESP_LOGI(TAG, "Send page %d field %d value %d", static_cast<int16_t>(page), field, value);
 };
 
 extern "C" void app_main()

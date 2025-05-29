@@ -87,6 +87,26 @@ namespace menu
         Autosave
     };
 
+    // somewhere in your menu namespace, after the Page & *Field enums:
+    static constexpr std::array<uint8_t, static_cast<size_t>(Page::_Count)> fieldsPerPage = {
+        // Channels page
+        static_cast<uint8_t>(ChannelField::_Count),
+        // Oscillator page
+        static_cast<uint8_t>(OscillatorField::_Count),
+        // Filter page
+        static_cast<uint8_t>(FilterField::_Count),
+        // Envelope page
+        static_cast<uint8_t>(EnvField::_Count),
+        // Tuning page
+        static_cast<uint8_t>(TuningField::_Count),
+        // Filter LFO page
+        static_cast<uint8_t>(LFOField::_Count),
+        // Detune LFO page (same as Filter LFO)
+        static_cast<uint8_t>(LFOField::_Count),
+        // Global BPM page
+        static_cast<uint8_t>(GlobalField::_Count),
+    };
+
     struct FieldInfo
     {
         const char *label;
@@ -173,8 +193,12 @@ namespace menu
     };
 
     // Total number of pages
-    static constexpr uint8_t PageCount = static_cast<uint8_t>(Page::_Count);
     static constexpr uint8_t MaxFieldsPerPage = 4;
+
+    /// Total pages (for convenience)
+    static constexpr size_t PageCount = static_cast<size_t>(Page::_Count);
+    static constexpr size_t GlobalParamPageCount = 1;
+    static constexpr size_t VOICE_PAGE_COUNT = PageCount - GlobalParamPageCount;
 
     static_assert((uint8_t)Page::_Count == (sizeof(menuPages) / sizeof(PageInfo)), "Page count mismatch");
 

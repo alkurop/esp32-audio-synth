@@ -7,7 +7,7 @@ namespace menu
 {
 
     ParamCache::ParamCache(uint8_t voiceCount)
-        : data(voiceCount, VoiceCache(PageCount - GlobalParamPageCount, PageCache{})),
+        : data(voiceCount, VoiceCache(VOICE_PAGE_COUNT, PageCache{})),
           globalData{} // zero‐initialize
     {
     }
@@ -36,7 +36,7 @@ namespace menu
         const auto &pi = menu::menuPages[static_cast<size_t>(page)];
         const auto &fi = pi.fields[field];
 
-        ESP_LOGI(TAG,
+        ESP_LOGD(TAG,
                  "Set in cache Voice %u  Page %u (%s)  Field %u (%s) = %d",
                  (unsigned)voiceIndex,
                  (unsigned)page,
@@ -44,6 +44,7 @@ namespace menu
                  (unsigned)field,
                  fi.label,
                  (int)value);
+
         size_t p = size_t(page);
         if (p >= PageCount || field >= MAX_FIELDS)
             return;
