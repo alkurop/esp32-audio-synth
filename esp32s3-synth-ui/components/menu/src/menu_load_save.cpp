@@ -50,10 +50,9 @@ void Menu::loadVoice(uint8_t slotIndex)
             int16_t v = entry.params[idx];
 
             // a) Log it
-            ESP_LOGI(TAG, "    Field %2u (%s) = %d", (unsigned)f, pi.fields[f].label, v);
 
             // b) Write into your in-RAM cache
-            cache.set( slotIndex, static_cast<menu::Page>(p), static_cast<uint8_t>(f), v);
+            cache.set(state.voice, static_cast<menu::Page>(p), static_cast<uint8_t>(f), v);
 
             // c) If this is channel/volume, also update your MenuState
             if (p == static_cast<size_t>(menu::Page::Channel))

@@ -50,6 +50,7 @@ namespace menu
 
         /// Total pages (for convenience)
         static constexpr size_t PageCount = static_cast<size_t>(Page::_Count);
+        static constexpr uint8_t GlobalParamPageCount = 1;
 
         bool isGlobal(Page page) const
         {
