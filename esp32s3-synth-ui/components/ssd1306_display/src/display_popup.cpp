@@ -68,7 +68,7 @@ void SSD1306::renderPopup(const menu::MenuState &st)
         renderPopupInput(st, layout);
     else
         renderPopupConfirm(st, layout);
-        
+
     showPopup();
     lv_timer_handler();
     lvgl_port_unlock();
@@ -150,8 +150,18 @@ void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
 
 void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L)
 {
-    // simple “Done” confirmation, centered
+    // Clear out any previous content
+    lv_obj_clean(popupContainer);
+
+    // Pull the edited name (4-char + ‘\0’) directly:
+    const char *name = st.popup.editName;
+
+    // Build your confirmation string
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%s  loaded", name);
+
+    // Create one centered label
     lv_obj_t *lbl = lv_label_create(popupContainer);
-    lv_label_set_text(lbl, "Done!");
-    lv_obj_set_pos(lbl, (L.container_width - lv_obj_get_width(lbl)) / 2, L.body_start_y + (L.container_height - L.body_start_y) / 2);
+    lv_label_set_text(lbl, buf);
+    lv_obj_align(lbl, LV_ALIGN_CENTER, 0, 0);
 }

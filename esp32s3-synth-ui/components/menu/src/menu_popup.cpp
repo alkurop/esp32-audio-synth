@@ -103,12 +103,17 @@ bool Menu::updatePopupStateForward()
     {
     case PopupMode::LoadVoiceConfirm:
     {
+        std::string n = state.popup.listItems[state.popup.slotIndex].name;
+        std::strncpy(state.popup.editName, n.c_str(), sizeof(state.popup.editName) - 1);
         loadVoice(state.popup.slotIndex);
         break;
     }
 
     case PopupMode::LoadProjectConfirm:
     {
+        std::string n = state.popup.listItems[state.popup.slotIndex].name;
+        std::strncpy(state.popup.editName, n.c_str(), sizeof(state.popup.editName) - 1);
+        std::string name(state.popup.editName, state.popup.editName + 4);
         loadProject(state.popup.slotIndex);
         break;
     }
