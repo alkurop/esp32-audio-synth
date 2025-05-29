@@ -122,14 +122,40 @@ void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
 {
     const auto &ps = st.popup;
     char buf[5] = {};
-    std::memcpy(buf, ps.editName, 4);
+
+    // — Prefill logic —
+    if (ps.editName[0] != '\0')
+    {
+        // You’ve already started editing: use what’s in editName
+        std::memcpy(buf, ps.editName, 4);
+    }
+    else
+    {
+        // First time in: copy the existing name from the list
+        const auto &entry = ps.listItems[ps.slotIndex];
+        // First, make sure buf is zeroed:
+        char buf[5] = {0};
+
+        // Copy up to 4 chars from the std::string into your C-string:
+        std::strncpy(buf, entry.name.c_str(), 4);
+
+        // Guarantee null-termination:
+        buf[4] = '\0';
+    }
+    buf[4] = '\0'; // ensure termination
+
+    // Replace any '\0' with underscore for display
     for (int i = 0; i < 4; ++i)
+    {
         if (buf[i] == '\0')
             buf[i] = '_';
+    }
 
+    // layout: split container into 4 cells
     int cell = L.container_width / 4;
     for (int i = 0; i < 4; ++i)
     {
+        // character label
         lv_obj_t *c = lv_label_create(popupContainer);
         lv_obj_set_style_text_font(c, &lv_font_montserrat_14, LV_STATE_DEFAULT);
         char ch[2] = {buf[i], '\0'};
@@ -138,7 +164,8 @@ void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
         int x = i * cell + (cell - 8) / 2;
         lv_obj_set_pos(c, x, L.body_start_y);
 
-        if (i == ps.slotIndex)
+        // underline the “cursor” position
+        if (i == ps.stepIndex)
         {
             lv_obj_t *cur = lv_obj_create(popupContainer);
             lv_obj_set_size(cur, 8, 2);
@@ -158,7 +185,7 @@ void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L
 
     // Build your confirmation string
     char buf[32];
-    snprintf(buf, sizeof(buf), "%s  loaded", name);
+    snprintf(buf, sizeof(buf), "%s", name);
 
     // Create one centered label
     lv_obj_t *lbl = lv_label_create(popupContainer);
