@@ -45,10 +45,10 @@ namespace menu
             if (voiceIndex >= data.size())
                 return;
             data[voiceIndex][p][field] = value;
-            if (callback)
-            {
-                callback(page, field, value);
-            }
+        }
+        if (callback)
+        {
+            callback(page, field, value);
         }
     }
 

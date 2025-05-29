@@ -134,33 +134,25 @@ void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
     const auto &ps = st.popup;
     char buf[5] = {};
 
-    // — Prefill logic —
+    // — Prefill logic (no shadowed buf!) —
     if (ps.editName[0] != '\0')
     {
-        // You’ve already started editing: use what’s in editName
         std::memcpy(buf, ps.editName, 4);
     }
     else
     {
-        // First time in: copy the existing name from the list
         const auto &entry = ps.listItems[ps.slotIndex];
-        // First, make sure buf is zeroed:
-        char buf[5] = {0};
-
-        // Copy up to 4 chars from the std::string into your C-string:
         std::strncpy(buf, entry.name.c_str(), 4);
-
-        // Guarantee null-termination:
-        buf[4] = '\0';
     }
     buf[4] = '\0'; // ensure termination
 
     // Replace any '\0' with underscore for display
     for (int i = 0; i < 4; ++i)
-    {
         if (buf[i] == '\0')
             buf[i] = '_';
-    }
+
+    // *** CLEAN OUT ANY OLD LABELS + CURSOR ***
+    lv_obj_clean(popupContainer);
 
     // layout: split container into 4 cells
     int cell = L.container_width / 4;
@@ -185,6 +177,7 @@ void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
         }
     }
 }
+
 
 void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L)
 {
