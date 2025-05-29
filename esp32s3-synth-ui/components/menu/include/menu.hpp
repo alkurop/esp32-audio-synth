@@ -26,7 +26,7 @@ namespace menu
         explicit Menu(uint8_t voiceCount);
         void init(DisplayCallback displayCallback);
         void enterMenuPage();
-        void exitMenuPage();
+        void exitPage();
         void closePopup();
         void enterPopup();
         void rotateKnob(uint8_t knob, uint8_t value);

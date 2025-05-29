@@ -82,7 +82,7 @@ auto rotaryCallback = [](uint8_t id, uint8_t newValue)
 auto left = [](uint8_t number, bool state)
 {
     if (state)
-        menuHolder.exitMenuPage();
+        menuHolder.exitPage();
 };
 auto right = [](uint8_t number, bool state)
 {

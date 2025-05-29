@@ -77,10 +77,6 @@ void Menu::enterPopup()
             state.popup.listItems = paramStore.listProjectNames();
         }
     }
-
-    // 5) recompute ranges & notify
-    state.encoderRanges = calcEncoderRanges();
-    notify();
 }
 
 void Menu::closePopup()
@@ -90,9 +86,6 @@ void Menu::closePopup()
 
     // clear popup state
     state.popup = {};
-
-    state.encoderRanges = calcEncoderRanges();
-    notify();
 }
 
 bool Menu::updatePopupStateForward()

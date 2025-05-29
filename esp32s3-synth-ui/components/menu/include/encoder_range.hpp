@@ -88,55 +88,84 @@ namespace menu
         return R;
     }
 
-    static inline std::array<EncoderRange, 4> getEncoderRangesPopup(
-        const PopupState &st)
+    /// Knob ranges when you’re browsing a list of items
+    inline std::array<EncoderRange, 4> getPopupRangesList(const PopupState &st)
     {
         std::array<EncoderRange, 4> R{};
 
-        // 0) Step selector
-        {
-            size_t wf = size_t(st.workflowIndex);
-            const auto &wk = (wf < workflowCnt ? popupWorkflows[wf] : popupWorkflows[0]);
-            R[0] = {0,
-                    static_cast<uint8_t>(wk.stepCount - 1),
-                    st.stepIndex};
-        }
+        // only knob 0 is used here:
+        uint8_t maxSlot = st.listItems.empty()
+                              ? 0
+                              : static_cast<uint8_t>(st.listItems.size() - 1);
+        R[0].min = 0;
+        R[0].max = maxSlot;
+        R[0].value = std::clamp<uint8_t>(st.slotIndex, 0, maxSlot);
 
-        // 1) Slot selector
-        {
-            uint8_t maxSlot = st.listItems.empty() ? 0 : static_cast<uint8_t>(st.listItems.size() - 1);
-            R[1] = {min : 0,
-                    max : maxSlot,
-                    value : std::clamp<uint8_t>(st.slotIndex, 0, maxSlot)};
-        }
-
-        // 2) Character‐index selector (0..3 for a 4‐char name)
-        {
-            constexpr uint8_t maxCharPos = sizeof(st.editName) / sizeof(*st.editName) - 1;
-            // You might want a separate `charIndex` in PopupState; if not, reuse slotIndex
-            uint8_t pos = std::clamp<uint8_t>(st.slotIndex, 0, maxCharPos);
-            R[2] = {min : 0, max : maxCharPos, value : pos};
-        }
-
-        // 3) Character‐value selector using nameAlphabet[]
-        {
-            constexpr size_t alphaLen = sizeof(nameAlphabet) - 1; // minus trailing '\0'
-
-            // Determine current letter index
-            char cur = st.editName[std::clamp<uint8_t>(st.slotIndex, 0, alphaLen - 1)];
-            auto it = std::find(nameAlphabet,
-                                nameAlphabet + alphaLen,
-                                cur);
-            uint8_t idx = (it != nameAlphabet + alphaLen)
-                              ? static_cast<uint8_t>(it - nameAlphabet)
-                              : 0;
-
-            R[3] = {0,
-                    static_cast<uint8_t>(alphaLen - 1),
-                    idx};
-        }
+        // clear knobs 1–3
+        for (int k = 1; k < 4; ++k)
+            R[k] = EncoderRange{0, 0, 0};
 
         return R;
+    }
+
+    /// Knob ranges when you’re renaming (4-char buffer + alphabet)
+    inline std::array<EncoderRange, 4> getPopupRangesRename(const PopupState &st)
+    {
+        std::array<EncoderRange, 4> R{};
+
+        // 0: choose which character (0..3)
+        constexpr uint8_t MAX_CHAR_POS = sizeof(st.editName) / sizeof(*st.editName) - 1;
+        R[0].min = 0;
+        R[0].max = MAX_CHAR_POS;
+        R[0].value = std::clamp<uint8_t>(st.stepIndex, 0, MAX_CHAR_POS);
+
+        // 1: choose its value from nameAlphabet[]
+        constexpr size_t ALPHA_LEN = sizeof(nameAlphabet) - 1;
+        char cur = st.editName[R[0].value];
+        auto it = std::find(nameAlphabet, nameAlphabet + ALPHA_LEN, cur);
+        uint8_t idx = (it != nameAlphabet + ALPHA_LEN) ? static_cast<uint8_t>(it - nameAlphabet) : 0;
+        R[1].min = 0;
+        R[1].max = static_cast<uint8_t>(ALPHA_LEN - 1);
+        R[1].value = idx;
+
+        // clear knobs 2–3
+        for (int k = 2; k < 4; ++k)
+            R[k] = EncoderRange{0, 0, 0};
+
+        return R;
+    }
+
+    /// Knob ranges when you’re on a yes/no confirmation
+    inline std::array<EncoderRange, 4> getPopupRangesConfirm(const PopupState &st)
+    {
+        std::array<EncoderRange, 4> R{};
+
+        // only knob 0 matters: yes/no
+        R[0].min = 0;
+        R[0].max = 1;
+        R[0].value = std::clamp<uint8_t>(st.slotIndex, 0, 1);
+
+        // clear knobs 1–3
+        for (int k = 1; k < 4; ++k)
+            R[k] = EncoderRange{0, 0, 0};
+
+        return R;
+    }
+
+    /// Dispatch based on which array the current PopupMode belongs to
+    inline std::array<EncoderRange, 4> getEncoderRangesPopup(const PopupState &st)
+    {
+        PopupMode mode = getCurrentPopupMode(st);
+
+        if (std::find(listModes.begin(), listModes.end(), mode) != listModes.end())
+            return getPopupRangesList(st);
+        if (std::find(inputModes.begin(), inputModes.end(), mode) != inputModes.end())
+            return getPopupRangesRename(st);
+        if (std::find(confirmModes.begin(), confirmModes.end(), mode) != confirmModes.end())
+            return getPopupRangesConfirm(st);
+
+        // Fallback: no knobs
+        return {};
     }
 
 } // namespace menu

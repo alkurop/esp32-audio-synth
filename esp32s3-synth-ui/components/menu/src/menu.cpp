@@ -64,7 +64,7 @@ void Menu::enterMenuPage()
     notify();
 }
 
-void Menu::exitMenuPage()
+void Menu::exitPage()
 {
     if (state.mode == AppMode::Popup)
     {
@@ -112,8 +112,7 @@ void Menu::changeValueMenuList(uint8_t knob, uint8_t pos)
         cache.set(state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Chan), pos);
         break;
     case 3:
-        cache.set(state.voice, Page::Channel,
-                  static_cast<uint8_t>(ChannelField::Vol), pos);
+        cache.set(state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Vol), pos);
         break;
     default:
         return;
