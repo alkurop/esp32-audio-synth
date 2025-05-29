@@ -8,6 +8,7 @@
 
 namespace menu
 {
+    static constexpr int8_t AUTOSAVE_SLOT = -1;
 
     /**
      * Manages in-memory parameter presets and persists them to NVS.
@@ -34,17 +35,12 @@ namespace menu
          * Load parameters from the project slot at index.
          * @return true if the slot contains a valid project.
          */
-        ProjectStoreEntry loadProject(uint8_t index);
+        ProjectStoreEntry loadProject(int16_t index);
 
         /**
          * List all stored project names (most-recent first).
          */
         std::vector<NameEntry> listProjectNames() const;
-
-        /**
-         * Get the index of the currently loaded project, or -1.
-         */
-        uint8_t getCurrentProjectIndex() const;
 
         // --- Global field operations ---
         std::vector<int16_t> getGlobalFields() const;
@@ -59,7 +55,7 @@ namespace menu
         /**
          * Save a single field for a specific voice in the current project.
          */
-        void saveProjectField(uint8_t projectIndex, uint8_t voice, Page page, uint8_t field, int16_t value);
+        void autoSaveField(uint8_t voice, Page page, uint8_t field, int16_t value);
 
         // --- Voice-level operations ---
 
@@ -72,7 +68,7 @@ namespace menu
          * Load a single voice preset from the given slot.
          * @return true if the slot contains a valid voice.
          */
-        VoiceStoreEntry loadVoice(uint8_t index);
+        VoiceStoreEntry loadVoice(int16_t index);
 
         /**
          * List all stored voice names (most-recent first).

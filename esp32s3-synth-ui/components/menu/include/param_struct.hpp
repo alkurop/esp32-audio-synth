@@ -31,7 +31,7 @@ namespace menu
      */
     struct VoiceStoreEntry
     {
-        uint8_t index;                   ///< Slot index (0-based)
+        int16_t index;                   ///< Slot index (0-based)
         std::optional<std::string> name; ///< Optional 4-char name
         std::vector<int16_t> params;     ///< Flat parameter array [page][field]
 
@@ -50,7 +50,7 @@ namespace menu
      */
     struct ProjectStoreEntry
     {
-        uint8_t index;                       ///< Slot index (0-based)
+        int16_t index;                       ///< Slot index (0-based)
         std::optional<std::string> name;     ///< Optional 4-char name
         std::vector<VoiceStoreEntry> voices; ///< One entry per voice
 
