@@ -59,7 +59,7 @@ namespace menu
         /**
          * Save a single field for a specific voice in the current project.
          */
-        void saveProjectField(uint8_t voice, Page page, uint8_t field, int16_t value);
+        void saveProjectField(uint8_t projectIndex, uint8_t voice, Page page, uint8_t field, int16_t value);
 
         // --- Voice-level operations ---
 
@@ -82,8 +82,6 @@ namespace menu
     private:
         uint8_t maxProjects;
         uint8_t maxVoices;
-
-        uint8_t currentProjectIndex = 0;
     };
 
 } // namespace menu

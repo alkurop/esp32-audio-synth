@@ -120,9 +120,6 @@ void ParamStore::saveProject(const ProjectStoreEntry &entry)
         ESP_LOGE(TAG, "  nvs_commit failed (%d)", rc);
     }
     nvs_close(h);
-
-    // 8) Remember the current project index
-    currentProjectIndex = entry.index;
 }
 
 ProjectStoreEntry ParamStore::loadProject(uint8_t index)
@@ -242,139 +239,137 @@ ProjectStoreEntry ParamStore::loadProject(uint8_t index)
     }
 
     nvs_close(handle);
-    currentProjectIndex = entry.index;
     ESP_LOGD(TAG, "loadProject: done, loaded %zu voices", entry.voices.size());
     return entry;
 }
 
 uint8_t ParamStore::getCurrentProjectIndex() const
 {
-    return currentProjectIndex;
+    return 0;
 }
 
 std::vector<int16_t> ParamStore::getGlobalFields() const
 {
     std::vector<int16_t> fields;
-    if (currentProjectIndex >= maxProjects)
-        return fields;
-    nvs_handle handle;
-    if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK)
-        return fields;
+    // nvs_handle handle;
+    // if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK)
+    //     return fields;
 
-    size_t pageCount = static_cast<size_t>(Page::_Count);
-    for (size_t p = 0; p < pageCount; ++p)
-    {
-        for (uint8_t f = 0; f < MAX_FIELDS; ++f)
-        {
-            char key[32];
-            std::snprintf(key, sizeof(key), "%s%u_%zu_%u", KEY_GLOB_FIELD, (unsigned)currentProjectIndex, p, f);
-            int16_t v = 0;
-            nvs_get_i16(handle, key, &v);
-            fields.push_back(v);
-        }
-    }
-    nvs_close(handle);
+    // size_t pageCount = static_cast<size_t>(Page::_Count);
+    // for (size_t p = 0; p < pageCount; ++p)
+    // {
+    //     for (uint8_t f = 0; f < MAX_FIELDS; ++f)
+    //     {
+    //         char key[32];
+    //         std::snprintf(key, sizeof(key), "%s%u_%zu_%u", KEY_GLOB_FIELD, (unsigned)currentProjectIndex, p, f);
+    //         int16_t v = 0;
+    //         nvs_get_i16(handle, key, &v);
+    //         fields.push_back(v);
+    //     }
+    // }
+    // nvs_close(handle);
     return fields;
 }
 
 void ParamStore::saveGlobalField(Page page, uint8_t field, int16_t value)
 {
-    if (currentProjectIndex >= maxProjects)
-        return;
-    nvs_handle handle;
-    if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle) != ESP_OK)
-        return;
-    char key[32];
-    std::snprintf(key, sizeof(key), "%s%u_%u_%u", KEY_GLOB_FIELD, (unsigned)currentProjectIndex, static_cast<unsigned>(page), field);
-    nvs_set_i16(handle, key, value);
-    nvs_commit(handle);
-    nvs_close(handle);
+    // if (currentProjectIndex >= maxProjects)
+    //     return;
+    // nvs_handle handle;
+    // if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle) != ESP_OK)
+    //     return;
+    // char key[32];
+    // std::snprintf(key, sizeof(key), "%s%u_%u_%u", KEY_GLOB_FIELD, (unsigned)currentProjectIndex, static_cast<unsigned>(page), field);
+    // nvs_set_i16(handle, key, value);
+    // nvs_commit(handle);
+    // nvs_close(handle);
 }
 
 void ParamStore::saveProjectField(
+    uint8_t projectIndex, 
     uint8_t voiceIndex,
     menu::Page page,
     uint8_t field,
     int16_t value)
 {
-    // 0) Must have a valid “current” project
-    if (currentProjectIndex >= maxProjects)
-    {
-        ESP_LOGW(TAG, "saveProjectField: no project selected");
-        return;
-    }
+    // // 0) Must have a valid “current” project
+    // if (currentProjectIndex >= maxProjects)
+    // {
+    //     ESP_LOGW(TAG, "saveProjectField: no project selected");
+    //     return;
+    // }
 
-    // 1) Open NVS
-    nvs_handle h;
-    esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &h);
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "saveProjectField: nvs_open failed (%d)", err);
-        return;
-    }
+    // // 1) Open NVS
+    // nvs_handle h;
+    // esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &h);
+    // if (err != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "saveProjectField: nvs_open failed (%d)", err);
+    //     return;
+    // }
 
-    // 2) Read the existing blob
-    char key[32];
-    std::snprintf(key, sizeof(key), "%s%u", KEY_PROJ_DATA, currentProjectIndex);
-    ESP_LOGD(TAG, "saveProjectField: dataKey=\"%s\", voice=%u page=%u field=%u value=%d",
-             key, (unsigned)voiceIndex, (unsigned)page, (unsigned)field, (int)value);
+    // // 2) Read the existing blob
+    // char key[32];
+    // std::snprintf(key, sizeof(key), "%s%u", KEY_PROJ_DATA, currentProjectIndex);
+    // ESP_LOGD(TAG, "saveProjectField: dataKey=\"%s\", voice=%u page=%u field=%u value=%d",
+    //          key, (unsigned)voiceIndex, (unsigned)page, (unsigned)field, (int)value);
 
-    size_t blobLen = 0;
-    err = nvs_get_blob(h, key, nullptr, &blobLen);
-    if (err != ESP_OK || blobLen == 0)
-    {
-        ESP_LOGE(TAG, "  nvs_get_blob probe failed (%d) or zero length", err);
-        nvs_close(h);
-        return;
-    }
+    // size_t blobLen = 0;
+    // err = nvs_get_blob(h, key, nullptr, &blobLen);
+    // if (err != ESP_OK || blobLen == 0)
+    // {
+    //     ESP_LOGE(TAG, "  nvs_get_blob probe failed (%d) or zero length", err);
+    //     nvs_close(h);
+    //     return;
+    // }
 
-    // 3) Load blob into a vector of int16_t
-    size_t entryCount = blobLen / sizeof(int16_t);
-    std::vector<int16_t> blob(entryCount);
-    err = nvs_get_blob(h, key, blob.data(), &blobLen);
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "  nvs_get_blob read failed (%d)", err);
-        nvs_close(h);
-        return;
-    }
+    // // 3) Load blob into a vector of int16_t
+    // size_t entryCount = blobLen / sizeof(int16_t);
+    // std::vector<int16_t> blob(entryCount);
+    // err = nvs_get_blob(h, key, blob.data(), &blobLen);
+    // if (err != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "  nvs_get_blob read failed (%d)", err);
+    //     nvs_close(h);
+    //     return;
+    // }
 
-    // 4) Compute the offset of this one field
-    constexpr size_t P = static_cast<size_t>(menu::Page::_Count);
-    constexpr size_t F = MAX_FIELDS;
-    size_t fieldsPerVoice = P * F;
+    // // 4) Compute the offset of this one field
+    // constexpr size_t P = static_cast<size_t>(menu::Page::_Count);
+    // constexpr size_t F = MAX_FIELDS;
+    // size_t fieldsPerVoice = P * F;
 
-    if (voiceIndex >= entryCount / fieldsPerVoice)
-    {
-        ESP_LOGE(TAG, "  voiceIndex %u out of range (only %u voices worth of data)", voiceIndex, (unsigned)(entryCount / fieldsPerVoice));
-        nvs_close(h);
-        return;
-    }
+    // if (voiceIndex >= entryCount / fieldsPerVoice)
+    // {
+    //     ESP_LOGE(TAG, "  voiceIndex %u out of range (only %u voices worth of data)", voiceIndex, (unsigned)(entryCount / fieldsPerVoice));
+    //     nvs_close(h);
+    //     return;
+    // }
 
-    size_t offs = voiceIndex * fieldsPerVoice + static_cast<size_t>(page) * F + static_cast<size_t>(field);
+    // size_t offs = voiceIndex * fieldsPerVoice + static_cast<size_t>(page) * F + static_cast<size_t>(field);
 
-    if (offs >= entryCount)
-    {
-        ESP_LOGE(TAG, "  computed offset %zu out of blob range (%zu)", offs, entryCount);
-        nvs_close(h);
-        return;
-    }
+    // if (offs >= entryCount)
+    // {
+    //     ESP_LOGE(TAG, "  computed offset %zu out of blob range (%zu)", offs, entryCount);
+    //     nvs_close(h);
+    //     return;
+    // }
 
-    // 5) Patch the value
-    blob[offs] = value;
+    // // 5) Patch the value
+    // blob[offs] = value;
 
-    // 6) Write it all back
-    err = nvs_set_blob(h, key, blob.data(), blob.size() * sizeof(blob[0]));
-    if (err != ESP_OK)
-    {
-        ESP_LOGE(TAG, "  nvs_set_blob(%s) failed (%d)", key, err);
-    }
-    else
-    {
-        nvs_commit(h);
-    }
+    // // 6) Write it all back
+    // err = nvs_set_blob(h, key, blob.data(), blob.size() * sizeof(blob[0]));
+    // if (err != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "  nvs_set_blob(%s) failed (%d)", key, err);
+    // }
+    // else
+    // {
+    //     nvs_commit(h);
+    // }
 
-    nvs_close(h);
+    // nvs_close(h);
 }
 
 void ParamStore::saveVoice(const VoiceStoreEntry &entry)
