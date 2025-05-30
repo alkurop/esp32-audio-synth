@@ -33,7 +33,7 @@ void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
     // prime the encoder ranges & draw initial screen
     state.encoderRanges = calcEncoderRanges();
     notify();
-    loadProject(AUTOSAVE_SLOT);
+    loadProject(-1);
 }
 
 void Menu::enterMenuPage()
@@ -92,6 +92,7 @@ void Menu::rotateKnob(uint8_t knob, uint8_t pos)
         break;
     case AppMode::Page:
         changeValuePage(knob, pos);
+        state.shouldAutoSave = true;
         break;
     case AppMode::Popup:
         changeValuePopup(knob, pos);

@@ -14,18 +14,16 @@ static constexpr char KEY_PROJ_VOICE_NAME[] = "pvn_";  // + project slot + "_" +
 
 static const char *TAG = "ParamStore";
 
-void ParamStore::saveProject(const ProjectStoreEntry &entry)
+void ParamStore::saveProject(const ProjectStoreEntry &entry, bool allowAutosave)
 {
     std::unique_lock<std::mutex> lock(nvsMutex);
 
-    // 0) Sanity check slot
     if (entry.index >= maxProjects)
     {
         ESP_LOGW(TAG, "saveProject: slot %d out of range", entry.index);
         return;
     }
 
-    // 1) Open NVS for read/write
     nvs_handle h;
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &h);
     if (err != ESP_OK)
@@ -37,16 +35,14 @@ void ParamStore::saveProject(const ProjectStoreEntry &entry)
     char key[32];
     esp_err_t rc;
 
-    // 2) Save the project’s display name
+    // Save the project’s display name using getName()
     std::snprintf(key, sizeof(key), "%s%d", KEY_PROJ_NAME, entry.index);
-    ESP_LOGD(TAG, "saveProject: nameKey=\"%s\", name=\"%s\"", key, entry.name.has_value() ? entry.name->c_str() : "<none>");
-    rc = nvs_set_str(h, key, entry.name.has_value() ? entry.name->c_str() : "");
+    std::string name = entry.getName();
+    rc = nvs_set_str(h, key, name.c_str());
     if (rc != ESP_OK)
-    {
-        ESP_LOGE(TAG, "  nvs_set_str(%s) failed (%d)", key, rc);
-    }
+        ESP_LOGE(TAG, "nvs_set_str(%s) failed (%d)", key, rc);
 
-    // 3) Flatten all voices' params into one big blob
+    // Flatten voices params into blob
     const size_t P = VOICE_PAGE_COUNT;
     const size_t F = MAX_FIELDS;
     std::vector<int16_t> blob;
@@ -55,45 +51,37 @@ void ParamStore::saveProject(const ProjectStoreEntry &entry)
     {
         if (ve.params.size() != P * F)
         {
-            ESP_LOGW(TAG, "  voice %u has %zu params, expected %zu", ve.index, ve.params.size(), P * F);
+            ESP_LOGW(TAG, "voice %d has %zu params, expected %zu", ve.index, ve.params.size(), P * F);
         }
         blob.insert(blob.end(), ve.params.begin(), ve.params.end());
     }
 
-    // 4) Save the flattened blob
-    std::snprintf(key, sizeof(key), "%s%u", KEY_PROJ_DATA, entry.index);
-    ESP_LOGD(TAG, "saveProject: dataKey=\"%s\", blobSize=%zu bytes (%zu voices)", key, blob.size() * sizeof(blob[0]), entry.voices.size());
+    // Save blob data
+    std::snprintf(key, sizeof(key), "%s%d", KEY_PROJ_DATA, entry.index);
     rc = nvs_set_blob(h, key, blob.data(), blob.size() * sizeof(blob[0]));
     if (rc != ESP_OK)
-    {
-        ESP_LOGE(TAG, "  nvs_set_blob(%s) failed (%d)", key, rc);
-    }
+        ESP_LOGE(TAG, "nvs_set_blob(%s) failed (%d)", key, rc);
 
-    // 5) Save the number of voices in this project
+    // Save voice count
     std::snprintf(key, sizeof(key), "%s%d", KEY_PROJ_VOICE_COUNT, entry.index);
-    ESP_LOGD(TAG, "saveProject: cntKey=\"%s\", count=%zu", key, entry.voices.size());
     rc = nvs_set_i32(h, key, static_cast<int32_t>(entry.voices.size()));
     if (rc != ESP_OK)
-    {
-        ESP_LOGE(TAG, "  nvs_set_i32(%s) failed (%d)", key, rc);
-    }
+        ESP_LOGE(TAG, "nvs_set_i32(%s) failed (%d)", key, rc);
 
-    // 6) Commit and close
     rc = nvs_commit(h);
     if (rc != ESP_OK)
-    {
-        ESP_LOGE(TAG, "  nvs_commit failed (%d)", rc);
-    }
+        ESP_LOGE(TAG, "nvs_commit failed (%d)", rc);
+
     nvs_close(h);
-    lock.unlock();
-    // --- AUTOSAVE ---
-    // Immediately mirror into the reserved slot
-    if (entry.index != AUTOSAVE_SLOT)
+
+    // Explicit autosave logic without deadlock
+    if (allowAutosave && entry.index != AUTOSAVE_SLOT)
     {
         ProjectStoreEntry autoEntry = entry;
         autoEntry.index = AUTOSAVE_SLOT;
-        saveProject(autoEntry);
-        ESP_LOGD(TAG, "loadProject: autosaved project to slot %d", AUTOSAVE_SLOT);
+        lock.unlock(); // explicitly unlock mutex before recursive call
+        saveProject(autoEntry, false);
+        ESP_LOGD(TAG, "Autosaved project to slot %d", AUTOSAVE_SLOT);
     }
 }
 
@@ -214,15 +202,5 @@ ProjectStoreEntry ParamStore::loadProject(int16_t index)
 
     nvs_close(handle);
     ESP_LOGD(TAG, "loadProject: done, loaded %zu voices", entry.voices.size());
-    lock.unlock();
-    // --- AUTOSAVE ---
-    // Immediately mirror into the reserved slot
-    if (entry.index != AUTOSAVE_SLOT)
-    {
-        ProjectStoreEntry autoEntry = entry;
-        autoEntry.index = AUTOSAVE_SLOT;
-        saveProject(autoEntry);
-        ESP_LOGD(TAG, "loadProject: autosaved project to slot %d", AUTOSAVE_SLOT);
-    }
     return entry;
 }

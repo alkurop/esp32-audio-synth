@@ -35,15 +35,6 @@ void ParamCache::set(uint8_t voiceIndex, Page page, uint8_t field, int16_t value
     const auto &pi = menu::menuPages[static_cast<size_t>(page)];
     const auto &fi = pi.fields[field];
 
-    ESP_LOGD(TAG,
-             "Set in cache Voice %u  Page %u (%s)  Field %u (%s) = %d",
-             (unsigned)voiceIndex,
-             (unsigned)page,
-             pi.title,
-             (unsigned)field,
-             fi.label,
-             (int)value);
-
     size_t p = size_t(page);
     if (p >= PageCount || field >= MAX_FIELDS)
         return;

@@ -33,7 +33,7 @@ namespace menu
         /**
          * Save all voice parameters in the given project slot.
          */
-        void saveProject(const ProjectStoreEntry &entry);
+        void saveProject(const ProjectStoreEntry &entry, bool allowAutosave = true);
 
         /**
          * Load parameters from the project slot at index.

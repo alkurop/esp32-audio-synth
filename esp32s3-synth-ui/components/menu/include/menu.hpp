@@ -31,7 +31,7 @@ namespace menu
         void closePopup();
         void enterPopup();
         void rotateKnob(uint8_t knob, uint8_t value);
-        void saveProject(uint8_t slotIndex, const std::string &name);
+        void saveProject(int16_t slotIndex, const std::string &name);
 
         // for autosave task
         ParamStore paramStore;
@@ -57,7 +57,7 @@ namespace menu
         void loadVoice(int16_t slotIndex);
         void loadProject(int16_t slotIndex);
 
-        void saveVoice(uint8_t slotIndex, const std::string &name);
+        void saveVoice(int16_t slotIndex, const std::string &name);
         void updatePageFromCache();
 
         uint8_t voiceCount;
