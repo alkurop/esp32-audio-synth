@@ -49,8 +49,8 @@ void Menu::loadVoice(int16_t slotIndex)
 {
     // 1) Pull back the stored entry
     const auto entry = paramStore.loadVoice(slotIndex);
-    ESP_LOGI(TAG, "loadVoice(%d): name=%s, params.size=%d", slotIndex, entry.name ? entry.name->c_str() : "<none>", entry.params.size());
-    if (entry.params.empty())
+    ESP_LOGI(TAG, "loadVoice(%d): name=%s, params.size=%d", slotIndex, entry.name ? entry.name->c_str() : "<none>", entry.voiceParams.size());
+    if (entry.voiceParams.empty())
     {
         // nothing to restore
         notify();
@@ -58,7 +58,7 @@ void Menu::loadVoice(int16_t slotIndex)
     }
 
     // 2) Compute page & field counts
-    size_t totalEntries = entry.params.size();
+    size_t totalEntries = entry.voiceParams.size();
     size_t pageCount = totalEntries / MAX_FIELDS;
     const size_t maxPages = static_cast<size_t>(menu::Page::_Count);
     pageCount = std::min(pageCount, maxPages);
@@ -74,7 +74,7 @@ void Menu::loadVoice(int16_t slotIndex)
         for (size_t f = 0; f < fields; ++f)
         {
             size_t idx = p * MAX_FIELDS + f;
-            int16_t v = entry.params[idx];
+            int16_t v = entry.voiceParams[idx];
 
             // a) Log it
 
@@ -106,7 +106,7 @@ void Menu::saveVoice(int16_t slotIndex, const std::string &name)
     VoiceStoreEntry entry = {
         .index = slotIndex,
         .name = name,
-        .params = flatParams};
+        .voiceParams = flatParams};
 
     paramStore.saveVoice(entry);
 }
@@ -125,7 +125,7 @@ void Menu::loadProject(int16_t slotIndex)
     for (size_t v = 0; v < projectEntry.voices.size(); ++v)
     {
         const auto &ve = projectEntry.voices[v];
-        const auto &flat = ve.params;
+        const auto &flat = ve.voiceParams;
         size_t pageCount = flat.size() / MAX_FIELDS;
 
         for (size_t p = 0; p < pageCount; ++p)
@@ -182,7 +182,7 @@ void Menu::saveProject(int16_t slotIndex, const std::string &name)
         VoiceStoreEntry ve{
             .index = static_cast<uint8_t>(i),
             .name = std::nullopt,
-            .params = std::move(flatParams)};
+            .voiceParams = std::move(flatParams)};
         entry.voices.push_back(std::move(ve));
     }
 

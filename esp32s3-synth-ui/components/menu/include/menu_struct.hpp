@@ -167,11 +167,10 @@ namespace menu
         {"Dept", FieldType::Range, 0, 31, nullptr, 0},
     };
 
-    // Global fields
-    static constexpr FieldInfo globalInfo[] = {
+    // BpmFields
+    static constexpr FieldInfo bpmInfo[] = {
         {"BpmSync", FieldType::Options, 0, 0, yesNo, 2},
         {"BPM", FieldType::Range, 30, 300, nullptr, 0},
-        {"AutoSave", FieldType::Options, 0, 0, yesNo, 2},
     };
 
     struct PageInfo
@@ -189,7 +188,7 @@ namespace menu
         {"Tuning", tuningInfo, sizeof(tuningInfo) / sizeof(FieldInfo)},
         {"Filter LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"Detune LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
-        {"Global BPM", globalInfo, sizeof(globalInfo) / sizeof(FieldInfo)},
+        {"BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
     };
 
     // Total number of pages
@@ -197,8 +196,8 @@ namespace menu
 
     /// Total pages (for convenience)
     static constexpr size_t PageCount = static_cast<size_t>(Page::_Count);
-    static constexpr size_t GlobalParamPageCount = 1;
-    static constexpr size_t VOICE_PAGE_COUNT = PageCount - GlobalParamPageCount;
+    static constexpr size_t GLOBAL_PAGE_COUNT = 1;
+    static constexpr size_t VOICE_PAGE_COUNT = PageCount - GLOBAL_PAGE_COUNT;
 
     static_assert((uint8_t)Page::_Count == (sizeof(menuPages) / sizeof(PageInfo)), "Page count mismatch");
 

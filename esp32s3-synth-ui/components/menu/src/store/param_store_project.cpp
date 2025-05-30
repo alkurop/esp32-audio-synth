@@ -49,11 +49,11 @@ void ParamStore::saveProject(const ProjectStoreEntry &entry, bool allowAutosave)
     blob.reserve(entry.voices.size() * P * F);
     for (const auto &ve : entry.voices)
     {
-        if (ve.params.size() != P * F)
+        if (ve.voiceParams.size() != P * F)
         {
-            ESP_LOGW(TAG, "voice %d has %zu params, expected %zu", ve.index, ve.params.size(), P * F);
+            ESP_LOGW(TAG, "voice %d has %zu params, expected %zu", ve.index, ve.voiceParams.size(), P * F);
         }
-        blob.insert(blob.end(), ve.params.begin(), ve.params.end());
+        blob.insert(blob.end(), ve.voiceParams.begin(), ve.voiceParams.end());
     }
 
     // Save blob data
@@ -187,14 +187,14 @@ ProjectStoreEntry ParamStore::loadProject(int16_t index)
         size_t offset = static_cast<size_t>(v) * voiceSize;
         size_t avail = (blob.size() >= offset + voiceSize) ? voiceSize : blob.size() - offset;
         // copy available data...
-        ve.params.assign(
+        ve.voiceParams.assign(
             blob.begin() + offset,
             blob.begin() + offset + avail);
 
         // ...and pad with zeros up to full voiceSize
         if (avail < voiceSize)
         {
-            ve.params.resize(voiceSize, 0);
+            ve.voiceParams.resize(voiceSize, 0);
         }
 
         entry.voices.push_back(std::move(ve));

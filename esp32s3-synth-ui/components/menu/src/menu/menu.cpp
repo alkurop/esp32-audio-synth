@@ -14,7 +14,7 @@ static const char *TAG = "Menu";
 using namespace menu;
 
 Menu::Menu(uint8_t voiceCount)
-    :  paramStore(), state{}, voiceCount(voiceCount), cache(voiceCount) // value‐initialize everything
+    : paramStore(), state{}, voiceCount(voiceCount), cache(voiceCount) // value‐initialize everything
 {
     // Set sensible defaults in state:
     state.mode = AppMode::MenuList;
@@ -113,9 +113,11 @@ void Menu::changeValueMenuList(uint8_t knob, uint8_t pos)
         break;
     case 2:
         cache.set(state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Chan), pos);
+        state.shouldAutoSave = true;
         break;
     case 3:
         cache.set(state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Vol), pos);
+        state.shouldAutoSave = true;
         break;
     default:
         return;

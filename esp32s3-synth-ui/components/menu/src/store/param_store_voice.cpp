@@ -16,7 +16,7 @@ VoiceStoreEntry ParamStore::loadVoice(int16_t index)
     std::lock_guard<std::mutex> lock(nvsMutex);
 
     // 1) Prepare an empty entry
-    VoiceStoreEntry entry{.index = index, .name = std::nullopt, .params = {}};
+    VoiceStoreEntry entry{.index = index, .name = std::nullopt, .voiceParams = {}};
 
     if (index >= maxVoices)
     {
@@ -75,12 +75,12 @@ VoiceStoreEntry ParamStore::loadVoice(int16_t index)
             ESP_LOGD(TAG, "  blobLen=%u bytes => %u int16_t entries",
                      (unsigned)blobLen, (unsigned)count);
 
-            entry.params.resize(count);
-            err = nvs_get_blob(handle, dataKey, entry.params.data(), &blobLen);
+            entry.voiceParams.resize(count);
+            err = nvs_get_blob(handle, dataKey, entry.voiceParams.data(), &blobLen);
             if (err != ESP_OK)
             {
                 ESP_LOGE(TAG, "  nvs_get_blob(%s) failed (%d)", dataKey, err);
-                entry.params.clear();
+                entry.voiceParams.clear();
             }
         }
         else
@@ -128,9 +128,9 @@ void ParamStore::saveVoice(const VoiceStoreEntry &entry)
 
     // --- save the params blob ---
     std::snprintf(key, sizeof(key), "%s%d", KEY_VOICE_DATA, slot);
-    size_t blobSize = entry.params.size() * sizeof(entry.params[0]);
-    ESP_LOGD(TAG, "saveVoice: dataKey='%s', blobSize=%zu bytes (%zu entries)", key, blobSize, entry.params.size());
-    rc = nvs_set_blob(handle, key, entry.params.data(), blobSize);
+    size_t blobSize = entry.voiceParams.size() * sizeof(entry.voiceParams[0]);
+    ESP_LOGD(TAG, "saveVoice: dataKey='%s', blobSize=%zu bytes (%zu entries)", key, blobSize, entry.voiceParams.size());
+    rc = nvs_set_blob(handle, key, entry.voiceParams.data(), blobSize);
     if (rc != ESP_OK)
     {
         ESP_LOGE(TAG, "  nvs_set_blob(%s) failed (%d)", key, rc);

@@ -46,13 +46,7 @@ namespace menu
          */
         std::vector<NameEntry> listProjectNames();
 
-        // --- Global field operations ---
-        std::vector<int16_t> getGlobalFields();
-
-        /**
-         * Save a single global (project-level) parameter value.
-         */
-        void saveGlobalField(Page page, uint8_t field, int16_t value);
+    
         // --- Voice-level operations ---
 
         /**
