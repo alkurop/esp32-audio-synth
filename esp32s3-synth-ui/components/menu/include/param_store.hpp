@@ -11,6 +11,8 @@ namespace menu
 {
     static constexpr int8_t AUTOSAVE_SLOT = -1;
     static constexpr char NVS_NAMESPACE[] = "synth";
+    static constexpr char KEY_PROJ_NAME[] = "pn_";
+    static constexpr char KEY_VOICE_NAME[] = "vn_";
 
     /**
      * Manages in-memory parameter presets and persists them to NVS.
@@ -51,14 +53,6 @@ namespace menu
          * Save a single global (project-level) parameter value.
          */
         void saveGlobalField(Page page, uint8_t field, int16_t value);
-
-        // --- Project field operations ---
-
-        /**
-         * Save a single field for a specific voice in the current project.
-         */
-        void autoSaveField(uint8_t voice, Page page, uint8_t field, int16_t value);
-
         // --- Voice-level operations ---
 
         /**

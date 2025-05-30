@@ -9,6 +9,12 @@
 #include <inttypes.h>
 using namespace menu;
 static constexpr char KEY_GLOB_FIELD[] = "gf_";
+static const char *TAG = "ParamStore";
+
+ParamStore::ParamStore(uint8_t maxProjects, uint8_t maxVoices) : maxProjects(maxProjects), maxVoices(maxVoices)
+{
+    nvs_flash_init();
+}
 
 std::vector<int16_t> ParamStore::getGlobalFields()
 {
