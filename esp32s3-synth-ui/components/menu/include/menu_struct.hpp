@@ -220,6 +220,7 @@ namespace menu
         uint8_t channel;       ///< Current channel for that voice
         uint8_t volume;        ///< Current volume for that voice
         int8_t fieldValues[4]; ///< Current values for each knob
+        bool shouldAutoSave;
 
         PopupState popup; ///< active load/save overlay
         std::array<EncoderRange, 4> encoderRanges;

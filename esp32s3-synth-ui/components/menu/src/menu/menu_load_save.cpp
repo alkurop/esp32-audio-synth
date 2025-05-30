@@ -5,6 +5,8 @@
 #include <utility>
 #include <esp_log.h>
 #include <cstring>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #include "menu.hpp"
 #include "menu_struct.hpp"
@@ -146,4 +148,22 @@ void Menu::saveProject(uint8_t slotIndex, const std::string &name)
 
     // 5) Save it
     paramStore.saveProject(entry);
+}
+
+void autoSaveTask(void *param)
+{
+    Menu *menu = static_cast<Menu *>(param);
+
+    while (true)
+    {
+        vTaskDelay(pdMS_TO_TICKS(AUTOSAVE_INTERVAL_MS));
+
+        if (menu->state.shouldAutoSave)
+        {
+            ESP_LOGI("Autosave", "Autosaving project to slot %d...", AUTOSAVE_SLOT);
+            menu->state.shouldAutoSave = false;
+            menu->saveProject(AUTOSAVE_SLOT, "autosave");
+            ESP_LOGI("Autosave", "Autosave completed.");
+        }
+    }
 }

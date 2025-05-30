@@ -10,6 +10,7 @@
 #include "encoder_range.hpp"
 #include "param_cache.hpp"
 #include "param_store.hpp"
+#define AUTOSAVE_INTERVAL_MS (2 * 60 * 1000) // 2 minutes
 
 namespace menu
 {
@@ -30,6 +31,10 @@ namespace menu
         void closePopup();
         void enterPopup();
         void rotateKnob(uint8_t knob, uint8_t value);
+        void saveProject(uint8_t slotIndex, const std::string &name);
+
+        // for autosave task
+        MenuState state;
 
     private:
         /// Notify the display callback of the current cached state.
@@ -49,16 +54,15 @@ namespace menu
 
         /// Internal actions for loading/saving
         void loadVoice(uint8_t slotIndex);
-        void saveVoice(uint8_t slotIndex, const std::string &name);
         void loadProject(uint8_t slotIndex);
-        void saveProject(uint8_t slotIndex, const std::string &name);
+
+        void saveVoice(uint8_t slotIndex, const std::string &name);
         void updatePageFromCache();
 
         uint8_t voiceCount;
         ParamCache cache;
         ParamStore paramStore;
 
-        MenuState state;
         DisplayCallback displayCallback;
     };
 
