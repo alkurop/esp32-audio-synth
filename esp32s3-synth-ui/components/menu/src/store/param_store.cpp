@@ -8,16 +8,13 @@
 #include <inttypes.h>
 
 using namespace menu;
-static constexpr char NVS_NAMESPACE[] = "synth";
 static constexpr char KEY_PROJ_NAME[] = "pn_";
 static constexpr char KEY_PROJ_DATA[] = "pd_";
-static constexpr char KEY_GLOB_FIELD[] = "gf_";
 static constexpr char KEY_VOICE_NAME[] = "vn_";
 static constexpr char KEY_VOICE_DATA[] = "vd_";
 static constexpr char KEY_PROJ_VOICE_COUNT[] = "pdc_"; // + project slot
 static constexpr char KEY_PROJ_VOICE_NAME[] = "pvn_";  // + project slot + "_" + voice index
 
-static constexpr uint8_t MAX_FIELDS = 4;
 static const char *TAG = "ParamStore";
 
 ParamStore::ParamStore(uint8_t maxProjects, uint8_t maxVoices) : maxProjects(maxProjects), maxVoices(maxVoices)
@@ -27,6 +24,8 @@ ParamStore::ParamStore(uint8_t maxProjects, uint8_t maxVoices) : maxProjects(max
 
 void ParamStore::saveProject(const ProjectStoreEntry &entry)
 {
+    std::lock_guard<std::mutex> lock(nvsMutex);
+
     // 0) Sanity check slot
     if (entry.index >= maxProjects)
     {
@@ -98,6 +97,8 @@ void ParamStore::saveProject(const ProjectStoreEntry &entry)
 
 ProjectStoreEntry ParamStore::loadProject(int16_t index)
 {
+    std::lock_guard<std::mutex> lock(nvsMutex);
+
     ProjectStoreEntry entry{};
     entry.index = index;
 
@@ -223,6 +224,8 @@ ProjectStoreEntry ParamStore::loadProject(int16_t index)
 
 void ParamStore::saveVoice(const VoiceStoreEntry &entry)
 {
+    std::lock_guard<std::mutex> lock(nvsMutex);
+
     // 1) Open NVS for read/write
     nvs_handle handle;
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle);
@@ -273,6 +276,8 @@ void ParamStore::saveVoice(const VoiceStoreEntry &entry)
 
 VoiceStoreEntry ParamStore::loadVoice(int16_t index)
 {
+    std::lock_guard<std::mutex> lock(nvsMutex);
+
     // 1) Prepare an empty entry
     VoiceStoreEntry entry{.index = index, .name = std::nullopt, .params = {}};
 
@@ -339,8 +344,10 @@ VoiceStoreEntry ParamStore::loadVoice(int16_t index)
     return entry;
 }
 
-std::vector<NameEntry> ParamStore::listProjectNames() const
+std::vector<NameEntry> ParamStore::listProjectNames()  
 {
+    std::lock_guard<std::mutex> lock(nvsMutex);
+
     std::vector<NameEntry> entries(maxProjects);
 
     // Try to open NVS once
@@ -386,8 +393,10 @@ std::vector<NameEntry> ParamStore::listProjectNames() const
     return entries;
 }
 
-std::vector<NameEntry> ParamStore::listVoiceNames() const
+std::vector<NameEntry> ParamStore::listVoiceNames()  
 {
+    std::lock_guard<std::mutex> lock(nvsMutex);
+
     std::vector<NameEntry> entries(maxVoices);
     for (uint8_t i = 0; i < maxVoices; ++i)
     {
@@ -423,6 +432,8 @@ void ParamStore::autoSaveField(
     uint8_t field,
     int16_t value)
 {
+    std::lock_guard<std::mutex> lock(nvsMutex);
+
     // 1) Open NVS
     nvs_handle h;
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READWRITE, &h);
@@ -496,37 +507,4 @@ void ParamStore::autoSaveField(
     nvs_close(h);
 }
 
-std::vector<int16_t> ParamStore::getGlobalFields() const
-{
-    std::vector<int16_t> fields;
-    nvs_handle handle;
-    if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK)
-        return fields;
 
-    size_t pageCount = static_cast<size_t>(GlobalField::_Count);
-    for (size_t p = 0; p < pageCount; ++p)
-    {
-        for (uint8_t f = 0; f < MAX_FIELDS; ++f)
-        {
-            char key[32];
-            std::snprintf(key, sizeof(key), "%s%u_%u", KEY_GLOB_FIELD, p, f);
-            int16_t v = 0;
-            nvs_get_i16(handle, key, &v);
-            fields.push_back(v);
-        }
-    }
-    nvs_close(handle);
-    return fields;
-}
-
-void ParamStore::saveGlobalField(Page page, uint8_t field, int16_t value)
-{
-    nvs_handle handle;
-    if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle) != ESP_OK)
-        return;
-    char key[32];
-    std::snprintf(key, sizeof(key), "%s%u_%u", KEY_GLOB_FIELD, static_cast<unsigned>(page), field);
-    nvs_set_i16(handle, key, value);
-    nvs_commit(handle);
-    nvs_close(handle);
-}

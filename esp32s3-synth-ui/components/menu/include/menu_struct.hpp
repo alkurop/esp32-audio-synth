@@ -264,4 +264,5 @@ namespace menu
             return PopupMode::Count;
         return workflow.steps[step].mode;
     }
+    static constexpr uint8_t MAX_FIELDS = 4;
 } // namespace menu

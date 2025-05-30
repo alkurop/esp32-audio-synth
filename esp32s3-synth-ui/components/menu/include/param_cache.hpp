@@ -12,7 +12,6 @@ namespace menu
     /**
      * Maximum number of fields per page (knobs 0..3)
      */
-    static constexpr uint8_t MAX_FIELDS = 4;
     using UpdateCallback = std::function<void(Page page, uint8_t field, int16_t value)>;
 
     /**

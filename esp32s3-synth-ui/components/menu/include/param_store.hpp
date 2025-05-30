@@ -5,10 +5,12 @@
 #include <cinttypes>
 #include "param_struct.hpp" // ProjectStoreEntry, VoiceStoreEntry
 #include "menu_struct.hpp"
+#include <mutex>
 
 namespace menu
 {
     static constexpr int8_t AUTOSAVE_SLOT = -1;
+    static constexpr char NVS_NAMESPACE[] = "synth";
 
     /**
      * Manages in-memory parameter presets and persists them to NVS.
@@ -40,10 +42,10 @@ namespace menu
         /**
          * List all stored project names (most-recent first).
          */
-        std::vector<NameEntry> listProjectNames() const;
+        std::vector<NameEntry> listProjectNames();
 
         // --- Global field operations ---
-        std::vector<int16_t> getGlobalFields() const;
+        std::vector<int16_t> getGlobalFields();
 
         /**
          * Save a single global (project-level) parameter value.
@@ -73,11 +75,12 @@ namespace menu
         /**
          * List all stored voice names (most-recent first).
          */
-        std::vector<NameEntry> listVoiceNames() const;
+        std::vector<NameEntry> listVoiceNames();
 
     private:
         uint8_t maxProjects;
         uint8_t maxVoices;
+        std::mutex nvsMutex;
     };
 
 } // namespace menu
