@@ -92,6 +92,11 @@ void Menu::saveVoice(uint8_t slotIndex, const std::string &name)
 void Menu::loadProject(uint8_t slotIndex)
 {
     const auto projectEntry = paramStore.loadProject(slotIndex);
+    if (projectEntry.voices.empty())
+    {
+        // nothing to restore
+        return;
+    }
     for (const auto &ve : projectEntry.voices)
     {
         const auto &flat = ve.params;

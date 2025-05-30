@@ -181,6 +181,8 @@ ProjectStoreEntry ParamStore::loadProject(int16_t index)
     if (blobLen != expectedBytes)
     {
         ESP_LOGW(TAG, "  blobLen (%zu) != expected (%zu)", blobLen, expectedBytes);
+        nvs_close(handle);
+        return entry; // <- Fast return point here
     }
 
     // 5) Split into voices, padding each out to P*F entries
@@ -322,7 +324,19 @@ VoiceStoreEntry ParamStore::loadVoice(int16_t index)
         err = nvs_get_blob(handle, dataKey, nullptr, &blobLen);
         if (err == ESP_OK && blobLen > 0)
         {
+            const size_t P = VOICE_PAGE_COUNT;
+            const size_t F = MAX_FIELDS;
+            const size_t voiceSize = P * F;
+            size_t expectedBytes = voiceSize * sizeof(int16_t);
             size_t count = blobLen / sizeof(int16_t);
+
+            if (count != expectedBytes)
+            {
+                ESP_LOGW(TAG, "Invalid param count (%u) for slot %u, expected %u. Aborting load.",
+                         (unsigned)count, (unsigned)index, (unsigned)expectedParamCount);
+                nvs_close(handle);
+                return entry; // <- Fast return point here
+            }
             ESP_LOGD(TAG, "  blobLen=%u bytes => %u int16_t entries",
                      (unsigned)blobLen, (unsigned)count);
 
@@ -344,7 +358,7 @@ VoiceStoreEntry ParamStore::loadVoice(int16_t index)
     return entry;
 }
 
-std::vector<NameEntry> ParamStore::listProjectNames()  
+std::vector<NameEntry> ParamStore::listProjectNames()
 {
     std::lock_guard<std::mutex> lock(nvsMutex);
 
@@ -393,7 +407,7 @@ std::vector<NameEntry> ParamStore::listProjectNames()
     return entries;
 }
 
-std::vector<NameEntry> ParamStore::listVoiceNames()  
+std::vector<NameEntry> ParamStore::listVoiceNames()
 {
     std::lock_guard<std::mutex> lock(nvsMutex);
 
@@ -506,5 +520,3 @@ void ParamStore::autoSaveField(
 
     nvs_close(h);
 }
-
-
