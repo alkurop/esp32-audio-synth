@@ -15,6 +15,36 @@
 static const char *TAG = "Menu";
 using namespace menu;
 
+static void autoSaveTask(void *param)
+{
+    Menu *menu = static_cast<Menu *>(param);
+
+    while (true)
+    {
+        vTaskDelay(pdMS_TO_TICKS(AUTOSAVE_INTERVAL_MS));
+
+        if (menu->state.shouldAutoSave)
+        {
+            ESP_LOGI("Autosave", "Autosaving project to slot %d...", AUTOSAVE_SLOT);
+            menu->state.shouldAutoSave = false;
+            menu->saveProject(AUTOSAVE_SLOT, "autosave");
+            ESP_LOGI("Autosave", "Autosave completed.");
+        }
+    }
+}
+
+void Menu::initAutosaveTask()
+{
+    xTaskCreate(
+        autoSaveTask,   // Task function
+        "AutoSaveTask", // Name (for debugging)
+        4096,           // Stack size (in words, 4KB here)
+        this,           // Parameter to pass to the task
+        1,              // Priority (low priority is good)
+        nullptr         // Task handle (optional, pass &handle if needed)
+    );
+}
+
 void Menu::loadVoice(int16_t slotIndex)
 {
     // 1) Pull back the stored entry
@@ -158,22 +188,4 @@ void Menu::saveProject(int16_t slotIndex, const std::string &name)
 
     // 5) Save it
     paramStore.saveProject(entry, true);
-}
-
-void autoSaveTask(void *param)
-{
-    Menu *menu = static_cast<Menu *>(param);
-
-    while (true)
-    {
-        vTaskDelay(pdMS_TO_TICKS(AUTOSAVE_INTERVAL_MS));
-
-        if (menu->state.shouldAutoSave)
-        {
-            ESP_LOGI("Autosave", "Autosaving project to slot %d...", AUTOSAVE_SLOT);
-            menu->state.shouldAutoSave = false;
-            menu->saveProject(AUTOSAVE_SLOT, "autosave");
-            ESP_LOGI("Autosave", "Autosave completed.");
-        }
-    }
 }

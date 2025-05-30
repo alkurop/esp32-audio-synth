@@ -59,6 +59,7 @@ namespace menu
 
         void saveVoice(int16_t slotIndex, const std::string &name);
         void updatePageFromCache();
+        void initAutosaveTask();
 
         uint8_t voiceCount;
         ParamCache cache;

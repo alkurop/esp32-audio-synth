@@ -32,6 +32,7 @@ void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
     cache.setCallback(updateCb);
     // prime the encoder ranges & draw initial screen
     state.encoderRanges = calcEncoderRanges();
+    initAutosaveTask();
     notify();
     loadProject(-1);
 }
