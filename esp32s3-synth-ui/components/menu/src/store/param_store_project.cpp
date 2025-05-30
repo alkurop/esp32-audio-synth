@@ -14,11 +14,9 @@ static constexpr char KEY_PROJ_VOICE_NAME[] = "pvn_";  // + project slot + "_" +
 
 static const char *TAG = "ParamStore";
 
-
-
 void ParamStore::saveProject(const ProjectStoreEntry &entry)
 {
-    std::lock_guard<std::mutex> lock(nvsMutex);
+    std::unique_lock<std::mutex> lock(nvsMutex);
 
     // 0) Sanity check slot
     if (entry.index >= maxProjects)
@@ -87,11 +85,21 @@ void ParamStore::saveProject(const ProjectStoreEntry &entry)
         ESP_LOGE(TAG, "  nvs_commit failed (%d)", rc);
     }
     nvs_close(h);
+    lock.unlock();
+    // --- AUTOSAVE ---
+    // Immediately mirror into the reserved slot
+    if (entry.index != AUTOSAVE_SLOT)
+    {
+        ProjectStoreEntry autoEntry = entry;
+        autoEntry.index = AUTOSAVE_SLOT;
+        saveProject(autoEntry);
+        ESP_LOGD(TAG, "loadProject: autosaved project to slot %d", AUTOSAVE_SLOT);
+    }
 }
 
 ProjectStoreEntry ParamStore::loadProject(int16_t index)
 {
-    std::lock_guard<std::mutex> lock(nvsMutex);
+    std::unique_lock<std::mutex> lock(nvsMutex);
 
     ProjectStoreEntry entry{};
     entry.index = index;
@@ -206,20 +214,15 @@ ProjectStoreEntry ParamStore::loadProject(int16_t index)
 
     nvs_close(handle);
     ESP_LOGD(TAG, "loadProject: done, loaded %zu voices", entry.voices.size());
-
+    lock.unlock();
     // --- AUTOSAVE ---
     // Immediately mirror into the reserved slot
+    if (entry.index != AUTOSAVE_SLOT)
     {
         ProjectStoreEntry autoEntry = entry;
         autoEntry.index = AUTOSAVE_SLOT;
         saveProject(autoEntry);
-        ESP_LOGD(TAG, "loadProject: autosaved project to slot %u", AUTOSAVE_SLOT);
+        ESP_LOGD(TAG, "loadProject: autosaved project to slot %d", AUTOSAVE_SLOT);
     }
     return entry;
 }
-
-
-
-
-
-

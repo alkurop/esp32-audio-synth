@@ -34,6 +34,7 @@ namespace menu
         void saveProject(uint8_t slotIndex, const std::string &name);
 
         // for autosave task
+        ParamStore paramStore;
         MenuState state;
 
     private:
@@ -53,15 +54,14 @@ namespace menu
         bool updatePopupStateBack();
 
         /// Internal actions for loading/saving
-        void loadVoice(uint8_t slotIndex);
-        void loadProject(uint8_t slotIndex);
+        void loadVoice(int16_t slotIndex);
+        void loadProject(int16_t slotIndex);
 
         void saveVoice(uint8_t slotIndex, const std::string &name);
         void updatePageFromCache();
 
         uint8_t voiceCount;
         ParamCache cache;
-        ParamStore paramStore;
 
         DisplayCallback displayCallback;
     };

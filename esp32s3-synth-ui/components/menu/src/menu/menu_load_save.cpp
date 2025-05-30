@@ -15,7 +15,7 @@
 static const char *TAG = "Menu";
 using namespace menu;
 
-void Menu::loadVoice(uint8_t slotIndex)
+void Menu::loadVoice(int16_t slotIndex)
 {
     // 1) Pull back the stored entry
     const auto entry = paramStore.loadVoice(slotIndex);
@@ -27,6 +27,7 @@ void Menu::loadVoice(uint8_t slotIndex)
     if (entry.params.empty())
     {
         // nothing to restore
+        notify();
         return;
     }
 
@@ -91,12 +92,13 @@ void Menu::saveVoice(uint8_t slotIndex, const std::string &name)
 }
 
 // Called when the user confirms “Load Project”
-void Menu::loadProject(uint8_t slotIndex)
+void Menu::loadProject(int16_t slotIndex)
 {
     const auto projectEntry = paramStore.loadProject(slotIndex);
     if (projectEntry.voices.empty())
     {
         // nothing to restore
+        notify();
         return;
     }
     for (const auto &ve : projectEntry.voices)

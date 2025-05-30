@@ -14,7 +14,7 @@ static const char *TAG = "Menu";
 using namespace menu;
 
 Menu::Menu(uint8_t voiceCount)
-    : voiceCount(voiceCount), cache(voiceCount), paramStore(), state{} // value‐initialize everything
+    :  paramStore(), state{}, voiceCount(voiceCount), cache(voiceCount) // value‐initialize everything
 {
     // Set sensible defaults in state:
     state.mode = AppMode::MenuList;
@@ -33,6 +33,7 @@ void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
     // prime the encoder ranges & draw initial screen
     state.encoderRanges = calcEncoderRanges();
     notify();
+    loadProject(AUTOSAVE_SLOT);
 }
 
 void Menu::enterMenuPage()
