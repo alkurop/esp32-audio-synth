@@ -27,10 +27,13 @@ void SSD1306::initMenuList(lv_obj_t *scr)
     // 1) create & position the scrolling container
     menuContainer = lv_obj_create(scr);
     lv_obj_set_size(menuContainer, cfg.width, cfg.height - ITEM_H);
-    lv_obj_align_to(menuContainer, topbar_label,
-                    LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
+    lv_obj_align_to(menuContainer, topbar_label, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
     lv_obj_set_scrollbar_mode(menuContainer, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_scroll_dir(menuContainer, LV_DIR_VER);
+
+    // Remove internal padding if any
+    lv_obj_set_style_pad_left(menuContainer, 0, 0);
+    lv_obj_set_style_pad_right(menuContainer, 0, 0);
 
     // 2) total items = pages + popup workflows
     const uint8_t pageCnt = static_cast<uint8_t>(menu::pageCnt);
@@ -44,30 +47,41 @@ void SSD1306::initMenuList(lv_obj_t *scr)
 
         if (i < pageCnt)
         {
-            // a “real” page
             txt = menu::menuPages[i].title;
         }
         else
         {
-            // a workflow entry
             uint8_t wfIdx = i - pageCnt;
             if (wfIdx < static_cast<uint8_t>(Workflow::Count))
                 txt = popupMenuTitles[wfIdx];
         }
 
-        // if txt is still null something’s wrong—but we’ll skip that here
-
-        // 4) create & position the label
+        // Create the label for item title
         lv_obj_t *lbl = lv_label_create(menuContainer);
         lv_label_set_text(lbl, txt);
         lv_obj_set_width(lbl, lv_obj_get_width(menuContainer));
         lv_obj_set_y(lbl, i * ITEM_H);
+        lv_obj_set_style_pad_left(lbl, 0, 0);
+        lv_obj_set_style_pad_right(lbl, 0, 0);
+        lv_label_set_long_mode(lbl, LV_LABEL_LONG_CLIP);
+        lv_obj_set_style_text_align(lbl, LV_TEXT_ALIGN_LEFT, 0);
 
-        // cache it for later (e.g. highlighting)
+        // Create the index label for all items
+        char indexStr[8];
+        std::snprintf(indexStr, sizeof(indexStr), "%d", i + CONFIG_HUMAN_INT_OFFSET);
+
+        lv_obj_t *indexLbl = lv_label_create(menuContainer);
+        lv_label_set_text(indexLbl, indexStr);
+        lv_obj_align(indexLbl, LV_ALIGN_TOP_RIGHT, -6, i * ITEM_H); // <- Offset from right
+        lv_obj_set_style_text_align(indexLbl, LV_TEXT_ALIGN_RIGHT, 0);
+        lv_obj_set_style_pad_right(indexLbl, 2, 0);
+        lv_obj_set_style_pad_left(indexLbl, 3, 0);
+        lv_obj_set_style_bg_opa(indexLbl, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+        // Cache for later (e.g. highlighting)
         menuItems[i] = lbl;
     }
 }
-
 void SSD1306::renderMenuList(const menu::MenuState &st)
 {
     if (!lvgl_port_lock(0))
