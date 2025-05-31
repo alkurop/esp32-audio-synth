@@ -103,7 +103,8 @@ namespace menu
         /* Workflow::LoadVoice */ {loadVoiceSteps, sizeof(loadVoiceSteps) / sizeof(PopupEntry)},
         /* Workflow::SaveVoice */ {saveVoiceSteps, sizeof(saveVoiceSteps) / sizeof(PopupEntry)},
         /* Workflow::LoadProject */ {loadProjectSteps, sizeof(loadProjectSteps) / sizeof(PopupEntry)},
-        /* Workflow::SaveProject */ {saveProjectSteps, sizeof(saveProjectSteps) / sizeof(PopupEntry)}};
+        /* Workflow::SaveProject */ {saveProjectSteps, sizeof(saveProjectSteps) / sizeof(PopupEntry)}
+        };
 
     struct PopupState
     {

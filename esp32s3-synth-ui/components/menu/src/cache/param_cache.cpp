@@ -19,7 +19,7 @@ int16_t ParamCache::get(uint8_t voiceIndex, Page page, uint8_t field) const
 
     if (isGlobal(page))
     {
-        return globalData[static_cast<uint8_t>(Page::_Count) - field][field];
+        return globalData[VOICE_PAGE_COUNT - p][ field];
     }
     else
     {
@@ -34,14 +34,14 @@ void ParamCache::set(uint8_t voiceIndex, Page page, uint8_t field, int16_t value
     // Look up the page and field info
     const auto &pi = menu::menuPages[static_cast<size_t>(page)];
     const auto &fi = pi.fields[field];
-
+    
     size_t p = size_t(page);
     if (p >= PAGE_COUNT || field >= MAX_FIELDS)
         return;
 
     if (isGlobal(page))
     {
-        globalData[p][static_cast<uint8_t>(Page::_Count) - field] = value;
+        globalData[VOICE_PAGE_COUNT - p][ field] = value;
     }
     else
     {

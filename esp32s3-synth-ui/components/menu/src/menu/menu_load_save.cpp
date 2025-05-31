@@ -164,24 +164,28 @@ void Menu::loadProject(int16_t slotIndex)
     const auto &flatGlobal = projectEntry.globalParams;
     if (!flatGlobal.empty())
     {
-        size_t globalPageCount = flatGlobal.size() / MAX_FIELDS;
 
-        for (size_t p = 0; p < globalPageCount; ++p)
+        for (size_t p = 0; p < GLOBAL_PAGE_COUNT; ++p)
         {
-            const auto &pi = menu::menuPages[p];
-            size_t fields = pi.fieldCount;
+            size_t pageIndex = VOICE_PAGE_COUNT + p; // Adjust offset to global pages
+            if (pageIndex >= PAGE_COUNT)
+                break;
+
+            const auto &pi = menu::menuPages[pageIndex];
+            size_t fields = std::min<size_t>(pi.fieldCount, MAX_FIELDS);
 
             for (size_t f = 0; f < fields; ++f)
             {
                 size_t idx = p * MAX_FIELDS + f;
                 if (idx >= flatGlobal.size())
                     break;
+
                 int16_t value = flatGlobal[idx];
 
-                // Set global field in cache
+                // Set global field in cache (voice = -1)
                 cache.set(
                     -1,
-                    static_cast<menu::Page>(p),
+                    static_cast<menu::Page>(pageIndex),
                     static_cast<uint8_t>(f),
                     value);
             }

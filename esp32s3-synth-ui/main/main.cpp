@@ -118,7 +118,7 @@ void createMenuRenderTask()
 
 auto updateCallback = [](Page page, uint8_t field, int16_t value)
 {
-    ESP_LOGI(TAG, "Send page %d field %d value %d", static_cast<int16_t>(page), field, value);
+    // ESP_LOGI(TAG, "Send page %d field %d value %d", static_cast<int16_t>(page), field, value);
 };
 
 extern "C" void app_main()

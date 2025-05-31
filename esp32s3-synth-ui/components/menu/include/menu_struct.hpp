@@ -169,7 +169,7 @@ namespace menu
 
     // BpmFields
     static constexpr FieldInfo bpmInfo[] = {
-        {"BpmSync", FieldType::Options, 0, 0, yesNo, 2},
+        {"Sync", FieldType::Options, 0, 0, yesNo, 2},
         {"BPM", FieldType::Range, 30, 300, nullptr, 0},
     };
 
