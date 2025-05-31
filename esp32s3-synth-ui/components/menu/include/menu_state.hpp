@@ -2,8 +2,10 @@
 #include <cstdint>
 #include <array>
 #include "menu_struct.hpp"
+#include "popup_struct.hpp"
 
 using namespace protocol;
+using namespace menu;
 
 namespace menu
 {
@@ -19,6 +21,7 @@ namespace menu
     {
         return static_cast<Page>(itemIndex);
     }
+    static constexpr uint8_t MENU_ITEM_COUNT = PAGE_COUNT + WORKFLOW_COUNT;
 
     /// “Is this index one of your popup workflows?”
     static inline bool isWorkflowItem(uint8_t itemIndex)
@@ -31,7 +34,7 @@ namespace menu
     {
         return popupWorkflows[itemIndex - PAGE_COUNT];
     }
-  struct PopupState
+    struct PopupState
     {
         Workflow workflowIndex = Workflow::Count; ///< invalid until set
         uint8_t stepIndex = 0;                    ///< 0..stepCount-1
@@ -50,7 +53,6 @@ namespace menu
             return PopupMode::Count;
         return workflow.steps[step].mode;
     }
-  
 
     static constexpr char nameAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     static constexpr std::size_t nameAlphabetSize = sizeof(nameAlphabet) - 1;
@@ -93,4 +95,5 @@ namespace menu
         PopupState popup; ///< active load/save overlay
         std::array<EncoderRange, MAX_FIELDS> encoderRanges;
     };
+
 }

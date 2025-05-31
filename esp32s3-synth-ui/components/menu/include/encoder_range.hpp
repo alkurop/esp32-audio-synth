@@ -3,6 +3,7 @@
 #include <algorithm> // for std::clamp and std::find
 #include "menu_struct.hpp"
 #include "param_store.hpp"
+#include "popup_struct.hpp"
 
 #define KNOB_COUNT 4
 

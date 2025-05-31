@@ -11,6 +11,8 @@
 #include "encoder_range.hpp"
 #include "param_cache.hpp"
 #include "param_store.hpp"
+#include "popup_struct.hpp"
+
 #define AUTOSAVE_INTERVAL_MS (2 * 60 * 1000) // 2 minutes
 
 using namespace protocol;
