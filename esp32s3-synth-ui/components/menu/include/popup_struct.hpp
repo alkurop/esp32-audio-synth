@@ -12,18 +12,21 @@ namespace menu
 
     enum class Workflow : uint8_t
     {
-        LoadVoice = 0,
-        SaveVoice,
-        LoadProject,
+        LoadProject = 0,
         SaveProject,
+        LoadVoice,
+
+        SaveVoice,
+
         Count
     };
 
     static constexpr const char *popupMenuTitles[static_cast<size_t>(Workflow::Count)] = {
+        "Load Project",
+        "Save Project",
         "Load Voice",
         "Save Voice",
-        "Load Project",
-        "Save Project"};
+    };
 
     enum class PopupMode : uint8_t
     {
@@ -100,11 +103,12 @@ namespace menu
         {PopupMode::SaveProjectConfirm, "Confirm Save"}};
 
     static constexpr PopupWorkflow popupWorkflows[static_cast<size_t>(Workflow::Count)] = {
+
+        /* Workflow::LoadProject */ {loadProjectSteps, sizeof(loadProjectSteps) / sizeof(PopupEntry)},
+        /* Workflow::SaveProject */ {saveProjectSteps, sizeof(saveProjectSteps) / sizeof(PopupEntry)},
         /* Workflow::LoadVoice */ {loadVoiceSteps, sizeof(loadVoiceSteps) / sizeof(PopupEntry)},
         /* Workflow::SaveVoice */ {saveVoiceSteps, sizeof(saveVoiceSteps) / sizeof(PopupEntry)},
-        /* Workflow::LoadProject */ {loadProjectSteps, sizeof(loadProjectSteps) / sizeof(PopupEntry)},
-        /* Workflow::SaveProject */ {saveProjectSteps, sizeof(saveProjectSteps) / sizeof(PopupEntry)}
-        };
+    };
 
     struct PopupState
     {
@@ -112,7 +116,7 @@ namespace menu
         uint8_t stepIndex = 0;                    ///< 0..stepCount-1
         uint8_t slotIndex = 0;                    ///< voice/project slot cursor
         char editName[5] = {'\0'};                ///< 4-char rename buffer
-        std::vector<NameEntry> listItems;       ///< current list of names
+        std::vector<NameEntry> listItems;         ///< current list of names
     };
 
     static constexpr char nameAlphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -142,6 +146,5 @@ namespace menu
         }
         return false;
     }
-
 
 } // namespace menu

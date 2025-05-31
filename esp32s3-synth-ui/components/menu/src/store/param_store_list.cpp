@@ -56,6 +56,7 @@ std::vector<NameEntry> ParamStore::listProjectNames()
     }
 
     nvs_close(handle);
+    ESP_LOGD(TAG, "listProjectNames");
     return entries;
 }
 
@@ -89,5 +90,6 @@ std::vector<NameEntry> ParamStore::listVoiceNames()
     }
 
     nvs_close(handle);
+    ESP_LOGD(TAG, "listVoiceNames");
     return entries;
 }
