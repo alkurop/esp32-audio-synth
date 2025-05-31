@@ -32,7 +32,7 @@ namespace protocol
      */
     struct VoiceStoreEntry
     {
-        int16_t index;                    ///< Slot index (0-based)
+        uint8_t index;                    ///< Slot index (0-based)
         std::optional<std::string> name;  ///< Optional 4-char name
         std::vector<int16_t> voiceParams; ///< Flat parameter array [page][field]
         /**

@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include <array>
-#include "popup_struct.hpp"
 
 namespace protocol
 {
@@ -206,7 +205,13 @@ namespace protocol
     static constexpr size_t PAGE_COUNT = static_cast<size_t>(Page::_Count);
     static constexpr size_t GLOBAL_PAGE_COUNT = 1;
     static constexpr size_t VOICE_PAGE_COUNT = PAGE_COUNT - GLOBAL_PAGE_COUNT;
-    static constexpr uint8_t WORKFLOW_COUNT = sizeof(popupWorkflows) / sizeof(*popupWorkflows);
-    static constexpr uint8_t MENU_ITEM_COUNT = PAGE_COUNT + WORKFLOW_COUNT;
+
+    struct FieldUpdate
+    {
+        uint8_t voiceIndex;
+        Page page;
+        uint8_t field;
+        int16_t value;
+    };
 
 } // namespace menu
