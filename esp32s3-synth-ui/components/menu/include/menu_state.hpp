@@ -5,6 +5,7 @@
 #include "popup_struct.hpp"
 
 using namespace protocol;
+using namespace store;
 using namespace menu;
 
 namespace menu

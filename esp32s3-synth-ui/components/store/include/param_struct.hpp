@@ -7,7 +7,7 @@
 #include <optional>
 #include <cinttypes>
 
-namespace protocol
+namespace store
 {
 
     static constexpr size_t NAME_LEN = 4;
