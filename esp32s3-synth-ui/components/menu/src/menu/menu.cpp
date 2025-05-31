@@ -84,7 +84,7 @@ void Menu::exitPage()
     notify();
 }
 
-void Menu::rotateKnob(uint8_t knob, uint8_t pos)
+void Menu::rotateKnob(uint8_t knob, int16_t pos)
 {
     switch (state.mode)
     {
@@ -101,7 +101,7 @@ void Menu::rotateKnob(uint8_t knob, uint8_t pos)
     }
 }
 
-void Menu::changeValueMenuList(uint8_t knob, uint8_t pos)
+void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
 {
     switch (knob)
     {
@@ -130,7 +130,7 @@ void Menu::changeValueMenuList(uint8_t knob, uint8_t pos)
     notify();
 }
 
-void Menu::changeValuePage(uint8_t knob, uint8_t pos)
+void Menu::changeValuePage(uint8_t knob, int16_t pos)
 {
     const auto &pi = menuPages[state.menuItemIndex];
     if (knob >= pi.fieldCount)

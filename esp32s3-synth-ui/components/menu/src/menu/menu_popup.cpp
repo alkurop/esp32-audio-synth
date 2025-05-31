@@ -12,7 +12,7 @@
 static const char *TAG = "Menu";
 using namespace menu;
 
-void Menu::changeValuePopup(uint8_t knob, uint8_t pos)
+void Menu::changeValuePopup(uint8_t knob, int16_t pos)
 {
     auto &ps = state.popup;
     // grab the current mode via helper
@@ -29,7 +29,7 @@ void Menu::changeValuePopup(uint8_t knob, uint8_t pos)
     else if (isInputPopup(mode))
     {
         // each encoder i (0..3) sets the character at editName[i]
-        if (knob < MaxFieldsPerPage)
+        if (knob < MAX_FIELDS)
         {
             int idx = std::clamp<int>(pos, 0, nameAlphabetSize - 1);
             ps.editName[knob] = nameAlphabet[idx];
@@ -54,7 +54,7 @@ void Menu::enterPopup()
     state.mode = AppMode::Popup;
 
     // 2) pick workflow from menuItemIndex
-    uint8_t rawWf = state.menuItemIndex - PageCount;
+    uint8_t rawWf = state.menuItemIndex - PAGE_COUNT;
     rawWf = std::min<uint8_t>(rawWf, static_cast<uint8_t>(Workflow::Count) - 1);
 
     // 3) reset PopupState

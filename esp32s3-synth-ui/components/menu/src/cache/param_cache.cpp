@@ -14,7 +14,7 @@ ParamCache::ParamCache(uint8_t voiceCount)
 int16_t ParamCache::get(uint8_t voiceIndex, Page page, uint8_t field) const
 {
     size_t p = size_t(page);
-    if (p >= PageCount || field >= MAX_FIELDS)
+    if (p >= PAGE_COUNT || field >= MAX_FIELDS)
         return 0;
 
     if (isGlobal(page))
@@ -36,7 +36,7 @@ void ParamCache::set(uint8_t voiceIndex, Page page, uint8_t field, int16_t value
     const auto &fi = pi.fields[field];
 
     size_t p = size_t(page);
-    if (p >= PageCount || field >= MAX_FIELDS)
+    if (p >= PAGE_COUNT || field >= MAX_FIELDS)
         return;
 
     if (isGlobal(page))

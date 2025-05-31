@@ -30,7 +30,7 @@ namespace menu
         void exitPage();
         void closePopup();
         void enterPopup();
-        void rotateKnob(uint8_t knob, uint8_t value);
+        void rotateKnob(uint8_t knob, int16_t value);
         void saveProject(int16_t slotIndex, const std::string &name);
 
         // for autosave task
@@ -45,9 +45,9 @@ namespace menu
         std::array<EncoderRange, 4> calcEncoderRanges();
 
         /// Handlers for knob changes in each mode
-        void changeValueMenuList(uint8_t knob, uint8_t value);
-        void changeValuePage(uint8_t knob, uint8_t value);
-        void changeValuePopup(uint8_t knob, uint8_t value);
+        void changeValueMenuList(uint8_t knob, int16_t value);
+        void changeValuePage(uint8_t knob, int16_t value);
+        void changeValuePopup(uint8_t knob, int16_t value);
 
         /// Advance or retreat in a popup workflow
         bool updatePopupStateForward();

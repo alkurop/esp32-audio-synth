@@ -21,48 +21,18 @@ namespace menu
     class ParamStore
     {
     public:
-        /**
-         * @param maxProjects   Maximum number of project slots available.
-         * @param maxVoices     Maximum number of voice slots available.
-         */
-        explicit ParamStore(uint8_t maxProjects = 32,
-                            uint8_t maxVoices = 32);
+        explicit ParamStore(uint8_t maxProjects = 32, uint8_t maxVoices = 32);
 
-        // --- Project-level operations ---
-
-        /**
-         * Save all voice parameters in the given project slot.
-         */
         void saveProject(const ProjectStoreEntry &entry, bool allowAutosave = true);
 
-        /**
-         * Load parameters from the project slot at index.
-         * @return true if the slot contains a valid project.
-         */
         ProjectStoreEntry loadProject(int16_t index);
 
-        /**
-         * List all stored project names (most-recent first).
-         */
         std::vector<NameEntry> listProjectNames();
 
-    
-        // --- Voice-level operations ---
-
-        /**
-         * Save a single voice preset under the given slot.
-         */
         void saveVoice(const VoiceStoreEntry &entry);
 
-        /**
-         * Load a single voice preset from the given slot.
-         * @return true if the slot contains a valid voice.
-         */
         VoiceStoreEntry loadVoice(int16_t index);
 
-        /**
-         * List all stored voice names (most-recent first).
-         */
         std::vector<NameEntry> listVoiceNames();
 
     private:

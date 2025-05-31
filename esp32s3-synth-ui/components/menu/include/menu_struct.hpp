@@ -191,15 +191,10 @@ namespace menu
         {"BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
     };
 
-    // Total number of pages
-    static constexpr uint8_t MaxFieldsPerPage = 4;
-
-    /// Total pages (for convenience)
-    static constexpr size_t PageCount = static_cast<size_t>(Page::_Count);
+    static constexpr uint8_t MAX_FIELDS = 4;
+    static constexpr size_t PAGE_COUNT = static_cast<size_t>(Page::_Count);
     static constexpr size_t GLOBAL_PAGE_COUNT = 1;
-    static constexpr size_t VOICE_PAGE_COUNT = PageCount - GLOBAL_PAGE_COUNT;
-
-    static_assert((uint8_t)Page::_Count == (sizeof(menuPages) / sizeof(PageInfo)), "Page count mismatch");
+    static constexpr size_t VOICE_PAGE_COUNT = PAGE_COUNT - GLOBAL_PAGE_COUNT;
 
     /// Simple [min,max] for an encoder knob.
     struct EncoderRange
@@ -218,11 +213,11 @@ namespace menu
         uint8_t voice;         ///< Current voice number (1..N)
         uint8_t channel;       ///< Current channel for that voice
         uint8_t volume;        ///< Current volume for that voice
-        int8_t fieldValues[4]; ///< Current values for each knob
+        int8_t fieldValues[MAX_FIELDS]; ///< Current values for each knob
         bool shouldAutoSave;
 
         PopupState popup; ///< active load/save overlay
-        std::array<EncoderRange, 4> encoderRanges;
+        std::array<EncoderRange, MAX_FIELDS> encoderRanges;
     };
 
     static constexpr uint8_t pageCnt = static_cast<uint8_t>(menu::Page::_Count);
@@ -264,5 +259,4 @@ namespace menu
             return PopupMode::Count;
         return workflow.steps[step].mode;
     }
-    static constexpr uint8_t MAX_FIELDS = 4;
 } // namespace menu
