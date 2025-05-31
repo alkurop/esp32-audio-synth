@@ -9,7 +9,7 @@
 
 using namespace protocol;
 
-namespace menu
+namespace store
 {
 
     /**

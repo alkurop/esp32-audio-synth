@@ -3,7 +3,7 @@
 #include "esp_log.h"
 static const char *TAG = "ParamCache";
 
-using namespace menu;
+using namespace store;
 
 ParamCache::ParamCache(uint8_t voiceCount)
     : data(voiceCount, VoiceCache(VOICE_PAGE_COUNT, PageCache{})),

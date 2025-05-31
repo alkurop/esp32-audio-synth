@@ -1,10 +1,10 @@
 # Grab every .cpp under src/
-file(GLOB_RECURSE MENU_SRCS
+file(GLOB_RECURSE CACHE_SRCS
   "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp"
 )
 
 idf_component_register(
-  SRCS ${MENU_SRCS}
+  SRCS ${CACHE_SRCS}
   INCLUDE_DIRS "include"
-  REQUIRES log protocol store cache_comp
+  REQUIRES log protocol store
 )
