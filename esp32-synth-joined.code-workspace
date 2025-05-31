@@ -5,7 +5,12 @@
     },
     {
       "path": "esp32s3-synth-ui"
+    },
+    {
+      "path": "common"
     }
+  ],
+
   ],
   "settings": {
     "files.associations": {
