@@ -15,6 +15,7 @@ namespace menu
     using UpdateCallback = std::function<void(Page page, uint8_t field, int16_t value)>;
     using PageCache = std::array<int16_t, MAX_FIELDS>;
     using VoiceCache = std::vector<PageCache>;
+    using GlobalCache = std::array<PageCache, GLOBAL_PAGE_COUNT>;
 
     class ParamCache
     {
@@ -32,11 +33,12 @@ namespace menu
         }
 
         const std::vector<VoiceCache> &getVoiceData() const { return data; }
+        const GlobalCache &getGlobalCache() const { return globalData; }
         void setCallback(UpdateCallback callback) { this->callback = std::move(callback); }
 
     private:
         std::vector<VoiceCache> data;
-        std::array<PageCache, PAGE_COUNT> globalData;  
+        GlobalCache globalData;
         UpdateCallback callback;
     };
 

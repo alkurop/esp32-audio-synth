@@ -34,7 +34,6 @@ namespace menu
         int16_t index;                    ///< Slot index (0-based)
         std::optional<std::string> name;  ///< Optional 4-char name
         std::vector<int16_t> voiceParams; ///< Flat parameter array [page][field]
-
         /**
          * Get the display name: explicit name or fallback "Vn".
          * Always returns a string up to 4 chars.
@@ -53,7 +52,7 @@ namespace menu
         int16_t index;                       ///< Slot index (0-based)
         std::optional<std::string> name;     ///< Optional 4-char name
         std::vector<VoiceStoreEntry> voices; ///< One entry per voice
-        // std::vector<int16_t> globalParams;   ///< Flat parameter array [page][field]
+        std::vector<int16_t> globalParams;   ///< Flat parameter array [page][field]
         /**
          * Get the display name: explicit name or fallback auto-name.
          */

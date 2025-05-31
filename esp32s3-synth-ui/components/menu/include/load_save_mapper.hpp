@@ -39,4 +39,35 @@ namespace menu
 
         return vc;
     }
+
+    inline std::vector<int16_t> flattenGlobalParams(const GlobalCache &globalData)
+    {
+        std::vector<int16_t> flat;
+        flat.reserve(GLOBAL_PAGE_COUNT * MAX_FIELDS);
+
+        for (const auto &page : globalData)
+        {
+            for (int16_t v : page)
+            {
+                flat.push_back(v);
+            }
+        }
+
+        return flat;
+    }
+
+    inline std::array<PageCache, GLOBAL_PAGE_COUNT> unflattenGlobalParams(const std::vector<int16_t> &flat)
+    {
+        std::array<PageCache, GLOBAL_PAGE_COUNT> globalData{};
+
+        for (size_t p = 0; p < GLOBAL_PAGE_COUNT; ++p)
+        {
+            for (size_t f = 0; f < MAX_FIELDS; ++f)
+            {
+                globalData[p][f] = flat[p * MAX_FIELDS + f];
+            }
+        }
+
+        return globalData;
+    }
 }

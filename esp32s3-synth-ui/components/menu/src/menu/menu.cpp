@@ -16,14 +16,7 @@ using namespace menu;
 Menu::Menu(uint8_t voiceCount)
     : paramStore(), state{}, voiceCount(voiceCount), cache(voiceCount) // value‐initialize everything
 {
-    // Set sensible defaults in state:
     state.mode = AppMode::MenuList;
-    state.menuItemIndex = 0;
-    state.voice = 0;
-    // channel & volume come from cache:
-    state.channel = cache.get(0, Page::Channel, 0);
-    state.volume = cache.get(0, Page::Channel, 1);
-    // popup already default‐constructed (invalid workflowIndex)
 }
 
 void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)

@@ -19,7 +19,7 @@ int16_t ParamCache::get(uint8_t voiceIndex, Page page, uint8_t field) const
 
     if (isGlobal(page))
     {
-        return globalData[p][field];
+        return globalData[static_cast<uint8_t>(Page::_Count) - field][field];
     }
     else
     {
@@ -41,7 +41,7 @@ void ParamCache::set(uint8_t voiceIndex, Page page, uint8_t field, int16_t value
 
     if (isGlobal(page))
     {
-        globalData[p][field] = value;
+        globalData[p][static_cast<uint8_t>(Page::_Count) - field] = value;
     }
     else
     {
