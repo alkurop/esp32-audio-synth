@@ -190,22 +190,12 @@ namespace protocol
         {"BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
     };
 
-    /// Simple [min,max] for an encoder knob.
-    struct EncoderRange
-    {
-        int16_t min;
-        int16_t max;
-        int16_t value = 0;
-    };
-    /**
-     * Holds the full menu state for UI callbacks.
-     */
-
     static constexpr uint8_t MAX_FIELDS = 4;
     static constexpr size_t PAGE_COUNT = static_cast<size_t>(Page::_Count);
     static constexpr size_t GLOBAL_PAGE_COUNT = 1;
     static constexpr size_t VOICE_PAGE_COUNT = PAGE_COUNT - GLOBAL_PAGE_COUNT;
 
+#pragma pack(push, 1)
     struct FieldUpdate
     {
         uint8_t voiceIndex;
@@ -213,5 +203,6 @@ namespace protocol
         uint8_t field;
         int16_t value;
     };
+#pragma pack(pop)
 
 } // namespace menu

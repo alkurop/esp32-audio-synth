@@ -83,6 +83,16 @@ namespace menu
         return false;
     }
 
+
+    /// Simple [min,max] for an encoder knob.
+    struct EncoderRange
+    {
+        int16_t min;
+        int16_t max;
+        int16_t value = 0;
+    };
+  
+
     struct MenuState
     {
         AppMode mode;                   // which of the 3 modes we’re in

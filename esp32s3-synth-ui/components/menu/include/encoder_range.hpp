@@ -2,8 +2,8 @@
 #include <array>
 #include <algorithm> // for std::clamp and std::find
 #include "menu_struct.hpp"
+#include "menu_state.hpp"
 #include "param_store.hpp"
-#include "popup_struct.hpp"
 
 #define KNOB_COUNT 4
 
@@ -11,8 +11,6 @@
 #define MENU_POSITION_VOICE 1
 #define MENU_POSITION_CH 2
 #define MENU_POSITION_VOL 3
-
-using namespace protocol;
 
 namespace menu
 {
