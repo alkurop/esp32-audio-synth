@@ -36,8 +36,8 @@ void SSD1306::initMenuList(lv_obj_t *scr)
     lv_obj_set_style_pad_right(menuContainer, 0, 0);
 
     // 2) total items = pages + popup workflows
-    const uint8_t pageCnt = static_cast<uint8_t>(menu::pageCnt);
-    const uint8_t wfCnt = static_cast<uint8_t>(menu::workflowCnt);
+    const uint8_t pageCnt = static_cast<uint8_t>(PAGE_COUNT);
+    const uint8_t wfCnt = static_cast<uint8_t>(WORKFLOW_COUNT);
     const uint8_t itemCnt = pageCnt + wfCnt;
 
     // 3) build each menu line
@@ -47,7 +47,7 @@ void SSD1306::initMenuList(lv_obj_t *scr)
 
         if (i < pageCnt)
         {
-            txt = menu::menuPages[i].title;
+            txt = menuPages[i].title;
         }
         else
         {
@@ -132,7 +132,7 @@ void SSD1306::renderMenuPage(const menu::MenuState &st)
 
     // Compute layout
     int container_w = cfg.width - 8;
-    const auto &pi = menu::menuPages[st.menuItemIndex];
+    const auto &pi = menuPages[st.menuItemIndex];
     int fieldCount = std::min<uint8_t>(pi.fieldCount, 4);
     if (fieldCount == 0)
     {
@@ -173,7 +173,7 @@ void SSD1306::renderMenuPage(const menu::MenuState &st)
 
         // — value or option —
         lv_obj_t *val = lv_label_create(pageContainer);
-        if (fi.type == menu::FieldType::Options)
+        if (fi.type == FieldType::Options)
         {
             char optBuf[PARAM_TRUNCATE_LEN + 1];
             const char *optStr = fi.opts[st.fieldValues[k]];

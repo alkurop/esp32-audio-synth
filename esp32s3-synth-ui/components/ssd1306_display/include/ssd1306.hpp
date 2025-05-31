@@ -13,7 +13,9 @@
 #pragma GCC diagnostic pop
 
 #include "menu_struct.hpp"
+#include "menu_state.hpp"
 
+using namespace protocol;
 namespace ui
 {
 
@@ -78,7 +80,7 @@ namespace ui
         lv_obj_t *popupContainer = nullptr;
         lv_obj_t *pageContainer = nullptr;
 
-        std::array<lv_obj_t *, menu::menuItemCnt> menuItems{};
+        std::array<lv_obj_t *, MENU_ITEM_COUNT> menuItems{};
         int8_t menuLastSelected = -1;
 
         std::vector<lv_obj_t *> popupLabels;
@@ -96,7 +98,7 @@ namespace ui
         void initMenuList(lv_obj_t *scr);
         void selectMenuItem(uint8_t page);
 
-        void renderPopupHeader(const menu::PopupEntry &entry);
+        void renderPopupHeader(const PopupEntry &entry);
 
         void renderPopupList(const menu::MenuState &st, const PopupLayout &layout);
         void initPopupList(const menu::MenuState &st, const PopupLayout &L);

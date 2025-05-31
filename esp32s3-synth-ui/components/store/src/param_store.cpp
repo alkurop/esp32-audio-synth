@@ -1,7 +1,7 @@
 #include <nvs_flash.h>
 #include "param_store.hpp"
 
-using namespace menu;
+using namespace store;
 
 ParamStore::ParamStore(uint8_t maxProjects, uint8_t maxVoices) : maxProjects(maxProjects), maxVoices(maxVoices)
 {

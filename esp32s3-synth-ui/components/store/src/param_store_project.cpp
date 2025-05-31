@@ -7,7 +7,7 @@
 #include "param_store.hpp"
 #include <inttypes.h>
 
-using namespace menu;
+using namespace store;
 static constexpr char KEY_PROJ_DATA[] = "pd_";
 static constexpr char KEY_PROJ_VOICE_COUNT[] = "pdc_"; // + project slot
 static constexpr char KEY_PROJ_VOICE_NAME[] = "pvn_";  // + project slot + "_" + voice index

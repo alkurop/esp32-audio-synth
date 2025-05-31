@@ -32,7 +32,7 @@ int16_t ParamCache::get(uint8_t voiceIndex, Page page, uint8_t field) const
 void ParamCache::set(uint8_t voiceIndex, Page page, uint8_t field, int16_t value)
 {
     // Look up the page and field info
-    const auto &pi = menu::menuPages[static_cast<size_t>(page)];
+    const auto &pi = menuPages[static_cast<size_t>(page)];
     const auto &fi = pi.fields[field];
     
     size_t p = size_t(page);

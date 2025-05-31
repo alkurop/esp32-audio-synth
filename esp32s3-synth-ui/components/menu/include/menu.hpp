@@ -7,10 +7,14 @@
 #include <string>
 
 #include "menu_struct.hpp"
+#include "menu_state.hpp"
 #include "encoder_range.hpp"
 #include "param_cache.hpp"
 #include "param_store.hpp"
 #define AUTOSAVE_INTERVAL_MS (2 * 60 * 1000) // 2 minutes
+
+using namespace protocol;
+using namespace store;
 
 namespace menu
 {

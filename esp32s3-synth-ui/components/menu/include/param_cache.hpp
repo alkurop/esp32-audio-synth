@@ -6,6 +6,9 @@
 #include "menu_struct.hpp"
 #include <functional>
 
+
+using namespace protocol;
+
 namespace menu
 {
 

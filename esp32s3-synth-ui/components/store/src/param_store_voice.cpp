@@ -7,7 +7,7 @@
 #include "param_store.hpp"
 #include <inttypes.h>
 
-using namespace menu;
+using namespace store;
 static constexpr char KEY_VOICE_DATA[] = "vd_";
 static const char *TAG = "ParamStore";
 

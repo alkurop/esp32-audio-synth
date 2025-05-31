@@ -30,7 +30,7 @@ void SSD1306::renderPopup(const menu::MenuState &st)
     // 1) Grab workflow index and validate it
     const auto &ps = st.popup;
     size_t wfIdx = static_cast<size_t>(ps.workflowIndex);
-    constexpr size_t wfCount = static_cast<size_t>(menu::Workflow::Count);
+    constexpr size_t wfCount = static_cast<size_t>(Workflow::Count);
     if (wfIdx >= wfCount)
     {
         lvgl_port_unlock();
@@ -38,7 +38,7 @@ void SSD1306::renderPopup(const menu::MenuState &st)
     }
 
     // 2) Lookup workflow and step entry
-    const auto &wf = menu::popupWorkflows[wfIdx];
+    const auto &wf = popupWorkflows[wfIdx];
     const auto &entry = wf.steps[ps.stepIndex];
 
     // 3) Render the common header
@@ -74,7 +74,7 @@ void SSD1306::renderPopup(const menu::MenuState &st)
     bool wasList = false;
     if (sameWorkflow && lastStepIdx >= 0)
     {
-        auto &oldStep = menu::popupWorkflows[lastWorkflowIdx]
+        auto &oldStep = popupWorkflows[lastWorkflowIdx]
                             .steps[lastStepIdx];
         wasList = isListPopup(oldStep.mode);
     }
@@ -123,7 +123,7 @@ void SSD1306::renderPopup(const menu::MenuState &st)
     lvgl_port_unlock();
 }
 
-void SSD1306::renderPopupHeader(const menu::PopupEntry &entry)
+void SSD1306::renderPopupHeader(const PopupEntry &entry)
 {
     lv_label_set_text(topbar_label, entry.title);
     lv_obj_align(topbar_label, LV_ALIGN_TOP_LEFT, 0, 0);
@@ -178,7 +178,6 @@ void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
     }
 }
 
-
 void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L)
 {
     // Clear out any previous content
@@ -218,7 +217,7 @@ void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
     // if cur == popupLastSelected, do nothing
 }
 
- void SSD1306::initPopupList(const menu::MenuState &st, const PopupLayout &L)
+void SSD1306::initPopupList(const menu::MenuState &st, const PopupLayout &L)
 {
     // 1) wipe out any old children
     lv_obj_clean(popupContainer);
@@ -242,13 +241,14 @@ void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
 
         // 2b) create the "loaded" indicator
         auto *icon = lv_label_create(popupContainer);
-        lv_label_set_text(icon, "X");       // or "*" or even an image
+        lv_label_set_text(icon, "X"); // or "*" or even an image
         lv_obj_set_style_text_font(icon, &lv_font_montserrat_14, 0);
         // position it right‐aligned in that row:
         lv_obj_align_to(icon, lbl, LV_ALIGN_OUT_RIGHT_MID, 4, 0);
 
         // show or hide it
-        if (!item.loaded) {
+        if (!item.loaded)
+        {
             lv_obj_add_flag(icon, LV_OBJ_FLAG_HIDDEN);
         }
         // (optional) store icons if you need to update them later:

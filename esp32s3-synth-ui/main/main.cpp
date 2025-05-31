@@ -13,6 +13,7 @@
 
 using namespace ui;
 using namespace menu;
+using namespace protocol;
 
 SSD1306 display = SSD1306(displayConfig);
 
@@ -82,13 +83,13 @@ static void render_task(void *arg)
             // draw according to mode
             switch (st.mode)
             {
-            case menu::AppMode::MenuList:
+            case AppMode::MenuList:
                 disp->renderMenuList(st);
                 break;
-            case menu::AppMode::Page:
+            case AppMode::Page:
                 disp->renderMenuPage(st);
                 break;
-            case menu::AppMode::Popup:
+            case AppMode::Popup:
                 disp->renderPopup(st);
                 break;
             default:

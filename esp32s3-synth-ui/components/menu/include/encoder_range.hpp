@@ -11,6 +11,8 @@
 #define MENU_POSITION_CH 2
 #define MENU_POSITION_VOL 3
 
+using namespace protocol;
+
 namespace menu
 {
     static_assert(KNOB_COUNT > 0, "KNOB_COUNT must be > 0");
@@ -24,7 +26,7 @@ namespace menu
         // page selector
         R[MENU_POSITION_LIST] = {
             .min = 0,
-            .max = static_cast<int16_t>(menuItemCnt - 1),
+            .max = static_cast<int16_t>(MENU_ITEM_COUNT - 1),
             .value = state.menuItemIndex};
 
         // voice selector

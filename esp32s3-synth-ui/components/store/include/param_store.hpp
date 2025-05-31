@@ -6,8 +6,8 @@
 #include "param_struct.hpp" // ProjectStoreEntry, VoiceStoreEntry
 #include "menu_struct.hpp"
 #include <mutex>
-
-namespace menu
+using namespace protocol;
+namespace store
 {
     static constexpr int8_t AUTOSAVE_SLOT = -1;
     static constexpr char NVS_NAMESPACE[] = "synth";

@@ -14,6 +14,7 @@
 
 static const char *TAG = "Menu";
 using namespace menu;
+using namespace protocol;
 
 static void autoSaveTask(void *param)
 {
@@ -60,13 +61,13 @@ void Menu::loadVoice(int16_t slotIndex)
     // 2) Compute page & field counts
     size_t totalEntries = entry.voiceParams.size();
     size_t pageCount = totalEntries / MAX_FIELDS;
-    const size_t maxPages = static_cast<size_t>(menu::Page::_Count);
+    const size_t maxPages = static_cast<size_t>(Page::_Count);
     pageCount = std::min(pageCount, maxPages);
 
     // 3) Walk each page
     for (size_t p = 0; p < pageCount; ++p)
     {
-        const auto &pi = menu::menuPages[p];
+        const auto &pi = menuPages[p];
         size_t fields = pi.fieldCount;
 
         ESP_LOGI(TAG, "  Page %2d (%s): %d fields", p, pi.title, fields);
@@ -79,14 +80,14 @@ void Menu::loadVoice(int16_t slotIndex)
             // a) Log it
 
             // b) Write into your in-RAM cache
-            cache.set(state.voice, static_cast<menu::Page>(p), static_cast<uint8_t>(f), v);
+            cache.set(state.voice, static_cast<Page>(p), static_cast<uint8_t>(f), v);
 
             // c) If this is channel/volume, also update your MenuState
-            if (p == static_cast<size_t>(menu::Page::Channel))
+            if (p == static_cast<size_t>(Page::Channel))
             {
-                if (f == static_cast<size_t>(menu::ChannelField::Chan))
+                if (f == static_cast<size_t>(ChannelField::Chan))
                     state.channel = static_cast<uint8_t>(v);
-                else if (f == static_cast<size_t>(menu::ChannelField::Vol))
+                else if (f == static_cast<size_t>(ChannelField::Vol))
                     state.volume = static_cast<uint8_t>(v);
             }
         }
@@ -131,7 +132,7 @@ void Menu::loadProject(int16_t slotIndex)
         for (size_t p = 0; p < pageCount; ++p)
         {
             // grab the real number of fields on this page
-            const auto &pi = menu::menuPages[p];
+            const auto &pi = menuPages[p];
             size_t fields = pi.fieldCount;
 
             for (size_t f = 0; f < fields; ++f)
@@ -142,17 +143,17 @@ void Menu::loadProject(int16_t slotIndex)
                 int16_t value = flat[idx];
                 cache.set(
                     ve.index,
-                    static_cast<menu::Page>(p),
+                    static_cast<Page>(p),
                     static_cast<uint8_t>(f),
                     value);
                 if (v == state.voice)
                 {
                     // c) If this is channel/volume, also update your MenuState
-                    if (p == static_cast<size_t>(menu::Page::Channel))
+                    if (p == static_cast<size_t>(Page::Channel))
                     {
-                        if (f == static_cast<size_t>(menu::ChannelField::Chan))
+                        if (f == static_cast<size_t>(ChannelField::Chan))
                             state.channel = static_cast<uint8_t>(v);
-                        else if (f == static_cast<size_t>(menu::ChannelField::Vol))
+                        else if (f == static_cast<size_t>(ChannelField::Vol))
                             state.volume = static_cast<uint8_t>(v);
                     }
                 }
@@ -171,7 +172,7 @@ void Menu::loadProject(int16_t slotIndex)
             if (pageIndex >= PAGE_COUNT)
                 break;
 
-            const auto &pi = menu::menuPages[pageIndex];
+            const auto &pi = menuPages[pageIndex];
             size_t fields = std::min<size_t>(pi.fieldCount, MAX_FIELDS);
 
             for (size_t f = 0; f < fields; ++f)
@@ -185,7 +186,7 @@ void Menu::loadProject(int16_t slotIndex)
                 // Set global field in cache (voice = -1)
                 cache.set(
                     -1,
-                    static_cast<menu::Page>(pageIndex),
+                    static_cast<Page>(pageIndex),
                     static_cast<uint8_t>(f),
                     value);
             }
