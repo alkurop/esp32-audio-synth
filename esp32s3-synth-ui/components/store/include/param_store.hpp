@@ -31,7 +31,7 @@ namespace store
 
         void saveVoice(const VoiceStoreEntry &entry);
 
-        VoiceStoreEntry loadVoice(int16_t index);
+        VoiceStoreEntry loadVoice(uint8_t index);
 
         std::vector<NameEntry> listVoiceNames();
 

@@ -60,10 +60,10 @@ namespace menu
         bool updatePopupStateBack();
 
         /// Internal actions for loading/saving
-        void loadVoice(int16_t slotIndex);
+        void loadVoice(uint8_t slotIndex);
         void loadProject(int16_t slotIndex);
 
-        void saveVoice(int16_t slotIndex, const std::string &name);
+        void saveVoice(uint8_t slotIndex, const std::string &name);
         void updatePageFromCache();
         void initAutosaveTask();
 

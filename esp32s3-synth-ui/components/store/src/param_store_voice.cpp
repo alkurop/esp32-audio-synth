@@ -11,7 +11,7 @@ using namespace store;
 static constexpr char KEY_VOICE_DATA[] = "vd_";
 static const char *TAG = "ParamStore";
 
-VoiceStoreEntry ParamStore::loadVoice(int16_t index)
+VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
 {
     std::lock_guard<std::mutex> lock(nvsMutex);
 

@@ -6,16 +6,17 @@
 #include "menu_struct.hpp"
 #include <functional>
 
-
 using namespace protocol;
 
 namespace store
 {
 
+    using FieldUpdateList = std::vector<FieldUpdate>;
+
     /**
      * Maximum number of fields per page (knobs 0..3)
      */
-    using UpdateCallback = std::function<void(Page page, uint8_t field, int16_t value)>;
+    using UpdateCallback = std::function<void(FieldUpdateList)>;
     using PageCache = std::array<int16_t, MAX_FIELDS>;
     using VoiceCache = std::vector<PageCache>;
     using GlobalCache = std::array<PageCache, GLOBAL_PAGE_COUNT>;
@@ -27,7 +28,7 @@ namespace store
 
         int16_t get(uint8_t voiceIndex, Page page, uint8_t field) const;
 
-        void set(uint8_t voiceIndex, Page page, uint8_t field, int16_t value);
+        void set(const FieldUpdateList &updates);
 
         bool isGlobal(Page page) const
         {

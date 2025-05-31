@@ -19,7 +19,7 @@ int16_t Cache::get(uint8_t voiceIndex, Page page, uint8_t field) const
 
     if (isGlobal(page))
     {
-        return globalData[VOICE_PAGE_COUNT - p][ field];
+        return globalData[VOICE_PAGE_COUNT - p][field];
     }
     else
     {
@@ -29,28 +29,28 @@ int16_t Cache::get(uint8_t voiceIndex, Page page, uint8_t field) const
     }
 }
 
-void Cache::set(uint8_t voiceIndex, Page page, uint8_t field, int16_t value)
+void Cache::set(const FieldUpdateList &updates)
 {
-    // Look up the page and field info
-    const auto &pi = menuPages[static_cast<size_t>(page)];
-    const auto &fi = pi.fields[field];
-    
-    size_t p = size_t(page);
-    if (p >= PAGE_COUNT || field >= MAX_FIELDS)
-        return;
+    for (const auto &u : updates)
+    {
+        size_t p = static_cast<size_t>(u.page);
+        if (p >= PAGE_COUNT || u.field >= MAX_FIELDS)
+            continue;
 
-    if (isGlobal(page))
-    {
-        globalData[VOICE_PAGE_COUNT - p][ field] = value;
+        if (isGlobal(u.page))
+        {
+            globalData[VOICE_PAGE_COUNT - p][u.field] = u.value;
+        }
+        else
+        {
+            if (u.voiceIndex >= data.size())
+                continue;
+            data[u.voiceIndex][p][u.field] = u.value;
+        }
     }
-    else
-    {
-        if (voiceIndex >= data.size())
-            return;
-        data[voiceIndex][p][field] = value;
-    }
+
     if (callback)
     {
-        callback(page, field, value);
+        callback(updates);
     }
 }

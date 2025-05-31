@@ -117,7 +117,7 @@ void createMenuRenderTask()
     configASSERT(ok == pdPASS);
 }
 
-auto updateCallback = [](Page page, uint8_t field, int16_t value)
+auto updateCallback = [](const FieldUpdateList &updates)
 {
     // ESP_LOGI(TAG, "Send page %d field %d value %d", static_cast<int16_t>(page), field, value);
 };

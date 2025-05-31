@@ -105,13 +105,21 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
         state.voice = pos;
         break;
     case 2:
-        cache.set(state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Chan), pos);
+    {
+        FieldUpdateList updates = {
+            FieldUpdate{state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Chan), pos}};
+        cache.set(updates);
         state.shouldAutoSave = true;
         break;
+    }
     case 3:
-        cache.set(state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Vol), pos);
+    {
+        FieldUpdateList updates = {
+            FieldUpdate{state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Vol), pos}};
+        cache.set(updates);
         state.shouldAutoSave = true;
         break;
+    }
     default:
         return;
     }
@@ -130,18 +138,23 @@ void Menu::changeValuePage(uint8_t knob, int16_t pos)
         return;
 
     const auto &fi = pi.fields[knob];
-    int newVal;
+    int16_t newVal;
     if (fi.type == FieldType::Range)
     {
-        newVal = std::clamp<int>(pos, fi.min, fi.max);
+        newVal = std::clamp<int16_t>(pos, fi.min, fi.max);
     }
     else
     {
         newVal = pos % fi.optCount;
     }
 
-    cache.set(state.voice, itemToPage(state.menuItemIndex), knob, newVal);
-
+    FieldUpdateList updates = {
+        FieldUpdate{
+            .voiceIndex = state.voice,
+            .page = itemToPage(state.menuItemIndex),
+            .field = knob,
+            .value = newVal}};
+    cache.set(updates);
     // update snapshot
     state.fieldValues[knob] = cache.get(
         state.voice,

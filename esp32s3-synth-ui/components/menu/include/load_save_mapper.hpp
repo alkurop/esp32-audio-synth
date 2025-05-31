@@ -2,7 +2,6 @@
 
 #include <vector>
 #include "menu_struct.hpp" // for MAX_FIELDS
-#include "param_cache.hpp"
 
 using namespace protocol;
 
