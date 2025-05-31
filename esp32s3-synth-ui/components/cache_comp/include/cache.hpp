@@ -20,10 +20,10 @@ namespace store
     using VoiceCache = std::vector<PageCache>;
     using GlobalCache = std::array<PageCache, GLOBAL_PAGE_COUNT>;
 
-    class ParamCache
+    class Cache
     {
     public:
-        explicit ParamCache(uint8_t voiceCount);
+        explicit Cache(uint8_t voiceCount);
 
         int16_t get(uint8_t voiceIndex, Page page, uint8_t field) const;
 

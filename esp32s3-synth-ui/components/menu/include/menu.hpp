@@ -9,7 +9,7 @@
 #include "menu_struct.hpp"
 #include "menu_state.hpp"
 #include "encoder_range.hpp"
-#include "param_cache.hpp"
+#include "cache.hpp"
 #include "param_store.hpp"
 #include "popup_struct.hpp"
 
@@ -68,7 +68,7 @@ namespace menu
         void initAutosaveTask();
 
         uint8_t voiceCount;
-        ParamCache cache;
+        Cache cache;
 
         DisplayCallback displayCallback;
     };
