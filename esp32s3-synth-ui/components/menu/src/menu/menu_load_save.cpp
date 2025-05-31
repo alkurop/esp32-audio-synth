@@ -162,26 +162,29 @@ void Menu::loadProject(int16_t slotIndex)
 
     // Restore global parameters
     const auto &flatGlobal = projectEntry.globalParams;
-    size_t globalPageCount = flatGlobal.size() / MAX_FIELDS;
-
-    for (size_t p = 0; p < globalPageCount; ++p)
+    if (!flatGlobal.empty())
     {
-        const auto &pi = menu::menuPages[p];
-        size_t fields = pi.fieldCount;
+        size_t globalPageCount = flatGlobal.size() / MAX_FIELDS;
 
-        for (size_t f = 0; f < fields; ++f)
+        for (size_t p = 0; p < globalPageCount; ++p)
         {
-            size_t idx = p * MAX_FIELDS + f;
-            if (idx >= flatGlobal.size())
-                break;
-            int16_t value = flatGlobal[idx];
+            const auto &pi = menu::menuPages[p];
+            size_t fields = pi.fieldCount;
 
-            // Set global field in cache
-            cache.set(
-                -1,
-                static_cast<menu::Page>(p),
-                static_cast<uint8_t>(f),
-                value);
+            for (size_t f = 0; f < fields; ++f)
+            {
+                size_t idx = p * MAX_FIELDS + f;
+                if (idx >= flatGlobal.size())
+                    break;
+                int16_t value = flatGlobal[idx];
+
+                // Set global field in cache
+                cache.set(
+                    -1,
+                    static_cast<menu::Page>(p),
+                    static_cast<uint8_t>(f),
+                    value);
+            }
         }
     }
     notify();
@@ -213,5 +216,6 @@ void Menu::saveProject(int16_t slotIndex, const std::string &name)
     }
 
     // 5) Save it
-    paramStore.saveProject(entry, true);
+    paramStore.saveProject(entry);
+    state.shouldAutoSave = true;
 }

@@ -11,10 +11,11 @@ using namespace menu;
 static constexpr char KEY_PROJ_DATA[] = "pd_";
 static constexpr char KEY_PROJ_VOICE_COUNT[] = "pdc_"; // + project slot
 static constexpr char KEY_PROJ_VOICE_NAME[] = "pvn_";  // + project slot + "_" + voice index
+static constexpr char KEY_PROJ_GLOBAL_PARAMS[] = "pgf_";
 
 static const char *TAG = "ParamStore";
 
-void ParamStore::saveProject(const ProjectStoreEntry &entry, bool allowAutosave)
+void ParamStore::saveProject(const ProjectStoreEntry &entry)
 {
     std::unique_lock<std::mutex> lock(nvsMutex);
 
@@ -68,21 +69,18 @@ void ParamStore::saveProject(const ProjectStoreEntry &entry, bool allowAutosave)
     if (rc != ESP_OK)
         ESP_LOGE(TAG, "nvs_set_i32(%s) failed (%d)", key, rc);
 
+    // save global params
+    const size_t globalExpectedSize = GLOBAL_PAGE_COUNT * MAX_FIELDS;
+    std::snprintf(key, sizeof(key), "%s%d", KEY_PROJ_GLOBAL_PARAMS, entry.index);
+    rc = nvs_set_blob(h, key, entry.globalParams.data(), globalExpectedSize * sizeof(int16_t));
+    if (rc != ESP_OK)
+        ESP_LOGE(TAG, "nvs_set_blob(%s) failed (%d)", key, rc);
+
     rc = nvs_commit(h);
     if (rc != ESP_OK)
         ESP_LOGE(TAG, "nvs_commit failed (%d)", rc);
 
     nvs_close(h);
-
-    // Explicit autosave logic without deadlock
-    if (allowAutosave && entry.index != AUTOSAVE_SLOT)
-    {
-        ProjectStoreEntry autoEntry = entry;
-        autoEntry.index = AUTOSAVE_SLOT;
-        lock.unlock(); // explicitly unlock mutex before recursive call
-        saveProject(autoEntry, false);
-        ESP_LOGD(TAG, "Autosaved project to slot %d", AUTOSAVE_SLOT);
-    }
 }
 
 ProjectStoreEntry ParamStore::loadProject(int16_t index)
@@ -198,6 +196,31 @@ ProjectStoreEntry ParamStore::loadProject(int16_t index)
         }
 
         entry.voices.push_back(std::move(ve));
+    }
+
+    std::snprintf(key, sizeof(key), "%s%d", KEY_PROJ_GLOBAL_PARAMS, entry.index);
+    size_t globalBlobLen = 0;
+
+    const size_t globalExpectedSize = GLOBAL_PAGE_COUNT * MAX_FIELDS;
+    // Load global params
+    // First: probe
+    err = nvs_get_blob(handle, key, nullptr, &globalBlobLen);
+    if (err == ESP_OK && globalBlobLen == globalExpectedSize * sizeof(int16_t))
+    {
+        entry.globalParams.resize(globalExpectedSize);
+
+        // Second: read data
+        err = nvs_get_blob(handle, key, entry.globalParams.data(), &globalBlobLen);
+        if (err != ESP_OK)
+        {
+            ESP_LOGE(TAG, "  globalParams blob read failed (err=%d)", static_cast<int>(err));
+            entry.globalParams.clear(); // fallback
+        }
+    }
+    else
+    {
+        ESP_LOGW(TAG, "  globalParams missing or wrong size (len=%zu, err=%d)", globalBlobLen, err);
+        entry.globalParams.resize(globalExpectedSize, 0); // fallback default
     }
 
     nvs_close(handle);

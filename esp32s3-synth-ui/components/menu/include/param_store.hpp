@@ -23,7 +23,7 @@ namespace menu
     public:
         explicit ParamStore(uint8_t maxProjects = 32, uint8_t maxVoices = 32);
 
-        void saveProject(const ProjectStoreEntry &entry, bool allowAutosave = true);
+        void saveProject(const ProjectStoreEntry &entry);
 
         ProjectStoreEntry loadProject(int16_t index);
 
