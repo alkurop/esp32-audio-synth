@@ -7,6 +7,8 @@
 #include "encoder_range.hpp"
 #include "mapping.hpp"
 #include "config.hpp"
+#include "sender.hpp"
+#include "protocol.hpp"
 
 #define B0 GPIO_NUM_9
 #define B1 GPIO_NUM_10
@@ -15,10 +17,19 @@
 #define VOICE_COUNT 8
 #define ENCODER_COUNT 4
 #define RENDER_TASK_STACK 8 * 1024 // 8 KB
+
 using namespace ui;
 using namespace menu;
+using namespace i2c;
+using namespace protocol;
 
 static const char *TAG = "Main";
+
+SenderConfig senderConfig = {
+    .sda_pin = GPIO_NUM_1,
+    .scl_pin = GPIO_NUM_2,
+    .i2c_port = I2C_NUM_1,
+    .receiver_address = RECEIVER_ARRDESS};
 
 SSD1306Config displayConfig = {
     .sda_pin = GPIO_NUM_14,

@@ -10,10 +10,12 @@
 #include "encoder_range.hpp"
 #include "mapping.hpp"
 #include "config.hpp"
+#include "sender.hpp"
 
 using namespace ui;
 using namespace menu;
 using namespace protocol;
+using namespace i2c;
 
 SSD1306 display = SSD1306(displayConfig);
 
@@ -27,6 +29,7 @@ Button button0;
 Button button1;
 Button button2;
 Button button3;
+Sender sender(senderConfig);
 
 Menu menuHolder(VOICE_COUNT);
 
@@ -119,7 +122,11 @@ void createMenuRenderTask()
 
 auto updateCallback = [](const FieldUpdateList &updates)
 {
-    // ESP_LOGI(TAG, "Send page %d field %d value %d", static_cast<int16_t>(page), field, value);
+    auto result = sender.send(updates);
+    if (result != ESP_OK)
+    {
+        ESP_LOGE(TAG, "sending falied with code %d", result);
+    }
 };
 
 extern "C" void app_main()
@@ -139,6 +146,8 @@ extern "C" void app_main()
     button2.install();
     button3.install();
     ESP_ERROR_CHECK(display.init());
+    ESP_ERROR_CHECK(sender.init());
+
     createMenuRenderTask();
 
     menuHolder.init([](const MenuState &state)

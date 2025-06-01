@@ -10,9 +10,6 @@ using namespace protocol;
 
 namespace store
 {
-
-    using FieldUpdateList = std::vector<FieldUpdate>;
-
     /**
      * Maximum number of fields per page (knobs 0..3)
      */

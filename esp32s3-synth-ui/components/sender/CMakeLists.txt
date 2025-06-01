@@ -6,5 +6,5 @@ file(GLOB_RECURSE SENDER_SRCS
 idf_component_register(
   SRCS ${SENDER_SRCS}
   INCLUDE_DIRS "include"
-  REQUIRES log protocol
+  REQUIRES log protocol driver
 )

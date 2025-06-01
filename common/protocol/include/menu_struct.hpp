@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <array>
+#include <vector>
 
 namespace protocol
 {
@@ -195,14 +196,14 @@ namespace protocol
     static constexpr size_t GLOBAL_PAGE_COUNT = 1;
     static constexpr size_t VOICE_PAGE_COUNT = PAGE_COUNT - GLOBAL_PAGE_COUNT;
 
-#pragma pack(push, 1)
-    struct FieldUpdate
+    struct __attribute__((packed)) FieldUpdate
     {
         uint8_t voiceIndex;
         Page page;
         uint8_t field;
         int16_t value;
     };
-#pragma pack(pop)
+
+    using FieldUpdateList = std::vector<FieldUpdate>;
 
 } // namespace menu
