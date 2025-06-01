@@ -1,9 +1,7 @@
 
 #include <esp_log.h>
-#include <driver/i2c.h>
 #include "receiver.hpp"
 #include "serialize.hpp"
-#include <driver/i2c_slave.h>
 
 constexpr char *TAG = "Receiver";
 using namespace protocol;

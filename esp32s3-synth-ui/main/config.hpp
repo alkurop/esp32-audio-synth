@@ -55,7 +55,9 @@ SenderConfig senderConfig = {
     .sda_pin = PROTOCOL_SDA_PIN,
     .scl_pin = PROTOCOL_SCL_PIN,
     .i2c_port = PROTOCOL_I2C_PORT,
-    .receiver_address = RECEIVER_ARRDESS};
+    .receiver_address = RECEIVER_ARRDESS,
+    .clock_speed= I2C_CLOCK_SPEED
+    };
 
 SSD1306Config displayConfig = {
     .sda_pin = DISPLAY_SDA_PIN,

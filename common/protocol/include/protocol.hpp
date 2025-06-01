@@ -5,6 +5,7 @@
 namespace protocol
 {
     constexpr uint8_t RECEIVER_ARRDESS = 0x28;
+    constexpr uint32_t I2C_CLOCK_SPEED = 400000;
 
     template <class... Ts>
     struct overloaded : Ts...

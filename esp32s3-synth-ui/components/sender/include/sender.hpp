@@ -18,6 +18,7 @@ namespace protocol
         gpio_num_t scl_pin;       ///< I2C SCL pin
         i2c_port_t i2c_port;      ///< I2C port (default: 0)
         uint8_t receiver_address; ///< SSD1306 I2C address
+        uint32_t clock_speed;
     };
 
     struct ReceiveResult
@@ -31,13 +32,14 @@ namespace protocol
     private:
         SenderConfig config;
         bool isConnected;
+        i2c_master_bus_handle_t bus_handle = nullptr;
+        i2c_master_dev_handle_t dev_handle = nullptr;
 
     public:
         explicit Sender(const SenderConfig &config);
         esp_err_t init();
         esp_err_t send(const FieldUpdateList &updates);
-        std::variant<FieldUpdate, esp_err_t> receive(Page page, uint8_t field);
+        std::variant<FieldUpdate, esp_err_t> receiveBpm();
     };
 
-  
 }
