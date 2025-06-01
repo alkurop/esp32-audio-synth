@@ -121,12 +121,12 @@ void createMenuRenderTask()
 
 auto updateCallback = [](const FieldUpdateList &updates)
 {
-    // auto result = sender.send(updates);
-    // if (result != ESP_OK)
-    // {
-    //     ESP_LOGE(TAG, "sending falied with code %d", result);
-    // }
-    sender.receiveBpm();
+    auto result = sender.send(updates);
+    if (result != ESP_OK)
+    {
+        ESP_LOGE(TAG, "sending falied with code %d", result);
+    }
+    // sender.receiveBpm();
 };
 
 extern "C" void app_main()
@@ -157,5 +157,6 @@ extern "C" void app_main()
     menuHolder.init([](const MenuState &state)
                     {
         // overwrite any pending state so we only keep the latest
-        xQueueOverwrite(menuRenderQueue, &state); }, updateCallback);
+        xQueueOverwrite(menuRenderQueue, &state); 
+        }, updateCallback);
 }

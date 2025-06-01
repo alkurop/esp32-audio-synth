@@ -75,12 +75,16 @@ esp_err_t Sender::send(const FieldUpdateList &updates)
         dev_handle,    // i2c_master_dev_handle_t
         buffer.data(), // pointer to bytes to write
         buffer.size(), // number of bytes to send
-        10000          // timeout in milliseconds
+        100            // timeout in milliseconds
     );
 
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "i2c_master_transmit failed: %s", esp_err_to_name(err));
+    }
+    else
+    {
+        ESP_LOGI(TAG, "i2c_master_transmit success size %d", buffer.size());
     }
 
     return err;
@@ -97,25 +101,17 @@ std::variant<FieldUpdate, esp_err_t> Sender::receiveBpm()
     // 1) Prepare a 2-byte buffer
     uint8_t buf[2] = {0, 0};
 
-    // // 2) Do a “pure read” by using transmit_receive with write_size = 0
-    // //    Under the hood this issues: START → (addr << 1) | READ → read 2 bytes → STOP
-    // esp_err_t err = i2c_master_transmit_receive(
-    //     dev_handle,  // handle from i2c_master_bus_add_device()
-    //     nullptr,     // no write-phase
-    //     0,           // write_size = 0
-    //     buf,         // read_buffer
-    //     sizeof(buf), // read_size = 2
-    //     100          // timeout = 100 ms
-    // );
-    uint8_t reg = 0x10;
+    // 2) Do a “pure read” by using transmit_receive with write_size = 0
+    //    Under the hood this issues: START → (addr << 1) | READ → read 2 bytes → STOP
     esp_err_t err = i2c_master_transmit_receive(
-        dev_handle,  // your i2c_master_dev_handle_t
-        &reg,        // write_buffer points to a valid byte
-        1,           // write_size = 1
+        dev_handle,  // handle from i2c_master_bus_add_device()
+        nullptr,     // no write-phase
+        0,           // write_size = 0
         buf,         // read_buffer
         sizeof(buf), // read_size = 2
-        100          // timeout in ms
+        100          // timeout = 100 ms
     );
+
     if (err != ESP_OK)
     {
         return err;

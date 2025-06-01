@@ -14,8 +14,8 @@ using namespace protocol;
 #define I2S_DO_IO GPIO_NUM_21
 
 // ESP32-S3 Pin Mapping for I2C
-#define SDA_PIN   GPIO_NUM_9  // red
-#define SCL_PIN  GPIO_NUM_10 // yellow
+#define SDA_PIN   GPIO_NUM_13  // red
+#define SCL_PIN  GPIO_NUM_14 // yellow
 
 // Configure sound engine
 SoundConfig config{
