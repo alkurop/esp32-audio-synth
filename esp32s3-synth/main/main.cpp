@@ -2,35 +2,22 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <esp_log.h>
+#include "config.hpp"
 #include "midi_module.hpp"
 #include "sound_module.hpp"
+#include "protocol.hpp"
+#include "receiver.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
+using namespace protocol;
 
 static const char *TAG = "Main";
-
-// ESP32-S3 Pin Mapping for I2S
-#define I2S_BCK_IO GPIO_NUM_17
-#define I2S_WS_IO GPIO_NUM_18
-#define I2S_DO_IO GPIO_NUM_21
-
-// Configure sound engine
-SoundConfig config{
-    .sampleRate = 96000,
-    .tableSize = 1024,
-    .amplitude = 16000,
-    .bufferSize = 128,
-    .numVoices = 8,
-    .i2s = {
-        .bclk_io = I2S_BCK_IO,
-        .lrclk_io = I2S_WS_IO,
-        .data_io = I2S_DO_IO},
-};
 
 SoundModule soundModule(config);
 MidiParser midiParser;
 MidiModule midiModule;
+Receiver i2cReceiver(receiverConfig);
 
 // MIDI packet callback
 MidiReadCallback midiReadCallback = [](const uint8_t packet[4])
@@ -64,6 +51,21 @@ BpmCounter::BpmCallback bpmCallback = [](uint8_t bpm)
     // handle BPM change as needed
 };
 
+int16_t sendBpm() { return 0; };
+
+auto updateCallback = [](const FieldUpdateList &updates)
+{
+    ESP_LOGI("Receiver", "Received %zu field update(s)", updates.size());
+    for (const auto &u : updates)
+    {
+        ESP_LOGI("Receiver", "voice=%u page=%u field=%u value=%d",
+                 u.voiceIndex,
+                 static_cast<uint8_t>(u.page),
+                 u.field,
+                 u.value);
+    }
+};
+
 extern "C" void app_main()
 {
 
@@ -77,4 +79,6 @@ extern "C" void app_main()
     midiParser.setSongPositionCallback(songPositionCallback);
     midiParser.setTransportCallback(transportCallback);
     midiParser.setBpmCallback(bpmCallback);
+
+    ESP_ERROR_CHECK(i2cReceiver.init(updateCallback, sendBpm));
 }

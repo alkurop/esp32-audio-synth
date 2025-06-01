@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "type": "gdbtarget",
+            "request": "attach",
+            "name": "Eclipse CDT GDB Adapter"
+        },
+        {
+            "type": "espidf",
+            "request": "launch",
+            "name": "Debug (GDB OpenOCD) ESP32-S3",
+            "projectName": "${workspaceFolderBasename}",
+            "executable": "${workspaceFolder}/build/${workspaceFolderBasename}.elf",
+            "gdb": "${command:espIdf.getToolchainGdb}",
+            "gdbTarget": "localhost:3333",
+            "openOCDConfig": [
+                "interface/ftdi/esp32_devkitj_v1.cfg",
+                "target/esp32s3.cfg"
+            ],
+            "monitorBaud": 460800,
+            "buildBeforeLaunch": true
+        }
+    ]
+}

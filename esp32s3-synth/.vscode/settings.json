@@ -1,6 +1,6 @@
 {
     "idf.port": "/dev/tty.usbmodem1114101",
-    "idf.adapterTargetName": "esp32s2",
+    "idf.adapterTargetName": "esp32s3",
     "idf.openOcdConfigs": [
         "board/esp32s3-builtin.cfg"
     ],
@@ -29,6 +29,7 @@
         "ostream": "cpp",
         "sstream": "cpp",
         "string.h": "c",
+        "nvs_flash.h": "c",
         "charconv": "cpp",
         "chrono": "cpp",
         "optional": "cpp",
@@ -99,8 +100,6 @@
         "esp_hid_common.h": "c",
         "esp_hid_gap.h": "c",
         "gpio_types.h": "c",
-        "osal.h": "c",
-        "tinyusb_types.h": "c",
         "text_encoding": "cpp"
     },
     "git.autoRepositoryDetection": "openEditors",
