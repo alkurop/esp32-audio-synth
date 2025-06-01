@@ -7,7 +7,7 @@
 #include <cstdio> // for std::snprintf
 #include <cstring>
 #include <algorithm>
-#include "ssd1306.hpp"
+#include "display.hpp"
 #include "truncate.hpp"
 
 static const char *TAG = "ui::SSD1306";
@@ -21,7 +21,7 @@ static constexpr int ITEM_HEIGHT = 14;
 
 // In display_popup.cpp:
 
-void SSD1306::renderPopup(const menu::MenuState &st)
+void Display::renderPopup(const menu::MenuState &st)
 {
     // 0) Try to lock LVGL
     if (!lvgl_port_lock(0))
@@ -123,13 +123,13 @@ void SSD1306::renderPopup(const menu::MenuState &st)
     lvgl_port_unlock();
 }
 
-void SSD1306::renderPopupHeader(const PopupEntry &entry)
+void Display::renderPopupHeader(const PopupEntry &entry)
 {
     lv_label_set_text(topbar_label, entry.title);
     lv_obj_align(topbar_label, LV_ALIGN_TOP_LEFT, 0, 0);
 }
 
-void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
+void Display::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
 {
     const auto &ps = st.popup;
     char buf[5] = {};
@@ -178,7 +178,7 @@ void SSD1306::renderPopupInput(const menu::MenuState &st, const PopupLayout &L)
     }
 }
 
-void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L)
+void Display::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L)
 {
     // Clear out any previous content
     lv_obj_clean(popupContainer);
@@ -197,7 +197,7 @@ void SSD1306::renderPopupConfirm(const menu::MenuState &st, const PopupLayout &L
 }
 
 /// On each frame/tick, either init or just select
-void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
+void Display::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
 {
     int16_t cur = st.popup.slotIndex;
 
@@ -217,7 +217,7 @@ void SSD1306::renderPopupList(const menu::MenuState &st, const PopupLayout &L)
     // if cur == popupLastSelected, do nothing
 }
 
-void SSD1306::initPopupList(const menu::MenuState &st, const PopupLayout &L)
+void Display::initPopupList(const menu::MenuState &st, const PopupLayout &L)
 {
     // 1) wipe out any old children
     lv_obj_clean(popupContainer);
@@ -263,7 +263,7 @@ void SSD1306::initPopupList(const menu::MenuState &st, const PopupLayout &L)
 }
 
 /// Clear the old “checked” state and apply it to the new index
-void SSD1306::selectPopupItem(int16_t newIndex)
+void Display::selectPopupItem(int16_t newIndex)
 {
     auto size = popupLabels.size();
     // // clear previous

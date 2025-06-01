@@ -4,6 +4,7 @@
 #include <vector>
 #include <array>
 #include "menu_struct.hpp"
+#include "protocol.hpp"
 #include <functional>
 
 using namespace protocol;
@@ -13,7 +14,6 @@ namespace store
     /**
      * Maximum number of fields per page (knobs 0..3)
      */
-    using UpdateCallback = std::function<void(FieldUpdateList)>;
     using PageCache = std::array<int16_t, MAX_FIELDS>;
     using VoiceCache = std::vector<PageCache>;
     using GlobalCache = std::array<PageCache, GLOBAL_PAGE_COUNT>;

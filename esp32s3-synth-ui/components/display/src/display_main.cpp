@@ -7,7 +7,7 @@
 #include <cstdio> // for std::snprintf
 #include <cstring>
 #include <algorithm>
-#include "ssd1306.hpp"
+#include "display.hpp"
 #include "truncate.hpp"
 
 static const char *TAG = "ui::SSD1306";
@@ -20,7 +20,7 @@ using namespace menu;
 
 static constexpr int ITEM_H = 16;
 
-void SSD1306::initMenuList(lv_obj_t *scr)
+void Display::initMenuList(lv_obj_t *scr)
 {
     static constexpr int ITEM_H = 16;
 
@@ -82,7 +82,7 @@ void SSD1306::initMenuList(lv_obj_t *scr)
         menuItems[i] = lbl;
     }
 }
-void SSD1306::renderMenuList(const menu::MenuState &st)
+void Display::renderMenuList(const menu::MenuState &st)
 {
     if (!lvgl_port_lock(0))
         return;
@@ -102,7 +102,7 @@ void SSD1306::renderMenuList(const menu::MenuState &st)
     lvgl_port_unlock();
 }
 
-void SSD1306::showMenuList(uint8_t page)
+void Display::showMenuList(uint8_t page)
 {
     if (menuContainer)
     {
@@ -120,7 +120,7 @@ void SSD1306::showMenuList(uint8_t page)
     selectMenuItem(page);
 }
 
-void SSD1306::renderMenuPage(const menu::MenuState &st)
+void Display::renderMenuPage(const menu::MenuState &st)
 {
     if (!lvgl_port_lock(0))
         return;
@@ -204,7 +204,7 @@ void SSD1306::renderMenuPage(const menu::MenuState &st)
     lvgl_port_unlock();
 }
 
-void SSD1306::showPage()
+void Display::showPage()
 {
     if (menuContainer)
     {
@@ -220,7 +220,7 @@ void SSD1306::showPage()
     }
 }
 
-void SSD1306::selectMenuItem(uint8_t page)
+void Display::selectMenuItem(uint8_t page)
 {
     // clear previous selection
     if (menuLastSelected >= 0)
@@ -236,7 +236,7 @@ void SSD1306::selectMenuItem(uint8_t page)
     menuLastSelected = page;
 }
 
-void SSD1306::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
+void Display::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
 {
     if (!topbar_label)
     {
@@ -261,7 +261,7 @@ void SSD1306::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
     lv_obj_invalidate(topbar_label);
 };
 
-void SSD1306::showPopup()
+void Display::showPopup()
 {
     if (menuContainer)
     {

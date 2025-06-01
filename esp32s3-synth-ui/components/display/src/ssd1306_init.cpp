@@ -7,24 +7,24 @@
 #include <cstdio> // for std::snprintf
 #include <cstring>
 #include <algorithm>
-#include "ssd1306.hpp"
+#include "display.hpp"
 
 #define LCD_CMD_BITS 8
 #define LCD_PARAM_BITS 8
 
 #define LCD_PIXEL_CLOCK_HZ (400 * 1000)
 
-static const char *TAG = "ui::SSD1306::init";
+static const char *TAG = "ui::Display";
 
 using namespace ui;
 using namespace menu;
 
-SSD1306::SSD1306(const SSD1306Config &cfg)
+Display::Display(const SSD1306Config &cfg)
     : cfg(cfg)
 {
 }
 
-esp_err_t SSD1306::init()
+esp_err_t Display::init()
 {
     esp_err_t err;
 
@@ -52,7 +52,7 @@ esp_err_t SSD1306::init()
     return ESP_OK;
 }
 
-esp_err_t SSD1306::configureI2C()
+esp_err_t Display::configureI2C()
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -67,7 +67,7 @@ esp_err_t SSD1306::configureI2C()
     return i2c_new_master_bus(&bus_cfg, &i2c_bus);
 }
 
-esp_err_t SSD1306::configureSSD1306()
+esp_err_t Display::configureSSD1306()
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -105,7 +105,7 @@ esp_err_t SSD1306::configureSSD1306()
     return ESP_OK;
 }
 
-esp_err_t SSD1306::configureLVGL()
+esp_err_t Display::configureLVGL()
 {
 
 #pragma GCC diagnostic push

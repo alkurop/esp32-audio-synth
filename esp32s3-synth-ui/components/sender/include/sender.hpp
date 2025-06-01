@@ -8,6 +8,7 @@
 #include <variant>
 #include <vector>
 #include "menu_struct.hpp"
+#include "protocol.hpp"
 
 namespace protocol
 {
@@ -38,11 +39,5 @@ namespace protocol
         std::variant<FieldUpdate, esp_err_t> receive(Page page, uint8_t field);
     };
 
-    template <class... Ts>
-    struct overloaded : Ts...
-    {
-        using Ts::operator()...;
-    };
-    template <class... Ts>
-    overloaded(Ts...) -> overloaded<Ts...>;
+  
 }

@@ -53,10 +53,10 @@ namespace ui
     /**
      * Wrapper for SSD1306-based UI using LVGL
      */
-    class SSD1306
+    class Display
     {
     public:
-        explicit SSD1306(const SSD1306Config &cfg);
+        explicit Display(const SSD1306Config &cfg);
         esp_err_t init();
 
         // Main menu entry point

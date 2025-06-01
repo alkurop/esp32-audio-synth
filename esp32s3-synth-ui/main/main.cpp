@@ -5,7 +5,7 @@
 
 #include "rotary.hpp"
 #include "button.hpp"
-#include "ssd1306.hpp"
+#include "display.hpp"
 #include "menu.hpp"
 #include "encoder_range.hpp"
 #include "rotary_mapping.hpp"
@@ -16,7 +16,7 @@ using namespace ui;
 using namespace menu;
 using namespace protocol;
 
-SSD1306 display = SSD1306(displayConfig);
+Display display = Display(displayConfig);
 
 Rotary rotary0(cfg0);
 Rotary rotary1(cfg1);
@@ -69,7 +69,7 @@ auto down = [](uint8_t number, bool state)
 static QueueHandle_t menuRenderQueue = nullptr;
 static void render_task(void *arg)
 {
-    auto disp = static_cast<SSD1306 *>(arg);
+    auto disp = static_cast<Display *>(arg);
     MenuState st;
 
     ESP_LOGI(TAG, "Render task running on core %d", xPortGetCoreID());
@@ -145,7 +145,7 @@ extern "C" void app_main()
     button2.install();
     button3.install();
     ESP_ERROR_CHECK(display.init());
-    ESP_ERROR_CHECK(sender.init());
+    // ESP_ERROR_CHECK(sender.init());
 
     createMenuRenderTask();
 
