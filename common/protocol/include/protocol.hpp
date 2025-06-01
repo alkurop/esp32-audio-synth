@@ -9,7 +9,6 @@ namespace protocol
     static uint32_t i2c_frequency = 100 * 1000;
     static uint32_t I2C_CLOCK_SPEED = i2c_frequency;
 
-
     template <class... Ts>
     struct overloaded : Ts...
     {
@@ -20,7 +19,7 @@ namespace protocol
     struct __attribute__((packed)) FieldUpdate
     {
         uint8_t voiceIndex;
-        Page page;
+        uint8_t pageByte;
         uint8_t field;
         int16_t value;
     };

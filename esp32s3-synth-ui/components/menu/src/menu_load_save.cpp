@@ -88,7 +88,7 @@ void Menu::loadVoice(uint8_t slotIndex)
 
             updates.push_back(FieldUpdate{
                 .voiceIndex = static_cast<uint8_t>(state.voice),
-                .page = static_cast<Page>(p),
+                .pageByte = static_cast<uint8_t>(p),
                 .field = static_cast<uint8_t>(f),
                 .value = v});
 
@@ -155,7 +155,7 @@ void Menu::loadProject(int16_t slotIndex)
                     break;
 
                 int16_t value = flat[idx];
-                updates.push_back(FieldUpdate{ve.index, static_cast<Page>(p), static_cast<uint8_t>(f), value});
+                updates.push_back(FieldUpdate{ve.index, static_cast<uint8_t>(p), static_cast<uint8_t>(f), value});
 
                 if (v == state.voice)
                 {
@@ -191,7 +191,7 @@ void Menu::loadProject(int16_t slotIndex)
                     break;
 
                 int16_t value = flatGlobal[idx];
-                updates.push_back(FieldUpdate{static_cast<uint8_t>(-1), static_cast<Page>(pageIndex), static_cast<uint8_t>(f), value});
+                updates.push_back(FieldUpdate{static_cast<uint8_t>(-1), static_cast<uint8_t>(pageIndex), static_cast<uint8_t>(f), value});
             }
         }
     }

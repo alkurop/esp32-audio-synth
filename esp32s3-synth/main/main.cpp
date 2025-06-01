@@ -60,7 +60,7 @@ auto updateCallback = [](const FieldUpdateList &updates)
     {
         ESP_LOGI("Receiver", "voice=%u page=%u field=%u value=%d",
                  u.voiceIndex,
-                 static_cast<uint8_t>(u.page),
+                 u.pageByte,
                  u.field,
                  u.value);
     }
@@ -69,16 +69,18 @@ auto updateCallback = [](const FieldUpdateList &updates)
 extern "C" void app_main()
 {
 
-    // Initialize modules
-    midiModule.init(midiReadCallback);
-    soundModule.init();
+    // // Initialize modules
+    // midiModule.init(midiReadCallback);
+    // soundModule.init();
 
-    // Set MIDI parser callbacks
-    midiParser.setControllerCallback(controllerCallback);
-    midiParser.setNoteMessageCallback(noteMessageCallback);
-    midiParser.setSongPositionCallback(songPositionCallback);
-    midiParser.setTransportCallback(transportCallback);
-    midiParser.setBpmCallback(bpmCallback);
+    // // Set MIDI parser callbacks
+    // midiParser.setControllerCallback(controllerCallback);
+    // midiParser.setNoteMessageCallback(noteMessageCallback);
+    // midiParser.setSongPositionCallback(songPositionCallback);
+    // midiParser.setTransportCallback(transportCallback);
+    // midiParser.setBpmCallback(bpmCallback);
 
     ESP_ERROR_CHECK(i2cReceiver.init(updateCallback, sendBpm));
+
+    // ESP_LOGI(TAG, "Something happened");
 }

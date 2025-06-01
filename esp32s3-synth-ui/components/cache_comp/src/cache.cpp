@@ -33,11 +33,13 @@ void Cache::set(const FieldUpdateList &updates)
 {
     for (const auto &u : updates)
     {
-        size_t p = static_cast<size_t>(u.page);
+        size_t p = static_cast<size_t>(u.pageByte);
         if (p >= PAGE_COUNT || u.field >= MAX_FIELDS)
             continue;
 
-        if (isGlobal(u.page))
+        auto page = static_cast<Page>(u.pageByte);
+
+        if (isGlobal(page))
         {
             globalData[VOICE_PAGE_COUNT - p][u.field] = u.value;
         }

@@ -16,7 +16,7 @@ namespace protocol
     // pages
     enum class Page : uint8_t
     {
-        Channel,
+        Channel = 0,
         Oscillator,
         Filter,
         Envelope,

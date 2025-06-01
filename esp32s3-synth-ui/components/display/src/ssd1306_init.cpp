@@ -62,7 +62,7 @@ esp_err_t Display::configureI2C()
         .scl_io_num = cfg.scl_pin,
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .glitch_ignore_cnt = 7,
-        .flags = {.enable_internal_pullup = true}};
+        .flags = {.enable_internal_pullup = false}};
 #pragma GCC diagnostic pop
     return i2c_new_master_bus(&bus_cfg, &i2c_bus);
 }

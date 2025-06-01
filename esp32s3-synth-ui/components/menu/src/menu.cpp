@@ -107,7 +107,7 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
     case 2:
     {
         FieldUpdateList updates = {
-            FieldUpdate{state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Chan), pos}};
+            FieldUpdate{state.voice, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Chan), pos}};
         cache.set(updates);
         state.shouldAutoSave = true;
         break;
@@ -115,7 +115,7 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
     case 3:
     {
         FieldUpdateList updates = {
-            FieldUpdate{state.voice, Page::Channel, static_cast<uint8_t>(ChannelField::Vol), pos}};
+            FieldUpdate{state.voice, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Vol), pos}};
         cache.set(updates);
         state.shouldAutoSave = true;
         break;
@@ -151,7 +151,7 @@ void Menu::changeValuePage(uint8_t knob, int16_t pos)
     FieldUpdateList updates = {
         FieldUpdate{
             .voiceIndex = state.voice,
-            .page = itemToPage(state.menuItemIndex),
+            .pageByte = static_cast<uint8_t>(itemToPage(state.menuItemIndex)),
             .field = knob,
             .value = newVal}};
     cache.set(updates);

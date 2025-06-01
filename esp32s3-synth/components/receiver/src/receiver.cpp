@@ -2,34 +2,50 @@
 #include <esp_log.h>
 #include "receiver.hpp"
 #include "serialize.hpp"
+#include <cstring>
 
 constexpr char *TAG = "Receiver";
 using namespace protocol;
 
-bool IRAM_ATTR i2c_slave_receive_cb(i2c_slave_dev_handle_t i2c_slave, const i2c_slave_rx_done_event_data_t *evt_data, void *arg)
+static bool IRAM_ATTR i2c_slave_receive_cb(
+    i2c_slave_dev_handle_t i2c_slave,
+    const i2c_slave_rx_done_event_data_t *evt_data,
+    void *arg)
 {
     auto *self = static_cast<Receiver *>(arg);
 
+    // 1) Check for valid incoming data
     if (!evt_data || evt_data->length == 0)
-        return true;
+    {
+        return false; // nothing to do
+    }
 
-    auto *buf = static_cast<uint8_t *>(heap_caps_malloc(evt_data->length, MALLOC_CAP_8BIT));
+    // 2) Allocate a buffer of exactly evt_data->size bytes in DRAM
+    size_t len = evt_data->length;
+    auto *buf = static_cast<uint8_t *>(
+        heap_caps_malloc(len, MALLOC_CAP_8BIT));
     if (!buf)
-        return true;
+    {
+        return false; // allocation failed
+    }
 
-    memcpy(buf, evt_data->buffer, evt_data->length);
+    // 3) Copy the incoming bytes into our buffer
+    memcpy(buf, evt_data->buffer, len);
 
+    // 4) Create a new IncomingMessage and store both buffer and length
     auto *msg = new protocol::IncomingMessage{
         .buffer = buf,
-        .length = evt_data->length,
+        .length = len, // <— use 'len', not 0
     };
 
+    // 5) Push the pointer to our receiveQueue (ISR-safe)
     BaseType_t hpTaskWoken = pdFALSE;
     xQueueSendFromISR(self->receiveQueue, &msg, &hpTaskWoken);
     if (hpTaskWoken)
+    {
         portYIELD_FROM_ISR();
-
-    return true;
+    }
+    return false;
 }
 
 bool IRAM_ATTR i2c_slave_request_cb(i2c_slave_dev_handle_t i2c_slave, const i2c_slave_request_event_data_t *evt_data, void *arg)
@@ -56,9 +72,11 @@ esp_err_t Receiver::init(UpdateCallback updateCallback, BpmCallback bpmCallback)
         .sda_io_num = config.sda_pin,
         .scl_io_num = config.scl_pin,
         .clk_source = I2C_CLK_SRC_DEFAULT,
-        .send_buf_depth = 100,
-        .receive_buf_depth = 100,
+        .send_buf_depth = 2000,
+        .receive_buf_depth = 2000,
         .slave_addr = config.receiver_address,
+        .flags = {.enable_internal_pullup = false}
+
     };
 
 #pragma GCC diagnostic pop
@@ -91,6 +109,8 @@ esp_err_t Receiver::init(UpdateCallback updateCallback, BpmCallback bpmCallback)
         ESP_LOGE("Receiver", "Failed to create update queue");
         return ESP_ERR_NO_MEM;
     }
+    this->receiveTask();
+    this->sendTask();
     return ESP_OK;
 }
 
@@ -101,15 +121,17 @@ void Receiver::receiveTask()
         protocol::IncomingMessage *msg = nullptr;
         if (xQueueReceive(receiveQueue, &msg, portMAX_DELAY) == pdTRUE)
         {
+
             if (msg && msg->buffer)
             {
                 // ⛳ Deserialization happens here!
                 FieldUpdateList updates = protocol::deserializeFieldUpdates(msg->buffer, msg->length);
-                heap_caps_free(msg->buffer);
-                delete msg;
 
+                ESP_LOGI(TAG, "Something happened of lengths %d", msg->length);
                 // 👇 User-defined callback gets parsed data
                 callback(updates);
+                heap_caps_free(msg->buffer);
+                delete msg;
             }
         }
     }
