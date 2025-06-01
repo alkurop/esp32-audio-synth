@@ -107,12 +107,11 @@ void Receiver::receiveTask()
             {
                 // ⛳ Deserialization happens here!
                 FieldUpdateList updates = protocol::deserializeFieldUpdates(msg->buffer, msg->length);
+                heap_caps_free(msg->buffer);
+                delete msg;
 
                 // 👇 User-defined callback gets parsed data
                 callback(updates);
-
-                free(msg->buffer);
-                delete msg;
             }
         }
     }
