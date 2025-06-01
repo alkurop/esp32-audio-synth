@@ -128,18 +128,6 @@ auto updateCallback = [](const FieldUpdateList &updates)
     }
 };
 
-void initI2cMaster()
-{
-    esp_err_t err;
-    while ((err = sender.init()) != ESP_OK)
-    {
-        ESP_LOGW(TAG, "sender.init() failed: %s – retrying in 1 second", esp_err_to_name(err));
-        // Delay 1000 ms before trying again
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-    ESP_LOGI(TAG, "sender.init() succeeded");
-}
-
 extern "C" void app_main()
 {
     rotary0.init(rotaryCallback);
@@ -157,6 +145,7 @@ extern "C" void app_main()
     button2.install();
     button3.install();
     ESP_ERROR_CHECK(display.init());
+    ESP_ERROR_CHECK(sender.init());
 
     createMenuRenderTask();
 
@@ -164,6 +153,4 @@ extern "C" void app_main()
                     {
         // overwrite any pending state so we only keep the latest
         xQueueOverwrite(menuRenderQueue, &state); }, updateCallback);
-
-    initI2cMaster();
 }
