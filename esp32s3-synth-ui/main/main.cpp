@@ -8,14 +8,13 @@
 #include "ssd1306.hpp"
 #include "menu.hpp"
 #include "encoder_range.hpp"
-#include "mapping.hpp"
+#include "rotary_mapping.hpp"
 #include "config.hpp"
 #include "sender.hpp"
 
 using namespace ui;
 using namespace menu;
 using namespace protocol;
-using namespace i2c;
 
 SSD1306 display = SSD1306(displayConfig);
 

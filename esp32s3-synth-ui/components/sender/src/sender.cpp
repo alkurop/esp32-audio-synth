@@ -5,7 +5,7 @@
 
 static constexpr const char *TAG = "Sender";
 
-using namespace i2c;
+using namespace protocol;
 
 Sender::Sender(const SenderConfig &cfg)
     : config(cfg), isConnected(false) {}

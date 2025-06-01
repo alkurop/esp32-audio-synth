@@ -5,7 +5,6 @@
 #include "ssd1306.hpp"
 #include "menu.hpp"
 #include "encoder_range.hpp"
-#include "mapping.hpp"
 #include "config.hpp"
 #include "sender.hpp"
 #include "protocol.hpp"
@@ -20,7 +19,6 @@
 
 using namespace ui;
 using namespace menu;
-using namespace i2c;
 using namespace protocol;
 
 static const char *TAG = "Main";

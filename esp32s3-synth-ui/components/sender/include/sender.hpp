@@ -9,8 +9,7 @@
 #include <vector>
 #include "menu_struct.hpp"
 
-using namespace protocol;
-namespace i2c
+namespace protocol
 {
     struct SenderConfig
     {
