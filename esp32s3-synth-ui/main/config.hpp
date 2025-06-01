@@ -15,8 +15,8 @@
 #define B3 GPIO_NUM_12
 
 // ESP32-S3 Pin Mapping for protocol I2C
-#define PROTOCOL_SDA_PIN GPIO_NUM_1
-#define PROTOCOL_SCL_PIN GPIO_NUM_2
+#define PROTOCOL_SDA_PIN GPIO_NUM_2 // red
+#define PROTOCOL_SCL_PIN GPIO_NUM_1 // yellow
 #define PROTOCOL_I2C_PORT I2C_NUM_1
 
 // ESP32-S3 Pin Mapping for display I2C

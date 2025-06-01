@@ -121,11 +121,12 @@ void createMenuRenderTask()
 
 auto updateCallback = [](const FieldUpdateList &updates)
 {
-    auto result = sender.send(updates);
-    if (result != ESP_OK)
-    {
-        ESP_LOGE(TAG, "sending falied with code %d", result);
-    }
+    // auto result = sender.send(updates);
+    // if (result != ESP_OK)
+    // {
+    //     ESP_LOGE(TAG, "sending falied with code %d", result);
+    // }
+    sender.receiveBpm();
 };
 
 extern "C" void app_main()
@@ -148,6 +149,10 @@ extern "C" void app_main()
     ESP_ERROR_CHECK(sender.init());
 
     createMenuRenderTask();
+
+     // wait for synth device to init, because initing menu will cause sending
+     // the synth settings over i2c
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
     menuHolder.init([](const MenuState &state)
                     {
