@@ -1,6 +1,6 @@
 #include "button.hpp"
-#include "tag.hpp"
 using namespace ui;
+const constexpr char *TAG{"Button module"};
 
 static void buttonSender(void *arg)
 {

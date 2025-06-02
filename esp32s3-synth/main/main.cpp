@@ -7,10 +7,12 @@
 #include "sound_module.hpp"
 #include "protocol.hpp"
 #include "receiver.hpp"
+#include "master_knob.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
 using namespace protocol;
+using namespace ui;
 
 static const char *TAG = "Main";
 
@@ -18,6 +20,13 @@ SoundModule soundModule(config);
 MidiParser midiParser;
 MidiModule midiModule;
 Receiver i2cReceiver(receiverConfig);
+
+MasterKnob masterKnob(masterKnobConfig);
+
+auto masterKnobCallback = [](uint8_t value)
+{
+    ESP_LOGI(TAG, "Master knob changes: %d", value);
+};
 
 // MIDI packet callback
 MidiReadCallback midiReadCallback = [](const uint8_t packet[4])
@@ -69,7 +78,7 @@ auto updateCallback = [](const FieldUpdateList &updates)
 extern "C" void app_main()
 {
 
-    // // Initialize modules
+    // // // Initialize modules
     // midiModule.init(midiReadCallback);
     // soundModule.init();
 
@@ -80,7 +89,6 @@ extern "C" void app_main()
     // midiParser.setTransportCallback(transportCallback);
     // midiParser.setBpmCallback(bpmCallback);
 
+    masterKnob.init(masterKnobCallback);
     ESP_ERROR_CHECK(i2cReceiver.init(updateCallback, sendBpm));
-
-    // ESP_LOGI(TAG, "Something happened");
 }

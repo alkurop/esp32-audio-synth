@@ -3,10 +3,12 @@
 #include "sound_module.hpp"
 #include "receiver.hpp"
 #include "protocol.hpp"
+#include "master_knob.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
 using namespace protocol;
+using namespace ui;
 
 // ESP32-S3 Pin Mapping for I2S
 #define I2S_BCK_IO GPIO_NUM_17
@@ -16,6 +18,8 @@ using namespace protocol;
 // ESP32-S3 Pin Mapping for I2C
 #define SDA_PIN   GPIO_NUM_13  // red
 #define SCL_PIN  GPIO_NUM_14 // yellow
+
+#define MASTER_KNOB_PIN GPIO_NUM_4
 
 // Configure sound engine
 SoundConfig config{
@@ -35,4 +39,10 @@ ReceiverConfig receiverConfig = {
     .scl_pin = SCL_PIN,
     .i2c_port = I2C_NUM_0,
     .receiver_address = RECEIVER_ARRDESS,
+};
+
+MasterKnobConfig masterKnobConfig = {
+    .pin  = MASTER_KNOB_PIN,
+    .adc_channel = ADC_CHANNEL_3,
+    .adc_unit= ADC_UNIT_1,
 };
