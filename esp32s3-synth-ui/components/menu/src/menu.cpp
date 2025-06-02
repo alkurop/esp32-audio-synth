@@ -1,5 +1,6 @@
 // Menu.cpp
-
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <algorithm>
 #include <cstdint>
 #include <utility>
@@ -27,6 +28,9 @@ void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
     state.encoderRanges = calcEncoderRanges();
     initAutosaveTask();
     notify();
+      // wait for synth device to init, because initing menu will cause sending
+     // the synth settings over i2c
+    vTaskDelay(pdMS_TO_TICKS(1000));
     loadProject(-1);
 }
 

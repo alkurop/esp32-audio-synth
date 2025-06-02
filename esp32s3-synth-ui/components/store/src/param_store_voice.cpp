@@ -20,7 +20,7 @@ VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
 
     if (index >= maxVoices)
     {
-        ESP_LOGW(TAG, "loadVoice: slot %d out of range", index);
+        ESP_LOGW(TAG, "loadVoice: slot %u out of range", index);
         return entry;
     }
 
@@ -29,14 +29,14 @@ VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
     esp_err_t err = nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle);
     if (err != ESP_OK)
     {
-        ESP_LOGE(TAG, "nvs_open RO failed (%d)", err);
+        ESP_LOGE(TAG, "loadVoice: nvs_open RO failed (%d)", err);
         return entry;
     }
 
     // 3) Load the optional name key & value
     {
         char nameKey[32];
-        std::snprintf(nameKey, sizeof(nameKey), "%s%d", KEY_VOICE_NAME, index);
+        std::snprintf(nameKey, sizeof(nameKey), "%s%u", KEY_VOICE_NAME, index);
         ESP_LOGD(TAG, "loadVoice: nameKey='%s'", nameKey);
 
         size_t len = 0;
@@ -52,29 +52,42 @@ VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
     // 4) Load the params blob key & data
     {
         char dataKey[32];
-        std::snprintf(dataKey, sizeof(dataKey), "%s%d", KEY_VOICE_DATA, index);
+        std::snprintf(dataKey, sizeof(dataKey), "%s%u", KEY_VOICE_DATA, index);
 
-        // Probe the blob length
+        // Probe the blob length in bytes
         size_t blobLen = 0;
         err = nvs_get_blob(handle, dataKey, nullptr, &blobLen);
         if (err == ESP_OK && blobLen > 0)
         {
-            const size_t P = VOICE_PAGE_COUNT;
-            const size_t F = MAX_FIELDS;
-            const size_t voiceSize = P * F;
-            size_t expectedBytes = voiceSize * sizeof(int16_t);
+            // Compute how many int16_t entries are actually stored
             size_t count = blobLen / sizeof(int16_t);
 
-            if (count != expectedBytes)
+            // Expected number of int16_t entries = VOICE_PAGE_COUNT * MAX_FIELDS
+            const size_t expectedCount = VOICE_PAGE_COUNT * MAX_FIELDS;
+
+            // Check that blobLen is an exact multiple of sizeof(int16_t)
+            if (blobLen % sizeof(int16_t) != 0)
             {
-                ESP_LOGW(TAG, "Invalid param count (%u) for slot %u, expected %u. Aborting load.",
-                         (unsigned)count, (unsigned)index, (unsigned)expectedBytes);
+                ESP_LOGW(TAG,
+                         "loadVoice: blob length %u is not aligned to int16_t (slot %u). Aborting load.",
+                         (unsigned)blobLen, (unsigned)index);
                 nvs_close(handle);
-                return entry; // <- Fast return point here
+                return entry;
             }
+
+            if (count != expectedCount)
+            {
+                ESP_LOGW(TAG,
+                         "loadVoice: invalid param count (%u) for slot %u, expected %u. Aborting load.",
+                         (unsigned)count, (unsigned)index, (unsigned)expectedCount);
+                nvs_close(handle);
+                return entry;
+            }
+
             ESP_LOGD(TAG, "  blobLen=%u bytes => %u int16_t entries",
                      (unsigned)blobLen, (unsigned)count);
 
+            // Now read the blob into entry.voiceParams (vector<int16_t>)
             entry.voiceParams.resize(count);
             err = nvs_get_blob(handle, dataKey, entry.voiceParams.data(), &blobLen);
             if (err != ESP_OK)

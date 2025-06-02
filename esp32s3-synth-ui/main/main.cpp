@@ -150,9 +150,7 @@ extern "C" void app_main()
 
     createMenuRenderTask();
 
-     // wait for synth device to init, because initing menu will cause sending
-     // the synth settings over i2c
-    vTaskDelay(pdMS_TO_TICKS(1000));
+   
 
     menuHolder.init([](const MenuState &state)
                     {
