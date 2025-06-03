@@ -8,31 +8,28 @@
 #include "protocol.hpp"
 #include "receiver.hpp"
 #include "knob.hpp"
+#include "setting_switch.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
 using namespace protocol;
 using namespace ui;
-
 static const char *TAG = "Main";
 
 SoundModule soundModule(config);
 MidiParser midiParser;
 MidiModule midiModule;
 Receiver i2cReceiver(receiverConfig);
+settings::SettingSwitch settingSwitch(&soundModule);
 
 Knob masterKnob(masterKnobConfig);
 
 auto masterKnobCallback = [](uint8_t value)
-{
-    ESP_LOGI(TAG, "Master knob changes: %d", value);
-};
+{ settingSwitch.setMasterVolume(value); };
 
 // MIDI packet callback
 MidiReadCallback midiReadCallback = [](const uint8_t packet[4])
-{
-    midiParser.feed(packet);
-};
+{ midiParser.feed(packet); };
 
 // MIDI event callbacks
 MidiControllerCallback controllerCallback = [](const ControllerChange &cc)
@@ -41,39 +38,23 @@ MidiControllerCallback controllerCallback = [](const ControllerChange &cc)
 };
 
 MidiNoteMessageCallback noteMessageCallback = [](const NoteMessage &note)
-{
-    soundModule.handle_note(note);
-};
+{ soundModule.handle_note(note); };
 
 MidiSongPositionCallback songPositionCallback = [](const SongPosition &sp)
-{
-    ESP_LOGI(TAG, "Song Position: %d", sp.position);
-};
+{ ESP_LOGI(TAG, "Song Position: %d", sp.position); };
 
 MidiTransportCallback transportCallback = [](const TransportEvent &ev)
-{
-    // handle transport as needed
-};
+{ settingSwitch.setTransportState(ev.command); };
 
 BpmCounter::BpmCallback bpmCallback = [](uint8_t bpm)
 {
-    // handle BPM change as needed
+    return settingSwitch.getMidiBpm();
 };
 
-int16_t sendBpm() { return 0; };
+uint16_t sendBpm() { return settingSwitch.getMidiBpm(); };
 
 auto updateCallback = [](const FieldUpdateList &updates)
-{
-    ESP_LOGI("Receiver", "Received %zu field update(s)", updates.size());
-    for (const auto &u : updates)
-    {
-        ESP_LOGI("Receiver", "voice=%u page=%u field=%u value=%d",
-                 u.voiceIndex,
-                 u.pageByte,
-                 u.field,
-                 u.value);
-    }
-};
+{ settingSwitch.setUpdateFromUi(updates); };
 
 extern "C" void app_main()
 {

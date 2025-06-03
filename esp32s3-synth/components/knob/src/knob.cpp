@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <esp_log.h>
 
-constexpr char *TAG = "MasterKnob";
+constexpr const char *TAG = "MasterKnob";
 
 static constexpr uint8_t DELTA_THRESHOLD = 5;                   
 static constexpr TickType_t POLL_INTERVAL = pdMS_TO_TICKS(100); // 100 ms → 10 Hz
@@ -22,6 +22,7 @@ void Knob::init(MasterKnobCallback cb)
     // We choose ADC_UNIT_1 since GPIO32..35 are on ADC1.
     adc_oneshot_unit_init_cfg_t initConfig = {
         .unit_id = config.adc_unit,
+        .clk_src = ADC_RTC_CLK_SRC_DEFAULT,
         .ulp_mode = ADC_ULP_MODE_DISABLE,
     };
     esp_err_t err = adc_oneshot_new_unit(&initConfig, &adcUnitHandle);
