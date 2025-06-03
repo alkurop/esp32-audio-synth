@@ -4,7 +4,7 @@
 
 constexpr char *TAG = "MasterKnob";
 
-static constexpr uint8_t DELTA_THRESHOLD = 2;                   // only report ±2 steps
+static constexpr uint8_t DELTA_THRESHOLD = 5;                   
 static constexpr TickType_t POLL_INTERVAL = pdMS_TO_TICKS(100); // 100 ms → 10 Hz
 
 using namespace ui;
@@ -48,13 +48,7 @@ void MasterKnob::init(MasterKnobCallback cb)
     //----------------------------------------
     // 3) Spawn the FreeRTOS “knob task”
     //----------------------------------------
-    BaseType_t rc = xTaskCreate(
-        knobTask,
-        "MasterKnobTask",
-        4096,
-        this,
-        tskIDLE_PRIORITY + 1,
-        &taskHandle);
+    BaseType_t rc = xTaskCreate( knobTask, "MasterKnobTask", 4096, this, tskIDLE_PRIORITY + 1, &taskHandle);
     if (rc != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to create MasterKnobTask");
@@ -80,8 +74,6 @@ void MasterKnob::knobTask(void *arg)
             ESP_LOGW(TAG, "adc_oneshot_read failed (%s)", esp_err_to_name(err));
             raw = 0;
         }
-
-        ESP_LOGI(TAG, "RAW %d", raw);
 
         raw = std::clamp(raw, 0, 4095);
 
