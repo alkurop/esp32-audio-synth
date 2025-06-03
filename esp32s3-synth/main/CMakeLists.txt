@@ -1,4 +1,4 @@
 idf_component_register(SRCS 
 "main.cpp"
 INCLUDE_DIRS ""
-REQUIRES midi sound receiver master_knob)
+REQUIRES midi sound receiver knob switch)

@@ -7,7 +7,7 @@
 #include "sound_module.hpp"
 #include "protocol.hpp"
 #include "receiver.hpp"
-#include "master_knob.hpp"
+#include "knob.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
@@ -21,7 +21,7 @@ MidiParser midiParser;
 MidiModule midiModule;
 Receiver i2cReceiver(receiverConfig);
 
-MasterKnob masterKnob(masterKnobConfig);
+Knob masterKnob(masterKnobConfig);
 
 auto masterKnobCallback = [](uint8_t value)
 {

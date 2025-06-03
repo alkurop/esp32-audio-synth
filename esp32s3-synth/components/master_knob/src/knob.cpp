@@ -1,4 +1,4 @@
-#include "master_knob.hpp"
+#include "knob.hpp"
 #include <algorithm>
 #include <esp_log.h>
 
@@ -9,9 +9,9 @@ static constexpr TickType_t POLL_INTERVAL = pdMS_TO_TICKS(100); // 100 ms → 10
 
 using namespace ui;
 
-MasterKnob::MasterKnob(const MasterKnobConfig &config) : config(config) {};
+Knob::Knob(const KnobConfig &config) : config(config) {};
 
-void MasterKnob::init(MasterKnobCallback cb)
+void Knob::init(MasterKnobCallback cb)
 {
 
     callback = std::move(cb);
@@ -58,9 +58,9 @@ void MasterKnob::init(MasterKnobCallback cb)
     }
 }
 
-void MasterKnob::knobTask(void *arg)
+void Knob::knobTask(void *arg)
 {
-    auto *self = static_cast<MasterKnob *>(arg);
+    auto *self = static_cast<Knob *>(arg);
 
     while (true)
     {

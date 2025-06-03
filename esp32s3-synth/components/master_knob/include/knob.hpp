@@ -10,7 +10,7 @@
 
 namespace ui
 {
-    struct MasterKnobConfig
+    struct KnobConfig
     {
         gpio_num_t pin;
         adc_channel_t adc_channel;
@@ -19,10 +19,10 @@ namespace ui
     };
 
     using MasterKnobCallback = std::function<void(uint8_t)>;
-    class MasterKnob
+    class Knob
     {
     private:
-        MasterKnobConfig config;
+        KnobConfig config;
         MasterKnobCallback callback;
         TaskHandle_t taskHandle = nullptr;
         adc_oneshot_unit_handle_t adcUnitHandle = nullptr;
@@ -34,7 +34,7 @@ namespace ui
         static void knobTask(void *arg);
         /* data */
     public:
-        MasterKnob(const MasterKnobConfig &config);
+        Knob(const KnobConfig &config);
         void init(MasterKnobCallback callback);
     };
 

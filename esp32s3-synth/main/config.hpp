@@ -3,7 +3,7 @@
 #include "sound_module.hpp"
 #include "receiver.hpp"
 #include "protocol.hpp"
-#include "master_knob.hpp"
+#include "knob.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
@@ -41,7 +41,7 @@ ReceiverConfig receiverConfig = {
     .receiver_address = RECEIVER_ARRDESS,
 };
 
-MasterKnobConfig masterKnobConfig = {
+KnobConfig masterKnobConfig = {
     .pin  = MASTER_KNOB_PIN,
     .adc_channel = ADC_CHANNEL_3,
     .adc_unit= ADC_UNIT_1,
