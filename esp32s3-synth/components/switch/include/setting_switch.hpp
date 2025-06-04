@@ -12,20 +12,20 @@ using namespace midi_module;
 namespace settings
 
 {
-
     class SettingSwitch
     {
     private:
-        SoundModule *soundModule;
+        SoundModule &soundModule;
         uint8_t midiBpm;
         uint16_t settingBpm;
         bool isSync;
         TransportCommand transportState;
 
         void setUpdate(const FieldUpdate &update);
+        void setGlobalPage(uint8_t field, int16_t value);
 
     public:
-        SettingSwitch(SoundModule *soundModule);
+        SettingSwitch(SoundModule &soundModule);
         void setMasterVolume(uint8_t volume);
         void setBpmFromMidi(uint8_t bpm);
         void setUpdateFromUi(const FieldUpdateList &update);

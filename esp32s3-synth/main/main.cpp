@@ -20,7 +20,7 @@ SoundModule soundModule(config);
 MidiParser midiParser;
 MidiModule midiModule;
 Receiver i2cReceiver(receiverConfig);
-settings::SettingSwitch settingSwitch(&soundModule);
+settings::SettingSwitch settingSwitch(soundModule);
 
 Knob masterKnob(masterKnobConfig);
 
