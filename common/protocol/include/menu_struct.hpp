@@ -50,7 +50,7 @@ namespace protocol
         Res,
         _Count
     };
-    enum class EnvField : uint8_t
+    enum class EnvelopeField : uint8_t
     {
         A,
         D,
@@ -97,7 +97,7 @@ namespace protocol
         // Filter page
         static_cast<uint8_t>(FilterField::_Count),
         // Envelope page
-        static_cast<uint8_t>(EnvField::_Count),
+        static_cast<uint8_t>(EnvelopeField::_Count),
         // Tuning page
         static_cast<uint8_t>(TuningField::_Count),
         // Filter LFO page

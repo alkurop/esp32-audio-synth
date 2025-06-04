@@ -1,5 +1,6 @@
 #pragma once
 #include "sound_module.hpp"
+#include "protocol.hpp"
 #include <cstdint>
 using namespace sound_module;
 

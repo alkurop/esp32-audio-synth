@@ -2,4 +2,7 @@
 
 using namespace settings;
 
-void setDetuneLfoPage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value) {};
+void settings::setDetuneLfoPage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value)
+{
+    auto fieldType = static_cast<protocol::LFOField>(field);
+};
