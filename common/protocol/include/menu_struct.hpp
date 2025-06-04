@@ -7,6 +7,8 @@
 namespace protocol
 {
 
+    constexpr const uint8_t NUM_VOICES = 8;
+
     enum class AppMode : uint8_t
     {
         MenuList, // page/voice selector
@@ -196,7 +198,5 @@ namespace protocol
     static constexpr size_t PAGE_COUNT = static_cast<size_t>(Page::_Count);
     static constexpr size_t GLOBAL_PAGE_COUNT = 1;
     static constexpr size_t VOICE_PAGE_COUNT = PAGE_COUNT - GLOBAL_PAGE_COUNT;
-
-    
 
 } // namespace menu

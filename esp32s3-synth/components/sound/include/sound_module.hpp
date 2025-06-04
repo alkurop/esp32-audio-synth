@@ -10,6 +10,7 @@
 #include <driver/i2s_std.h>
 #include "voice.hpp"
 #include "midi_parser.hpp"
+#include "menu_struct.hpp"
 
 
 namespace sound_module
@@ -30,7 +31,7 @@ namespace sound_module
         size_t tableSize = 256;     // Wavetable resolution
         uint16_t amplitude = 16000;  // Peak amplitude for 16-bit audio
         size_t bufferSize = 64;     // Samples per I2S buffer
-        size_t numVoices = 8;       // Polyphony
+        size_t numVoices = protocol::NUM_VOICES;       // Polyphony
         I2SParams i2s;              // I2S pin configuration
     };
 

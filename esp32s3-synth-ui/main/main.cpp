@@ -30,7 +30,7 @@ Button button2;
 Button button3;
 Sender sender(senderConfig);
 
-Menu menuHolder(VOICE_COUNT);
+Menu menuHolder(protocol::NUM_VOICES);
 
 auto rotaryCallback = [](uint8_t id, uint8_t newValue)
 {
