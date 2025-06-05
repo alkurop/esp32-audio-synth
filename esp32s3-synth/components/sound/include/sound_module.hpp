@@ -12,7 +12,6 @@
 #include "midi_parser.hpp"
 #include "menu_struct.hpp"
 
-
 namespace sound_module
 {
 
@@ -27,12 +26,21 @@ namespace sound_module
     // Main sound engine configuration
     struct SoundConfig
     {
-        uint32_t sampleRate = 44100; // Audio sample rate in Hz
-        size_t tableSize = 256;     // Wavetable resolution
-        uint16_t amplitude = 16000;  // Peak amplitude for 16-bit audio
-        size_t bufferSize = 64;     // Samples per I2S buffer
-        size_t numVoices = protocol::NUM_VOICES;       // Polyphony
-        I2SParams i2s;              // I2S pin configuration
+        uint32_t sampleRate; // Audio sample rate in Hz
+        size_t tableSize;    // Wavetable resolution
+        uint16_t amplitude;  // Peak amplitude for 16-bit audio
+        size_t bufferSize;   // Samples per I2S buffer
+        size_t numVoices;    // Polyphony
+        I2SParams i2s;       // I2S pin configuration
+    };
+
+    struct GlobalState
+    {
+        midi_module::TransportCommand transportState;
+        uint8_t masterVolume = 0;
+        uint8_t midiBpm = 0;
+        uint16_t settingsBpm = 0;
+        bool usesSettingsBmp = false;
     };
 
     class SoundModule
@@ -46,14 +54,16 @@ namespace sound_module
         void handle_note(const midi_module::NoteMessage &msg);
 
         // Access voices for advanced control
-        std::vector<Voice> &voices() { return _voices; }
-        const std::vector<Voice> &voices() const { return _voices; }
+        std::vector<Voice> &getVoices() { return voices; }
+        GlobalState &getState() { return state; }
+        void updateBpmSetting();
 
     private:
-        SoundConfig _config;
-        i2s_chan_handle_t _txChan;
-        std::vector<Voice> _voices;
-        TaskHandle_t _audioTask = nullptr;
+        SoundConfig config;
+        i2s_chan_handle_t txChan;
+        std::vector<Voice> voices;
+        TaskHandle_t audioTask = nullptr;
+        GlobalState state;
 
         // Internal audio task entry point
         static void audio_task_entry(void *arg);

@@ -1,18 +1,20 @@
-#include "setting_switch.hpp"
+#include "setting_router.hpp"
 #include "set_page.hpp"
 
 using namespace settings;
 
-SettingSwitch::SettingSwitch(SoundModule &soundModule) : soundModule(soundModule) {};
+SettingRouter::SettingRouter(SoundModule &soundModule) : soundModule(soundModule) {};
 
-void SettingSwitch::setMasterVolume(uint8_t volume) {};
+uint8_t SettingRouter::getMidiBpm() { return soundModule.getState().midiBpm; }
 
-void SettingSwitch::setBpmFromMidi(uint8_t bpm)
+void SettingRouter::setMasterVolume(uint8_t volume)
 {
-    this->midiBpm = bpm;
+    soundModule.getState().masterVolume = volume;
 };
 
-void SettingSwitch::setUpdateFromUi(const FieldUpdateList &update)
+void SettingRouter::setBpmFromMidi(uint8_t bpm) { this->soundModule.getState().midiBpm = bpm; };
+
+void SettingRouter::setUpdateFromUi(const FieldUpdateList &update)
 {
     for (auto &u : update)
     {
@@ -20,12 +22,12 @@ void SettingSwitch::setUpdateFromUi(const FieldUpdateList &update)
     }
 };
 
-void SettingSwitch::setTransportState(const TransportCommand &update)
+void SettingRouter::setTransportState(const TransportCommand &update)
 {
-    this->transportState = update;
+    this->soundModule.getState().transportState = update;
 };
 
-void SettingSwitch::setUpdate(const FieldUpdate &update)
+void SettingRouter::setUpdate(const FieldUpdate &update)
 {
     // Cast the raw byte to our Page enum
     Page page = static_cast<Page>(update.pageByte);
@@ -90,7 +92,7 @@ void SettingSwitch::setUpdate(const FieldUpdate &update)
         break;
 
     case Page::Global:
-        setGlobalPage(update.field, update.value);
+        settings::setGlobalPage(soundModule, update.field, update.value);
         break;
 
     default:
@@ -99,5 +101,3 @@ void SettingSwitch::setUpdate(const FieldUpdate &update)
         break;
     }
 };
-
-void SettingSwitch::setGlobalPage(uint8_t field, int16_t value) {};

@@ -11,15 +11,15 @@ using namespace sound_module;
 using namespace midi_module;
 
 SoundModule::SoundModule(const SoundConfig &config)
-    : _config(config)
+    : config(config)
 {
     // Initialize voices vector with configured polyphony
-    _voices.reserve(_config.numVoices);
-    for (size_t i = 0; i < _config.numVoices; ++i)
+    voices.reserve(config.numVoices);
+    for (size_t i = 0; i < config.numVoices; ++i)
     {
-        Voice v(_config.sampleRate, 16);
+        Voice v(config.sampleRate, 16);
         v.set_midi_channel(static_cast<uint8_t>(i));
-        _voices.push_back(v);
+        voices.push_back(v);
     }
 }
 
@@ -27,30 +27,30 @@ void SoundModule::init()
 {
     // Step 1: Create I2S TX channel
     i2s_chan_config_t tx_chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
-    ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &_txChan, nullptr));
+    ESP_ERROR_CHECK(i2s_new_channel(&tx_chan_cfg, &txChan, nullptr));
 
     // Step 2: Configure TX for standard I2S mode
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
     i2s_std_config_t tx_std_cfg = {
-        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(_config.sampleRate),
+        .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(config.sampleRate),
         .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
         .gpio_cfg = {
             .mclk = I2S_GPIO_UNUSED,
-            .bclk = _config.i2s.bclk_io,
-            .ws = _config.i2s.lrclk_io,
-            .dout = _config.i2s.data_io,
+            .bclk = config.i2s.bclk_io,
+            .ws = config.i2s.lrclk_io,
+            .dout = config.i2s.data_io,
             .din = I2S_GPIO_UNUSED,
             .invert_flags = {false, false, false},
         },
     };
 #pragma GCC diagnostic pop
 
-    ESP_ERROR_CHECK(i2s_channel_init_std_mode(_txChan, &tx_std_cfg));
-    ESP_ERROR_CHECK(i2s_channel_enable(_txChan));
+    ESP_ERROR_CHECK(i2s_channel_init_std_mode(txChan, &tx_std_cfg));
+    ESP_ERROR_CHECK(i2s_channel_enable(txChan));
 
     // Step 3: Launch audio task pinned to core 1
-    if (_audioTask == nullptr)
+    if (audioTask == nullptr)
     {
         xTaskCreatePinnedToCore(
             audio_task_entry,
@@ -58,7 +58,7 @@ void SoundModule::init()
             4096,
             this,
             5,
-            &_audioTask,
+            &audioTask,
             1 // core 1
         );
     }
@@ -66,7 +66,7 @@ void SoundModule::init()
 
 void SoundModule::handle_note(const NoteMessage &msg)
 {
-    for (auto &voice : _voices)
+    for (auto &voice : voices)
     {
         if (msg.on)
             voice.note_on(msg.channel, msg.note, msg.velocity);
@@ -77,25 +77,30 @@ void SoundModule::handle_note(const NoteMessage &msg)
 
 void SoundModule::process()
 {
-    size_t num_samples = _config.bufferSize;
+    size_t num_samples = config.bufferSize;
     std::vector<int16_t> buffer(num_samples * 2);
+
+    float invNumVoices = 1.0f / static_cast<float>(config.numVoices);
+    float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
 
     for (size_t i = 0; i < num_samples; ++i)
     {
         float mix = 0.0f;
-        for (auto &voice : _voices)
+        for (auto &voice : voices)
         {
             mix += voice.get_sample();
         }
-        mix /= static_cast<float>(_config.numVoices);
+
+        mix *= invNumVoices;
         float clamped = clamp(mix, -1.0f, 1.0f);
-        int16_t sample = static_cast<int16_t>(clamped * _config.amplitude);
-        buffer[2 * i] = sample;
-        buffer[2 * i + 1] = sample;
+        int16_t sample = static_cast<int16_t>(clamped * config.amplitude * volumeScale);
+
+        buffer[2 * i] = sample;     // Left
+        buffer[2 * i + 1] = sample; // Right
     }
 
     size_t bytes_written;
-    i2s_channel_write(_txChan, buffer.data(), buffer.size() * sizeof(int16_t), &bytes_written, portMAX_DELAY);
+    i2s_channel_write(txChan, buffer.data(), buffer.size() * sizeof(int16_t), &bytes_written, portMAX_DELAY);
 }
 
 void SoundModule::audio_task_entry(void *arg)
@@ -104,5 +109,14 @@ void SoundModule::audio_task_entry(void *arg)
     while (true)
     {
         self->process();
+    }
+}
+
+void SoundModule::updateBpmSetting()
+{
+    for (auto &voice : voices)
+    {
+        uint16_t bpm = state.usesSettingsBmp? state.settingsBpm : state.midiBpm;
+        // voice.updateBpm();
     }
 }

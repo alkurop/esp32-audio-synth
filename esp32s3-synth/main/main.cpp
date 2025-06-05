@@ -8,7 +8,7 @@
 #include "protocol.hpp"
 #include "receiver.hpp"
 #include "knob.hpp"
-#include "setting_switch.hpp"
+#include "setting_router.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
@@ -20,7 +20,7 @@ SoundModule soundModule(config);
 MidiParser midiParser;
 MidiModule midiModule;
 Receiver i2cReceiver(receiverConfig);
-settings::SettingSwitch settingSwitch(soundModule);
+settings::SettingRouter settingSwitch(soundModule);
 
 Knob masterKnob(masterKnobConfig);
 
