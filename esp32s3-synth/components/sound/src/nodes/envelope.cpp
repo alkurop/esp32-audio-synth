@@ -1,14 +1,17 @@
 // envelope.cpp
 #include "nodes/envelope.hpp"
 #include "utils.hpp"
+#include "protocol.hpp"
 
 using namespace sound_module;
+using namespace protocol;
 
-Envelope::Envelope(float sampleRate)
+inline auto clamp_to_envelope_max(int x) noexcept { return (x > envelope::MAX ? envelope::MAX : x); }
+
+Envelope::Envelope(float sampleRate, uint16_t initialBpm)
     : state(State::Idle),
       cursor(0),
-      params{0, 0, 7, 0},
-      bpm(120.0f),
+      params{0, 0, 0, 0},
       sampleRate(sampleRate),
       attackSamples(0),
       decaySamples(0),
@@ -17,27 +20,28 @@ Envelope::Envelope(float sampleRate)
       decayReciprocals(0.0f),
       releaseReciprocals(0.0f)
 {
-    setTempo(bpm);
+    setBpm(initialBpm);
 }
 
-void Envelope::setAttack(uint8_t beats)
+void Envelope::setAttack(uint8_t value)
 {
-    params.attack = (beats > kMaxSteps ? kMaxSteps : beats);
+    params.attack = clamp_to_envelope_max(value);
+    recalculate();
 }
-
-void Envelope::setDecay(uint8_t beats)
+void Envelope::setDecay(uint8_t value)
 {
-    params.decay = (beats > kMaxSteps ? kMaxSteps : beats);
+    params.decay = clamp_to_envelope_max(value);
+    recalculate();
 }
-
-void Envelope::setSustain(uint8_t level)
+void Envelope::setSustain(uint8_t value)
 {
-    params.sustain = (level > kMaxSteps ? kMaxSteps : level);
+    params.sustain = clamp_to_envelope_max(value);
+    recalculate();
 }
-
-void Envelope::setRelease(uint8_t beats)
+void Envelope::setRelease(uint8_t value)
 {
-    params.release = (beats > kMaxSteps ? kMaxSteps : beats);
+    params.release = clamp_to_envelope_max(value);
+    recalculate();
 }
 
 uint8_t Envelope::getAttack() const { return params.attack; }
@@ -45,35 +49,52 @@ uint8_t Envelope::getDecay() const { return params.decay; }
 uint8_t Envelope::getSustain() const { return params.sustain; }
 uint8_t Envelope::getRelease() const { return params.release; }
 
-void Envelope::setTempo(float bpm)
+void Envelope::setBpm(uint16_t bpm)
 {
-    bpm = bpm;
+    this->bpm = bpm;
+    recalculate();
+}
+void Envelope::recalculate()
+{
+    // (1) Compute seconds‐per‐beat:
     float spb = 60.0f / bpm;
+    //      ↑–––––––––––––––––––↑
+    //      If bpm = 120, spb = 0.5 seconds per beat.
 
-    // Exponential mapping parameters (in beats)
-    constexpr float minBeats = 0.125f; // 1/8 beat
-    constexpr float maxBeats = 8.0f;   // 8 beats
-    float ratio = maxBeats / minBeats;
+    // (2) Decide what “value” (in beats) each ADSR stage should last.
+    //
+    //     You map the parameter integer (0 … envelope::MAX) to a
+    //     number of beats between minvalue (0.125 beats) and maxvalue (8.0 beats).
+    constexpr float minvalue = 0.125f; // 1/8 of a beat
+    constexpr float maxvalue = 8.0f;   // 8 beats
+    float ratio = maxvalue / minvalue; // = 64.0
 
-    // Map steps (0–kMaxSteps) exponentially to beat durations
-    float attackBeats = minBeats * powf(ratio, float(params.attack) / float(kMaxSteps));
-    float decayBeats = minBeats * powf(ratio, float(params.decay) / float(kMaxSteps));
-    float releaseBeats = minBeats * powf(ratio, float(params.release) / float(kMaxSteps));
+    //    For each ADSR parameter (attack, decay, release), you compute:
+    float attackvalue = minvalue * powf(ratio, float(params.attack) / float(envelope::MAX));
+    float decayvalue = minvalue * powf(ratio, float(params.decay) / float(envelope::MAX));
+    float releasevalue = minvalue * powf(ratio, float(params.release) / float(envelope::MAX));
 
-    // Convert beats to sample counts
-    attackSamples = static_cast<uint32_t>(attackBeats * spb * sampleRate);
-    decaySamples = static_cast<uint32_t>(decayBeats * spb * sampleRate);
-    releaseSamples = static_cast<uint32_t>(releaseBeats * spb * sampleRate);
+    //    Example: if params.attack = 0,
+    //      attackvalue = 0.125 beats
+    //    if params.attack = envelope::MAX,
+    //      attackvalue = 8.0 beats
+    //
+    //    Anything in between is on an exponential curve from 1/8 beat → 8 beats.
 
-    // Precompute reciprocals for performance
-    attackReciprocals = (attackSamples > 0) ? (1.0f / float(attackSamples)) : 0.0f;
-    float sustainNorm = static_cast<float>(params.sustain) / float(kMaxSteps);
-    decayReciprocals = (decaySamples > 0)
-                    ? ((1.0f - sustainNorm) / float(decaySamples))
-                    : 0.0f;
-    releaseReciprocals = (releaseSamples > 0)
-                    ? (sustainNorm / float(releaseSamples))
-                    : 0.0f;
+    // (3) Convert “beats” to actual sample counts:
+    attackSamples = uint32_t(attackvalue * spb * sampleRate);
+    decaySamples = uint32_t(decayvalue * spb * sampleRate);
+    releaseSamples = uint32_t(releasevalue * spb * sampleRate);
+
+    //    For example, if sampleRate = 48 kHz, bpm = 120 → spb = 0.5 s/beat:
+    //      attackvalue = 1 beat  → attackSamples = 1 × 0.5 s × 48000 = 24,000 samples.
+    //      releasevalue = 4 beats → releaseSamples = 4 × 0.5 s × 48000 = 96,000 samples.
+    //
+    // (4) Precompute reciprocals for performance in next():
+    attackReciprocals = (attackSamples > 0 ? 1.0f / float(attackSamples) : 0.0f);
+    float sustainNorm = float(params.sustain) / float(envelope::MAX);
+    decayReciprocals = (decaySamples > 0 ? ((1.0f - sustainNorm) / float(decaySamples)) : 0.0f);
+    releaseReciprocals = (releaseSamples > 0 ? (sustainNorm / float(releaseSamples)) : 0.0f);
 }
 
 void Envelope::noteOn()
@@ -109,10 +130,10 @@ float Envelope::next()
         }
         break;
     case State::Sustain:
-        out = static_cast<float>(params.sustain) / float(kMaxSteps);
+        out = static_cast<float>(params.sustain) / float(envelope::MAX);
         break;
     case State::Release:
-        out = (static_cast<float>(params.sustain) / float(kMaxSteps)) - static_cast<float>(cursor) * releaseReciprocals;
+        out = (static_cast<float>(params.sustain) / float(envelope::MAX)) - static_cast<float>(cursor) * releaseReciprocals;
         if (++cursor >= releaseSamples)
         {
             state = State::Idle;

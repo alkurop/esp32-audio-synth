@@ -17,7 +17,7 @@ SoundModule::SoundModule(const SoundConfig &config)
     voices.reserve(config.numVoices);
     for (size_t i = 0; i < config.numVoices; ++i)
     {
-        Voice v(config.sampleRate, voice::MAX_POLYPHONY, i);
+        Voice v(config.sampleRate, voice::MAX_POLYPHONY, i, state.settingsBpm);
         voices.push_back(v);
     }
 }

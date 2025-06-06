@@ -8,7 +8,11 @@ using namespace sound_module;
 
 // Find a free Sound slot or steal the oldest
 Sound &Voice::find_available_slot()
-{
+{ for (auto &s : sounds)
+    {
+        if (!s.active)
+            return s;
+    }
     for (auto &s : sounds)
     {
         if (!s.active)

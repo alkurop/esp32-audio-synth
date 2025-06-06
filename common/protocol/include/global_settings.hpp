@@ -16,4 +16,9 @@ namespace protocol
         _Count
     };
 
+    namespace global_settings
+    {
+        constexpr const uint16_t INITIAL_BMP = 120;
+    };
+
 }

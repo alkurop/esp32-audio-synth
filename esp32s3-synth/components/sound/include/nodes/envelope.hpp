@@ -13,8 +13,6 @@ namespace sound_module
     class Envelope
     {
     public:
-        static constexpr uint8_t kMaxSteps = 7;
-
         struct Params
         {
             uint8_t attack;  // Attack time in beats (0–7)
@@ -24,7 +22,7 @@ namespace sound_module
         };
 
         // Construct with fixed sample rate (Hz)
-        explicit Envelope(float sampleRate);
+        explicit Envelope(float sampleRate, uint16_t initialBpm);
 
         // Setters / getters for each parameter (clamped to [0, kMaxSteps])
         void setAttack(uint8_t beats);
@@ -38,7 +36,7 @@ namespace sound_module
         uint8_t getRelease() const;
 
         // Call when BPM changes; must precede note_on()
-        void setTempo(float bpm);
+        void setBpm(uint16_t bpm);
 
         // Trigger envelope phases
         void noteOn();
@@ -61,10 +59,9 @@ namespace sound_module
         } state{State::Idle};
         uint32_t cursor{0};
 
-        Params params{0, 0, 7, 0};
-        float bpm{120.0f};
+        Params params{0, 0, 0, 0};
         const float sampleRate; // fixed sample rate
-
+        uint16_t bpm;
         // Sample counts for phases
         uint32_t attackSamples{0};
         uint32_t decaySamples{0};
@@ -74,6 +71,7 @@ namespace sound_module
         float attackReciprocals{0.0f};
         float decayReciprocals{0.0f};
         float releaseReciprocals{0.0f};
+        void recalculate();
     };
 
 } // namespace sound_module

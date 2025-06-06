@@ -24,7 +24,7 @@ namespace sound_module
          * @param sample_rate Audio sample rate in Hz.
          * @param max_polyphony Maximum simultaneous notes.
          */
-        Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel);
+        Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel, uint16_t initial_bpm);
 
         /**
          * Note on/off handlers.
