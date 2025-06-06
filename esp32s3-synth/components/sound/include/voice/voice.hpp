@@ -6,7 +6,9 @@
 #include "../utils.hpp"
 #include "sound.hpp"
 #include "../nodes/envelope.hpp"
+#include "menu_struct.hpp"
 
+using namespace protocol;
 namespace sound_module
 {
 
@@ -38,7 +40,7 @@ namespace sound_module
         float getSample();
 
         // Voice-level controls
-        void setVolume(float v) { volume = v; }
+        void setVolume(uint8_t volume);
         void setPitchShift(float sem) { pitch_shift = sem; }
         void setTranspose(int semitones) { transpose_semitones = semitones; }
         void setMidiChannel(uint8_t ch)
@@ -66,6 +68,10 @@ namespace sound_module
         // Helpers for voice allocation
         Sound &find_available_slot();
         Sound *find_active_note(uint8_t midi_note); // can be a nullptr
+
+        // Internally, we store the *linear* gain target and smooth it:
+        voice::SmoothedValue gain_smoothed;
+
         void all_notes_off();
     };
 
