@@ -18,7 +18,7 @@ SoundModule::SoundModule(const SoundConfig &config)
     for (size_t i = 0; i < config.numVoices; ++i)
     {
         Voice v(config.sampleRate, 16);
-        v.set_midi_channel(static_cast<uint8_t>(i));
+        v.setMidiChannel(static_cast<uint8_t>(i));
         voices.push_back(v);
     }
 }
@@ -69,9 +69,9 @@ void SoundModule::handle_note(const NoteMessage &msg)
     for (auto &voice : voices)
     {
         if (msg.on)
-            voice.note_on(msg.channel, msg.note, msg.velocity);
+            voice.noteOn(msg.channel, msg.note, msg.velocity);
         else
-            voice.note_off(msg.channel, msg.note);
+            voice.noteOff(msg.channel, msg.note);
     }
 }
 
@@ -88,7 +88,7 @@ void SoundModule::process()
         float mix = 0.0f;
         for (auto &voice : voices)
         {
-            mix += voice.get_sample();
+            mix += voice.getSample();
         }
 
         mix *= invNumVoices;
@@ -116,7 +116,7 @@ void SoundModule::updateBpmSetting()
 {
     for (auto &voice : voices)
     {
-        uint16_t bpm = state.usesSettingsBmp? state.settingsBpm : state.midiBpm;
-        // voice.updateBpm();
+        uint16_t bpm = state.usesSettingsBmp ? state.settingsBpm : state.midiBpm;
+        voice.setBpm(bpm);
     }
 }

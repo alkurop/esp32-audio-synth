@@ -41,8 +41,8 @@ namespace sound_module
         void setTempo(float bpm);
 
         // Trigger envelope phases
-        void note_on();
-        void note_off();
+        void noteOn();
+        void noteOff();
 
         // Advance one sample; returns amplitude [0.0f–1.0f]
         float next();
@@ -58,22 +58,22 @@ namespace sound_module
             Decay,
             Sustain,
             Release
-        } _state{State::Idle};
-        uint32_t _cursor{0};
+        } state{State::Idle};
+        uint32_t cursor{0};
 
-        Params _p{0, 0, 7, 0};
-        float _bpm{120.0f};
-        const float _sr; // fixed sample rate
+        Params params{0, 0, 7, 0};
+        float bpm{120.0f};
+        const float sampleRate; // fixed sample rate
 
         // Sample counts for phases
-        uint32_t _attSamples{0};
-        uint32_t _decSamples{0};
-        uint32_t _relSamples{0};
+        uint32_t attackSamples{0};
+        uint32_t decaySamples{0};
+        uint32_t releaseSamples{0};
 
         // Reciprocals for fast multiplications
-        float _attRecip{0.0f};
-        float _decRecip{0.0f};
-        float _relRecip{0.0f};
+        float attackReciprocals{0.0f};
+        float decayReciprocals{0.0f};
+        float releaseReciprocals{0.0f};
     };
 
 } // namespace sound_module

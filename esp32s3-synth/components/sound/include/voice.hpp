@@ -28,28 +28,29 @@ namespace sound_module
          * Note on/off handlers.
          * velocity: normalized 0.0–1.0
          */
-        void note_on(uint8_t channel, uint8_t midi_note, float velocity);
-        void note_off(uint8_t channel, uint8_t midi_note);
+        void noteOn(uint8_t channel, uint8_t midi_note, float velocity);
+        void noteOff(uint8_t channel, uint8_t midi_note);
 
         /**
          * Generate the next mixed sample for this voice.
          * @return Sample amplitude in [-1.0, 1.0]
          */
-        float get_sample();
+        float getSample();
 
         // Voice-level controls
-        void set_volume(float v) { volume = v; }
-        void set_pitch_shift(float sem) { pitch_shift = sem; }
-        void set_transpose(int semitones) { transpose_semitones = semitones; }
-        void set_midi_channel(uint8_t ch)
+        void setVolume(float v) { volume = v; }
+        void setPitchShift(float sem) { pitch_shift = sem; }
+        void setTranspose(int semitones) { transpose_semitones = semitones; }
+        void setMidiChannel(uint8_t ch)
         {
             midi_channel = ch;
             all_notes_off();
         }
 
+        void setBpm(uint16_t bpm);
+
         // Access the shared ADSR envelope for parameter changes
         Envelope &envelope() { return amp_env; }
-        const Envelope &envelope() const { return amp_env; }
 
     private:
         uint32_t sample_rate;    // in Hz
@@ -63,8 +64,8 @@ namespace sound_module
         Envelope amp_env;          // shared ADSR envelope
 
         // Helpers for voice allocation
-        Sound *find_available_slot();
-        Sound *find_active_note(uint8_t midi_note);
+        Sound &find_available_slot();
+        Sound *find_active_note(uint8_t midi_note); // can be a nullptr
         void all_notes_off();
     };
 
