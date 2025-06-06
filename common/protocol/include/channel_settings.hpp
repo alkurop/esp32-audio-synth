@@ -22,6 +22,7 @@ namespace protocol
         constexpr uint8_t VOL_MAX = 31;
         constexpr float MIN_DB = -60.0f;
         constexpr float MAX_DB = 0.0f;
+        constexpr uint8_t MAX_POLYPHONY = 16;
 
         struct SmoothedValue
         {
@@ -41,6 +42,24 @@ namespace protocol
                 current += alpha * (target - current);
                 return current;
             }
+        };
+
+        struct VolumeSettings
+        {
+            uint8_t volume;
+            SmoothedValue gain_smoothed;
+        };
+
+        struct AudioConfig
+        {
+            uint32_t sample_rate; // in Hz
+            size_t max_polyphony; // number of simultaneous sounds;
+        };
+
+        struct PitchSettings
+        {
+            float pitch_shift;
+            uint16_t transpose_semitones;
         };
 
     }

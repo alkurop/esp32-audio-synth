@@ -24,7 +24,7 @@ namespace sound_module
          * @param sample_rate Audio sample rate in Hz.
          * @param max_polyphony Maximum simultaneous notes.
          */
-        Voice(uint32_t sample_rate, size_t max_polyphony);
+        Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel);
 
         /**
          * Note on/off handlers.
@@ -41,35 +41,21 @@ namespace sound_module
 
         // Voice-level controls
         void setVolume(uint8_t volume);
-        void setPitchShift(float sem) { pitch_shift = sem; }
-        void setTranspose(int semitones) { transpose_semitones = semitones; }
         void setMidiChannel(uint8_t ch);
 
         void setBpm(uint16_t bpm);
 
-        // Access the shared ADSR envelope for parameter changes
-        Envelope &envelope() { return amp_env; }
-
+        const voice::AudioConfig config;
+        voice::VolumeSettings volumeSettings;
+        voice::PitchSettings pitchSettings;
+        Envelope envelope; // shared ADSR envelope
     private:
+        size_t midi_channel = 0;
         uint16_t bpm;
-        uint32_t sample_rate;    // in Hz
-        size_t midi_channel = 0; // 0–15
-        size_t max_polyphony;    // number of simultaneous sounds
-        uint8_t volume;
-        ;
-        float pitch_shift;
-        uint16_t transpose_semitones = 0;
 
         std::vector<Sound> sounds; // dynamic polyphony set by constructor
-        Envelope amp_env;          // shared ADSR envelope
-        voice::SmoothedValue gain_smoothed;
-
-        // Helpers for voice allocation
         Sound &find_available_slot();
         Sound *find_active_note(uint8_t midi_note); // can be a nullptr
-
-        // Internally, we store the *linear* gain target and smooth it:
-
         void all_notes_off();
     };
 

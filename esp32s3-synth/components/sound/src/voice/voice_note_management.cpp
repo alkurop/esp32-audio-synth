@@ -37,15 +37,15 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, float velocity)
         return;
 
     Sound slot = find_available_slot();
-    int transposed = clamp_midi_note(int(midi_note) + transpose_semitones);
+    int transposed = clamp_midi_note(int(midi_note) + pitchSettings.transpose_semitones);
     float base_freq = midi_note_freq[transposed];
-    float freq = base_freq * std::pow(2.0f, pitch_shift / 12.0f);
+    float freq = base_freq * std::pow(2.0f, pitchSettings.pitch_shift / 12.0f);
 
     // Configure envelope for this note
-    amp_env.noteOn();
+    envelope.noteOn();
 
     // Start the sound
-    slot.note_on(static_cast<uint8_t>(transposed), freq, velocity, sample_rate);
+    slot.note_on(static_cast<uint8_t>(transposed), freq, velocity, config.sample_rate);
 }
 
 // Note off: release matching sound and envelope
@@ -58,7 +58,7 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
     if (match)
     {
         match->note_off();
-        amp_env.noteOff();
+        envelope.noteOff();
     }
 }
 
@@ -68,6 +68,6 @@ void Voice::all_notes_off()
     for (auto &s : sounds)
     {
         s.note_off();
-        amp_env.noteOff();
+        envelope.noteOff();
     }
 }

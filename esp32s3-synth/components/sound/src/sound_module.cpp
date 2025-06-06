@@ -17,8 +17,7 @@ SoundModule::SoundModule(const SoundConfig &config)
     voices.reserve(config.numVoices);
     for (size_t i = 0; i < config.numVoices; ++i)
     {
-        Voice v(config.sampleRate, 16);
-        v.setMidiChannel(static_cast<uint8_t>(i));
+        Voice v(config.sampleRate, voice::MAX_POLYPHONY, i);
         voices.push_back(v);
     }
 }

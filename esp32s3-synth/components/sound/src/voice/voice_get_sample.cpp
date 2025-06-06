@@ -12,7 +12,7 @@ using namespace protocol;
 float Voice::getSample()
 {
     // 1) Get the smoothed linear gain each sample:
-    float sm_gain = gain_smoothed.next();
+    float sm_gain = volumeSettings.gain_smoothed.next();
 
     // If effectively silent, skip all per-voice work:
     if (sm_gain <= 1e-6f)
@@ -25,14 +25,14 @@ float Voice::getSample()
     {
         if (!s.active)
             continue;
-        mix += s.get_sample(sample_rate);
+        mix += s.get_sample(config.sample_rate);
         ++active_count;
     }
     if (active_count > 0)
         mix /= static_cast<float>(active_count);
 
     // 3) Apply the ADSR envelope:
-    float env_amp = amp_env.next();
+    float env_amp = envelope.next();
 
     // 4) Multiply by smoothed gain:
     return mix * env_amp * sm_gain;
@@ -45,15 +45,15 @@ void Voice::setVolume(uint8_t newVolume)
         newVolume = 0;
     else if (newVolume > voice::VOL_MAX)
         newVolume = voice::VOL_MAX;
-    volume = newVolume;
+    volumeSettings.volume = newVolume;
 
     // 1) Normalize to [0..1]:
-    float normalized = static_cast<float>(volume) / static_cast<float>(voice::VOL_MAX);
+    float normalized = static_cast<float>(volumeSettings.volume) / static_cast<float>(voice::VOL_MAX);
 
     // 2) Map normalized → dB:
     float volume_dB = voice::VOL_MAX + normalized * (voice::VOL_MAX - voice::MIN_DB);
 
     // 3) Convert dB → linear and feed into the smoother:
     float linearGain = std::pow(10.0f, volume_dB * 0.05f);
-    gain_smoothed.setTarget(linearGain);
+    volumeSettings.gain_smoothed.setTarget(linearGain);
 }
