@@ -8,7 +8,7 @@
 #include <freertos/task.h>
 #include <driver/gpio.h>
 #include <driver/i2s_std.h>
-#include "voice.hpp"
+#include "voice/voice.hpp"
 #include "midi_parser.hpp"
 #include "menu_struct.hpp"
 

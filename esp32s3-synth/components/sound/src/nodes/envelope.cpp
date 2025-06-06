@@ -1,5 +1,5 @@
 // envelope.cpp
-#include "envelope.hpp"
+#include "nodes/envelope.hpp"
 #include "utils.hpp"
 
 using namespace sound_module;

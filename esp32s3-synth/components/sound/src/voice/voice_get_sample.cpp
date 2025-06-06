@@ -1,6 +1,6 @@
 // Generate mixed sample and apply envelope
 // voice.cpp
-#include "voice.hpp"
+#include "voice/voice.hpp"
 #include <cmath>
 #include "tag.hpp"
 #include <esp_log.h>

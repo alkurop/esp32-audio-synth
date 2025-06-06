@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <vector>
 #include "note_freq_table.hpp"
-#include "utils.hpp"
+#include "../utils.hpp"
 #include "sound.hpp"
-#include "envelope.hpp"
+#include "../nodes/envelope.hpp"
 
 namespace sound_module
 {
