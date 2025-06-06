@@ -15,7 +15,8 @@ Voice::Voice(uint32_t sample_rate, size_t max_polyphony)
       pitch_shift(0.0f),
       transpose_semitones(0),
       sounds(),
-      amp_env(sample_rate)
+      amp_env(sample_rate),
+      gain_smoothed()
 {
     sounds.reserve(max_polyphony);
     for (size_t i = 0; i < max_polyphony; ++i)
@@ -24,8 +25,13 @@ Voice::Voice(uint32_t sample_rate, size_t max_polyphony)
     }
 }
 
-
 void Voice::setBpm(uint16_t bpm)
 {
-    // TODO where do we use bpm?
+    bpm = bpm;
 }
+
+void Voice::setMidiChannel(uint8_t midiChannel)
+{
+    midi_channel = midiChannel;
+    all_notes_off();
+};

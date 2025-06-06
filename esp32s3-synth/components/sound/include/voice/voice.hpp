@@ -43,11 +43,7 @@ namespace sound_module
         void setVolume(uint8_t volume);
         void setPitchShift(float sem) { pitch_shift = sem; }
         void setTranspose(int semitones) { transpose_semitones = semitones; }
-        void setMidiChannel(uint8_t ch)
-        {
-            midi_channel = ch;
-            all_notes_off();
-        }
+        void setMidiChannel(uint8_t ch);
 
         void setBpm(uint16_t bpm);
 
@@ -55,22 +51,24 @@ namespace sound_module
         Envelope &envelope() { return amp_env; }
 
     private:
+        uint16_t bpm;
         uint32_t sample_rate;    // in Hz
         size_t midi_channel = 0; // 0–15
         size_t max_polyphony;    // number of simultaneous sounds
-        float volume = 1.0f;
-        float pitch_shift = 0.0f;
+        uint8_t volume;
+        ;
+        float pitch_shift;
         uint16_t transpose_semitones = 0;
 
         std::vector<Sound> sounds; // dynamic polyphony set by constructor
         Envelope amp_env;          // shared ADSR envelope
+        voice::SmoothedValue gain_smoothed;
 
         // Helpers for voice allocation
         Sound &find_available_slot();
         Sound *find_active_note(uint8_t midi_note); // can be a nullptr
 
         // Internally, we store the *linear* gain target and smooth it:
-        voice::SmoothedValue gain_smoothed;
 
         void all_notes_off();
     };
