@@ -44,11 +44,6 @@ void Envelope::setRelease(uint8_t value)
     recalculate();
 }
 
-uint8_t Envelope::getAttack() const { return params.attack; }
-uint8_t Envelope::getDecay() const { return params.decay; }
-uint8_t Envelope::getSustain() const { return params.sustain; }
-uint8_t Envelope::getRelease() const { return params.release; }
-
 void Envelope::setBpm(uint16_t bpm)
 {
     this->bpm = bpm;
@@ -97,13 +92,13 @@ void Envelope::recalculate()
     releaseReciprocals = (releaseSamples > 0 ? (sustainNorm / float(releaseSamples)) : 0.0f);
 }
 
-void Envelope::noteOn()
+void Envelope::gateOn()
 {
     state = State::Attack;
     cursor = 0;
 }
 
-void Envelope::noteOff()
+void Envelope::gateOff()
 {
     state = State::Release;
     cursor = 0;

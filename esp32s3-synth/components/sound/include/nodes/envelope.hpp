@@ -30,19 +30,16 @@ namespace sound_module
         void setSustain(uint8_t level);
         void setRelease(uint8_t beats);
 
-        uint8_t getAttack() const;
-        uint8_t getDecay() const;
-        uint8_t getSustain() const;
-        uint8_t getRelease() const;
+ 
 
         // Call when BPM changes; must precede note_on()
         void setBpm(uint16_t bpm);
 
         // Trigger envelope phases
-        void noteOn();
-        void noteOff();
+        void gateOn();
+        void gateOff();
 
-        // Advance one sample; returns amplitude [0.0f–1.0f]
+       
         float next();
 
         // True when envelope has completed the release phase

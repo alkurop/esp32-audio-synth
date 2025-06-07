@@ -57,6 +57,7 @@ namespace sound_module
         std::vector<Voice> &getVoices() { return voices; }
         GlobalState &getState() { return state; }
         void updateBpmSetting();
+        Voice &getVoice(uint8_t index) { return getVoices()[index]; }
 
     private:
         SoundConfig config;

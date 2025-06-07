@@ -37,56 +37,49 @@ void SettingRouter::setUpdate(const FieldUpdate &update)
     {
     case Page::Channel:
         settings::setChannelPage(
-            soundModule,
-            update.voiceIndex,
+            soundModule.getVoice(update.voiceIndex),
             update.field,
             update.value);
         break;
 
     case Page::Oscillator:
         settings::setOscillatorPage(
-            soundModule,
-            update.voiceIndex,
+            soundModule.getVoice(update.voiceIndex),
             update.field,
             update.value);
         break;
 
     case Page::Filter:
         settings::setFilterPage(
-            soundModule,
-            update.voiceIndex,
+            soundModule.getVoice(update.voiceIndex),
             update.field,
             update.value);
         break;
 
     case Page::Envelope:
         settings::setEnvelopePage(
-            soundModule,
-            update.voiceIndex,
+            soundModule.getVoice(update.voiceIndex),
             update.field,
             update.value);
         break;
 
     case Page::Tuning:
         settings::setTuningPage(
-            soundModule,
-            update.voiceIndex,
+            soundModule.getVoice(update.voiceIndex),
             update.field,
             update.value);
         break;
 
     case Page::FilterLFO:
         settings::setFilterLfoPage(
-            soundModule,
-            update.voiceIndex,
+            soundModule.getVoice(update.voiceIndex),
             update.field,
             update.value);
         break;
 
     case Page::DetuneLFO:
         settings::setDetuneLfoPage(
-            soundModule,
-            update.voiceIndex,
+            soundModule.getVoice(update.voiceIndex),
             update.field,
             update.value);
         break;

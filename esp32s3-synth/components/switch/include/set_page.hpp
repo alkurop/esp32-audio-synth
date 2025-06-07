@@ -6,12 +6,12 @@ using namespace sound_module;
 
 namespace settings
 {
-    void setChannelPage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value);
-    void setOscillatorPage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value);
-    void setFilterPage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value);
-    void setEnvelopePage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value);
-    void setTuningPage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value);
-    void setFilterLfoPage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value);
-    void setDetuneLfoPage(SoundModule &sound_module, uint8_t voice_index, uint8_t field, int16_t value);
+    void setChannelPage(Voice &voice, uint8_t field, int16_t value);
+    void setOscillatorPage(Voice &voice, uint8_t field, int16_t value);
+    void setFilterPage(Voice &voice, uint8_t field, int16_t value);
+    void setEnvelopePage(Voice &voice, uint8_t field, int16_t value);
+    void setTuningPage(Voice &voice, uint8_t field, int16_t value);
+    void setFilterLfoPage(Voice &voice, uint8_t field, int16_t value);
+    void setDetuneLfoPage(Voice &voice, uint8_t field, int16_t value);
     void setGlobalPage(SoundModule &sound_module, uint8_t field, int16_t value);
 }

@@ -46,7 +46,7 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, float velocity)
     float freq = base_freq * std::pow(2.0f, pitchSettings.pitch_shift / 12.0f);
 
     // Configure envelope for this note
-    envelope.noteOn();
+    envelope.gateOn();
 
     // Start the sound
     slot.note_on(static_cast<uint8_t>(transposed), freq, velocity, config.sample_rate);
@@ -62,7 +62,7 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
     if (match)
     {
         match->note_off();
-        envelope.noteOff();
+        envelope.gateOff();
     }
 }
 
@@ -72,6 +72,6 @@ void Voice::all_notes_off()
     for (auto &s : sounds)
     {
         s.note_off();
-        envelope.noteOff();
+        envelope.gateOff();
     }
 }
