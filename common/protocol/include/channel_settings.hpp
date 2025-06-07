@@ -58,8 +58,9 @@ namespace protocol
 
         struct PitchSettings
         {
-            float pitch_shift;
-            uint16_t transpose_semitones;
+            int16_t fine_tuning;
+            int16_t transpose_semitones;
+            int16_t transpose_octave;
         };
 
     }

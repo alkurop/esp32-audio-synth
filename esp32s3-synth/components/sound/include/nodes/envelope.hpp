@@ -25,10 +25,10 @@ namespace sound_module
         explicit Envelope(float sampleRate, uint16_t initialBpm);
 
         // Setters / getters for each parameter (clamped to [0, kMaxSteps])
-        void setSustain(uint8_t beats);
-        void setSustain(uint8_t beats);
-        void setSustain(uint8_t level);
-        void setRelease(uint8_t beats);
+        void setAttack(uint8_t value);
+        void setDecay(uint8_t value);
+        void setSustain(uint8_t value);
+        void setRelease(uint8_t value);
 
  
 

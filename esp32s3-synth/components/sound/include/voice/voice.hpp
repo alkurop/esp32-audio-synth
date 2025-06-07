@@ -7,6 +7,7 @@
 #include "sound.hpp"
 #include "../nodes/envelope.hpp"
 #include "menu_struct.hpp"
+#include "nodes/lfo.hpp"
 
 using namespace protocol;
 namespace sound_module
@@ -49,6 +50,8 @@ namespace sound_module
         voice::VolumeSettings volumeSettings;
         voice::PitchSettings pitchSettings;
         Envelope envelope; // shared ADSR envelope
+        LFO vibrato_lfo;
+        LFO tremolo_lfo;
     private:
         size_t midi_channel = 0;
         uint16_t bpm;

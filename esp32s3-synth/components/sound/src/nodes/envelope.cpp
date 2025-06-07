@@ -23,12 +23,12 @@ Envelope::Envelope(float sampleRate, uint16_t initialBpm)
     setBpm(initialBpm);
 }
 
-void Envelope::setSustain(uint8_t value)
+void Envelope::setAttack(uint8_t value)
 {
     params.attack = clamp_to_envelope_max(value);
     recalculate();
 }
-void Envelope::setSustain(uint8_t value)
+void Envelope::setDecay(uint8_t value)
 {
     params.decay = clamp_to_envelope_max(value);
     recalculate();

@@ -8,11 +8,7 @@ using namespace sound_module;
 
 // Find a free Sound slot or steal the oldest
 Sound &Voice::find_available_slot()
-{ for (auto &s : sounds)
-    {
-        if (!s.active)
-            return s;
-    }
+{
     for (auto &s : sounds)
     {
         if (!s.active)
@@ -34,21 +30,28 @@ Sound *Voice::find_active_note(uint8_t midi_note)
     return nullptr;
 }
 
-// Note on: trigger new sound and envelope
+// Note on: trigger new sound, retrigger LFOs, and envelope
 void Voice::noteOn(uint8_t ch, uint8_t midi_note, float velocity)
 {
     if (ch != midi_channel)
         return;
 
-    Sound slot = find_available_slot();
+    // 1) Find an available slot by reference
+    Sound &slot = find_available_slot();
+
+    // 2) Compute transposed MIDI note and base frequency
     int transposed = clamp_midi_note(int(midi_note) + pitchSettings.transpose_semitones);
     float base_freq = midi_note_freq[transposed];
-    float freq = base_freq * std::pow(2.0f, pitchSettings.pitch_shift / 12.0f);
+    float freq = base_freq * std::pow(2.0f, pitchSettings.fine_tuning / 1200.0f); // fine_tuning in cents
 
-    // Configure envelope for this note
+    // 3) Retrigger both LFOs so they start from phase=0 on every new note
+    vibrato_lfo.reset_phase();
+    tremolo_lfo.reset_phase();
+
+    // 4) Configure envelope for this note
     envelope.gateOn();
 
-    // Start the sound
+    // 5) Start the sound with the calculated frequency and velocity
     slot.note_on(static_cast<uint8_t>(transposed), freq, velocity, config.sample_rate);
 }
 

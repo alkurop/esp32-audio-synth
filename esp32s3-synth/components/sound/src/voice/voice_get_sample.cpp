@@ -11,31 +11,44 @@ using namespace protocol;
 
 float Voice::getSample()
 {
-    // 1) Get the smoothed linear gain each sample:
+    // 0) Master gain smoothing
     float sm_gain = volumeSettings.gain_smoothed.next();
-
-    // If effectively silent, skip all per-voice work:
     if (sm_gain <= 1e-6f)
         return 0.0f;
 
-    // 2) Mix all active oscillators:
+    // 1) Tremolo: bipolar LFO output in –depth…+depth → map to [0…1]
+    float ampBipolar = tremolo_lfo.get_value(); // –depth…+depth
+    float tremDepth = static_cast<float>(tremolo_lfo.getDepth());
+    float tremUnipolar = 0.5f * (ampBipolar / tremDepth + 1.0f);
+    float tremGain = tremUnipolar; // now in [0…1]
+
+    // 2) Vibrato: bipolar LFO in cents
+    float vibCents = vibrato_lfo.get_value();           // –depth…+depth cents
+    float pitchMul = std::pow(2.0f, vibCents / 1200.0f); // cents → freq multiplier
+
+    // 3) Mix all active voices with per-voice vibrato
     float mix = 0.0f;
     int active_count = 0;
     for (auto &s : sounds)
     {
         if (!s.active)
             continue;
-        mix += s.get_sample(config.sample_rate);
+
+        // Apply vibrato to this voice’s stored base_frequency
+        float modFreq = s.base_frequency * pitchMul;
+        s.set_frequency(modFreq, config.sample_rate);
+
+        mix += s.get_sample();
         ++active_count;
     }
     if (active_count > 0)
         mix /= static_cast<float>(active_count);
 
-    // 3) Apply the ADSR envelope:
-    float env_amp = envelope.next();
+    // 4) ADSR envelope
+    float envAmp = envelope.next();
 
-    // 4) Multiply by smoothed gain:
-    return mix * env_amp * sm_gain;
+    // 5) Final output: mix → envelope → master gain → tremolo
+    return mix * envAmp * sm_gain * tremGain;
 }
 
 void Voice::setVolume(uint8_t newVolume)
