@@ -12,8 +12,8 @@ Voice::Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel, uint16
       volumeSettings(),
       pitchSettings(),
       envelope(sample_rate, initial_bpm),
-      vibrato_lfo(sample_rate, initial_bpm),
-      tremolo_lfo(sample_rate, initial_bpm),
+      pitch_lfo(sample_rate, initial_bpm),
+      amp_lfo(sample_rate, initial_bpm),
       midi_channel(channel),
       sounds()
 
@@ -29,8 +29,8 @@ void Voice::setBpm(uint16_t bpm)
 {
     bpm = bpm;
     envelope.setBpm(bpm);
-    tremolo_lfo.setBpm(bpm);
-    vibrato_lfo.setBpm(bpm);
+    amp_lfo.setBpm(bpm);
+    pitch_lfo.setBpm(bpm);
 }
 
 void Voice::setMidiChannel(uint8_t midiChannel)

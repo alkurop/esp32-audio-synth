@@ -17,13 +17,13 @@ float Voice::getSample()
         return 0.0f;
 
     // 1) Tremolo: bipolar LFO output in –depth…+depth → map to [0…1]
-    float ampBipolar = tremolo_lfo.get_value(); // –depth…+depth
-    float tremDepth = static_cast<float>(tremolo_lfo.getDepth());
+    float ampBipolar = amp_lfo.get_value(); // –depth…+depth
+    float tremDepth = static_cast<float>(amp_lfo.getDepth());
     float tremUnipolar = 0.5f * (ampBipolar / tremDepth + 1.0f);
     float tremGain = tremUnipolar; // now in [0…1]
 
     // 2) Vibrato: bipolar LFO in cents
-    float vibCents = vibrato_lfo.get_value();           // –depth…+depth cents
+    float vibCents = pitch_lfo.get_value();           // –depth…+depth cents
     float pitchMul = std::pow(2.0f, vibCents / 1200.0f); // cents → freq multiplier
 
     // 3) Mix all active voices with per-voice vibrato

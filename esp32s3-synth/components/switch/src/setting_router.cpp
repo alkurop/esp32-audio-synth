@@ -78,8 +78,8 @@ void SettingRouter::setUpdate(const FieldUpdate &update)
             update.value);
         break;
 
-    case Page::DetuneLFO:
-        settings::setDetuneLfoPage(
+    case Page::PitchLFO:
+        settings::setPitchLfoPage(
             soundModule.getVoice(update.voiceIndex),
             update.field,
             update.value);

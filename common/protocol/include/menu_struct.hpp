@@ -31,7 +31,7 @@ namespace protocol
         Envelope,
         Tuning,
         FilterLFO,
-        DetuneLFO,
+        PitchLFO,
         Global, ///< Global BPM settings page
         _Count
     };

@@ -50,8 +50,8 @@ namespace sound_module
         voice::VolumeSettings volumeSettings;
         voice::PitchSettings pitchSettings;
         Envelope envelope; // shared ADSR envelope
-        LFO vibrato_lfo;
-        LFO tremolo_lfo;
+        LFO pitch_lfo;
+        LFO amp_lfo;
     private:
         size_t midi_channel = 0;
         uint16_t bpm;

@@ -45,8 +45,8 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, float velocity)
     float freq = base_freq * std::pow(2.0f, pitchSettings.fine_tuning / 1200.0f); // fine_tuning in cents
 
     // 3) Retrigger both LFOs so they start from phase=0 on every new note
-    vibrato_lfo.reset_phase();
-    tremolo_lfo.reset_phase();
+    pitch_lfo.reset_phase();
+    amp_lfo.reset_phase();
 
     // 4) Configure envelope for this note
     envelope.gateOn();
