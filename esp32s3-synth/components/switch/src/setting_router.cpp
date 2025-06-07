@@ -33,6 +33,7 @@ void SettingRouter::setUpdate(const FieldUpdate &update)
     Page page = static_cast<Page>(update.pageByte);
 
     // Dispatch to the right “setXPage” function based on which page it is:
+
     switch (page)
     {
     case Page::Channel:
