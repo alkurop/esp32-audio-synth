@@ -38,3 +38,8 @@ void Voice::setMidiChannel(uint8_t midiChannel)
     midi_channel = midiChannel;
     all_notes_off();
 };
+
+std::vector<Sound> &Voice::getSounds()
+{
+    return sounds;
+}

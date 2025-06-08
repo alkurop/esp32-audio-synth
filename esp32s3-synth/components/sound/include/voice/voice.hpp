@@ -44,6 +44,7 @@ namespace sound_module
         void setVolume(uint8_t volume);
         void setMidiChannel(uint8_t ch);
         void setBpm(uint16_t bpm);
+        std::vector<Sound> &getSounds();
 
         const voice::AudioConfig config;
         voice::VolumeSettings volumeSettings;
@@ -51,7 +52,6 @@ namespace sound_module
 
         Envelope envelope; // shared ADSR envelope
 
-        
         LFO pitch_lfo;
         LFO amp_lfo;
 
