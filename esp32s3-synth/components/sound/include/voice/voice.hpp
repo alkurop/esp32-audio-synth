@@ -2,9 +2,9 @@
 #pragma once
 #include <cstdint>
 #include <vector>
-#include "note_freq_table.hpp"
+#include "sound/note_freq_table.hpp"
 #include "../utils.hpp"
-#include "sound.hpp"
+#include "sound/sound.hpp"
 #include "../nodes/envelope.hpp"
 #include "menu_struct.hpp"
 #include "nodes/lfo.hpp"

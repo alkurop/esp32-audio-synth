@@ -52,7 +52,7 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, float velocity)
     envelope.gateOn();
 
     // 5) Start the sound with the calculated frequency and velocity
-    slot.note_on(static_cast<uint8_t>(transposed), freq, velocity, config.sample_rate);
+    slot.note_on(freq, velocity);
 }
 
 // Note off: release matching sound and envelope

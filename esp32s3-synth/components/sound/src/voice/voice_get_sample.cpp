@@ -29,16 +29,16 @@ float Voice::getSample()
     // 3) Mix all active voices with per-voice vibrato
     float mix = 0.0f;
     int active_count = 0;
-    for (auto &s : sounds)
+    for (auto &sound : sounds)
     {
-        if (!s.active)
+        if (!sound.active)
             continue;
 
         // Apply vibrato to this voice’s stored base_frequency
-        float modFreq = s.base_frequency * pitchMul;
-        s.set_frequency(modFreq, config.sample_rate);
+        float modFreq = sound.base_frequency * pitchMul;
+        sound.set_frequency(modFreq);
 
-        mix += s.get_sample();
+        mix += sound.get_sample();
         ++active_count;
     }
     if (active_count > 0)

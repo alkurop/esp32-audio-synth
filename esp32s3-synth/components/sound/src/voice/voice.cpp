@@ -21,7 +21,7 @@ Voice::Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel, uint16
     sounds.reserve(max_polyphony);
     for (size_t i = 0; i < max_polyphony; ++i)
     {
-        sounds.emplace_back();
+        sounds.emplace_back(config.sample_rate);
     }
 }
 
