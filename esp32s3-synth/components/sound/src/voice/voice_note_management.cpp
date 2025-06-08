@@ -15,7 +15,7 @@ Sound &Voice::find_available_slot()
             return s;
     }
     // All slots full — steal the first one
-    sounds[0].note_off();
+    sounds[0].release();
     return sounds[0];
 }
 
@@ -52,7 +52,7 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, float velocity)
     envelope.gateOn();
 
     // 5) Start the sound with the calculated frequency and velocity
-    slot.note_on(freq, velocity);
+    slot.trigger(freq, velocity, midi_note);
 }
 
 // Note off: release matching sound and envelope
@@ -64,7 +64,7 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
     Sound *match = find_active_note(midi_note);
     if (match)
     {
-        match->note_off();
+        match->release();
         envelope.gateOff();
     }
 }
@@ -74,7 +74,7 @@ void Voice::all_notes_off()
 {
     for (auto &s : sounds)
     {
-        s.note_off();
+        s.release();
         envelope.gateOff();
     }
 }

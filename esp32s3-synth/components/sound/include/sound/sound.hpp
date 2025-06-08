@@ -1,21 +1,22 @@
 #pragma once
 #include <cstdint>
+#include "oscillator_settings.hpp" // for OscillatorShape, oscShapes, yesNo
 
 namespace sound_module
 {
     ///
-    /// Simple sine-wave voice
-    /// Stores MIDI note, base frequency, velocity, and handles phase incrementing.
+    /// Simple oscillator-based voice
+    /// Supports trigger/release, pitch modulation, and waveform settings.
     class Sound
     {
     public:
         explicit Sound(uint32_t sample_rate);
 
-        /// Trigger a note-on: store MIDI note, frequency, velocity, reset phase
-        void note_on(float frequency, float velocity_in);
+        /// Trigger the oscillator: set frequency, velocity, and reset phase
+        void trigger(float frequency, float velocity_in, uint8_t midi_note);
 
-        /// Trigger a note-off: mark inactive
-        void note_off();
+        /// Release the oscillator: mark inactive
+        void release();
 
         /// Update the oscillator’s phase increment to match a new frequency
         void set_frequency(float frequency);
@@ -24,15 +25,32 @@ namespace sound_module
         /// returns zero if inactive
         float get_sample();
 
+        /// Configuration setters
+        void set_shape(protocol::OscillatorShape newShape);
+        void set_morph(uint8_t morph); // 0–31
+        void set_pwm(uint8_t pwm);     // 0–31
+        void set_sync(bool sync_on);
+
+        /// Configuration getters
+        protocol::OscillatorShape get_shape() const;
+        uint8_t get_morph() const;
+        uint8_t get_pwm() const;
+        bool get_sync() const;
+
         /// Public state for introspection or external use
-        bool active = false;         ///< true if note is on
-        uint8_t midi_note = 0;       ///< stored for note-off
+        bool active = false;         ///< true if currently playing
         float base_frequency = 0.0f; ///< unmodulated frequency in Hz
         float velocity = 1.0f;       ///< note velocity (gain)
+        uint8_t midi_note = 0;
 
     private:
-        const uint32_t sample_rate;   ///< note velocity (gain)
+        const uint32_t sample_rate;   ///< samples per second
         float phase = 0.0f;           ///< oscillator phase [0,1)
         float phase_increment = 0.0f; ///< increment per sample
+        // Oscillator settings
+        protocol::OscillatorShape shape = protocol::OscillatorShape::Sine;
+        uint8_t morph = 0;
+        uint8_t pwm = 0;
+        bool sync = false;
     };
 } // namespace sound_module

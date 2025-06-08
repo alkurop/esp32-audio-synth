@@ -3,10 +3,20 @@
 
 namespace protocol
 {
+
+    enum OscillatorShape
+    {
+        Sine,
+        Saw,
+        Square,
+        Tri,
+        Noise,
+        _Count
+    };
     // oscillator fields
-    static constexpr const char *oscShapes[] = {"Sine", "Saw", "Square", "Tri"};
+    static constexpr const char *oscShapes[] = {"Sine", "Saw", "Square", "Tri", "Noise"};
     static constexpr FieldInfo oscInfo[] = {
-        {"Shape", FieldType::Options, 0, 0, oscShapes, 4},
+        {"Shape", FieldType::Options, 0, 0, oscShapes, 5},
         {"Morph", FieldType::Range, 0, 31, nullptr, 0},
         {"PWM", FieldType::Range, 0, 31, nullptr, 0},
         {"Sync", FieldType::Options, 0, 0, yesNo, 2},
