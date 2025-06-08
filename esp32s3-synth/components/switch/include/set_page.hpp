@@ -11,7 +11,8 @@ namespace settings
     void setFilterPage(Voice &voice, uint8_t field, int16_t value);
     void setEnvelopePage(Voice &voice, uint8_t field, int16_t value);
     void setTuningPage(Voice &voice, uint8_t field, int16_t value);
-    void setFilterLfoPage(Voice &voice, uint8_t field, int16_t value);
+    void setFilterCutoffLfoPage(Voice &voice, uint8_t field, int16_t value);
+    void setFilterResLfoPage(Voice &voice, uint8_t field, int16_t value);
     void setPitchLfoPage(Voice &voice, uint8_t field, int16_t value);
     void setAmpLfoPage(Voice &voice, uint8_t field, int16_t value);
     void setGlobalPage(SoundModule &sound_module, uint8_t field, int16_t value);

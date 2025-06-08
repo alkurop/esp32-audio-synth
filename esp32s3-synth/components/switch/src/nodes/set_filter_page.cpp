@@ -20,9 +20,11 @@ void settings::setFilterPage(Voice &voice, uint8_t field, int16_t value)
         break;
     }
     case FilterField::Resonance:
-     auto castValue = static_cast<uint8_t>(value);
+    {
+        auto castValue = static_cast<uint8_t>(value);
         voice.filter.setResonance(castValue);
         break;
+    }
 
     default:
         break;

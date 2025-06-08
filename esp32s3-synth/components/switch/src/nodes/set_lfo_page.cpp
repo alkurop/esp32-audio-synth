@@ -42,6 +42,14 @@ void settings::setPitchLfoPage(Voice &voice, uint8_t field, int16_t value)
     setLfo(voice.pitch_lfo, field, value);
 };
 
-void settings::setFilterLfoPage(Voice &voice, uint8_t field, int16_t value) {
-    // setLfo(voice.amp_lfo, field, value);
+void settings::setFilterCutoffLfoPage(Voice &voice, uint8_t field, int16_t value)
+{
+    auto lfo = voice.filter.cutoffLfo;
+    setLfo(lfo, field, value);
+};
+
+void settings::setFilterResLfoPage(Voice &voice, uint8_t field, int16_t value)
+{
+    auto lfo = voice.filter.resonanceLfo;
+    setLfo(lfo, field, value);
 };

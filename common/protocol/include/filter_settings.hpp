@@ -10,7 +10,8 @@ namespace protocol
     {
         Type,
         Cutoff,
-        Resonance
+        Resonance,
+        _Count
     };
 
     enum class FilterType : uint8_t
