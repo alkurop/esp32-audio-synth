@@ -8,6 +8,7 @@
 #include "../nodes/envelope.hpp"
 #include "menu_struct.hpp"
 #include "nodes/lfo.hpp"
+#include "nodes/filter.hpp"
 
 using namespace protocol;
 namespace sound_module
@@ -54,6 +55,7 @@ namespace sound_module
 
         LFO pitch_lfo;
         LFO amp_lfo;
+        Filter filter;
 
     private:
         size_t midi_channel = 0;

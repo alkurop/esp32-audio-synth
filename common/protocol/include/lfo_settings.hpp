@@ -4,6 +4,7 @@
 namespace protocol
 {
 
+    constexpr const uint8_t LFO_DEPTH_MAX = 127;
     enum class LfoSubdivision : uint8_t
     {
         Double = 128,       // "2/1"
@@ -13,7 +14,7 @@ namespace protocol
         DottedQuarter = 24, // "3/8"
         Eighth = 8,         // "1/8"
         Sixteenth = 4,      // "1/16"
-        ThirtySecond = 2    // "1/32"
+        ThirtySecond = 2,   // "1/32"
     };
 
     // New: which waveform the LFO outputs
@@ -22,7 +23,7 @@ namespace protocol
         Sine = 0,
         Triangle,
         Sawtooth,
-        Pulse
+        Pulse,
     };
 
     static constexpr const char *subdivisions[] =
@@ -34,7 +35,7 @@ namespace protocol
     static constexpr FieldInfo lfoInfo[] = {
         {"Form", FieldType::Options, 0, 0, subdivisions, 8},
         {"Subd", FieldType::Options, 0, 0, form, 4},
-        {"Dept", FieldType::Range, 0, 127, nullptr, 0, 4},
+        {"Dept", FieldType::Range, 0, LFO_DEPTH_MAX, nullptr, 0, 4},
     };
 
     enum class LFOField : uint8_t

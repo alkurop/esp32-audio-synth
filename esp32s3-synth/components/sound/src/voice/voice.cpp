@@ -14,6 +14,7 @@ Voice::Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel, uint16
       envelope(sample_rate, initial_bpm),
       pitch_lfo(sample_rate, initial_bpm),
       amp_lfo(sample_rate, initial_bpm),
+      filter(sample_rate, initial_bpm),
       midi_channel(channel),
       sounds()
 
@@ -31,6 +32,7 @@ void Voice::setBpm(uint16_t bpm)
     envelope.setBpm(bpm);
     amp_lfo.setBpm(bpm);
     pitch_lfo.setBpm(bpm);
+    filter.setBpm(bpm);
 }
 
 void Voice::setMidiChannel(uint8_t midiChannel)
