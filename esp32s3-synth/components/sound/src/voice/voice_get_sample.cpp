@@ -23,7 +23,7 @@ float Voice::getSample()
     float tremGain = tremUnipolar; // now in [0…1]
 
     // 2) Vibrato: bipolar LFO in cents
-    float vibCents = pitch_lfo.get_value();           // –depth…+depth cents
+    float vibCents = pitch_lfo.get_value();              // –depth…+depth cents
     float pitchMul = std::pow(2.0f, vibCents / 1200.0f); // cents → freq multiplier
 
     // 3) Mix all active voices with per-voice vibrato
@@ -54,9 +54,7 @@ float Voice::getSample()
 void Voice::setVolume(uint8_t newVolume)
 {
     // Clamp to [0..MAX_VOLUME]
-    if (newVolume < 0)
-        newVolume = 0;
-    else if (newVolume > voice::VOL_MAX)
+    if (newVolume > voice::VOL_MAX)
         newVolume = voice::VOL_MAX;
     volumeSettings.volume = newVolume;
 

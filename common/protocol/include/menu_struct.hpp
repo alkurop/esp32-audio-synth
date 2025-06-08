@@ -30,8 +30,9 @@ namespace protocol
         Filter,
         Envelope,
         Tuning,
-        FilterLFO,
         PitchLFO,
+        AmpLFO,
+        FilterLFO,
         Global, ///< Global BPM settings page
         _Count
     };
@@ -50,9 +51,11 @@ namespace protocol
         static_cast<uint8_t>(EnvelopeField::_Count),
         // Tuning page
         static_cast<uint8_t>(TuningField::_Count),
-        // Filter LFO page
+        // PitchLFO page (same as Filter LFO)
         static_cast<uint8_t>(LFOField::_Count),
-        // Detune LFO page (same as Filter LFO)
+        // Amp LFO page
+        static_cast<uint8_t>(LFOField::_Count),
+        // Filter LFO page
         static_cast<uint8_t>(LFOField::_Count),
         // Global BPM page
         static_cast<uint8_t>(GlobalField::_Count),
@@ -73,8 +76,9 @@ namespace protocol
         {"Filter", filterInfo, sizeof(filterInfo) / sizeof(FieldInfo)},
         {"Envelope", envInfo, sizeof(envInfo) / sizeof(FieldInfo)},
         {"Tuning", tuningInfo, sizeof(tuningInfo) / sizeof(FieldInfo)},
+        {"Pitch LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
+        {"Amp LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"Filter LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
-        {"Detune LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
     };
 

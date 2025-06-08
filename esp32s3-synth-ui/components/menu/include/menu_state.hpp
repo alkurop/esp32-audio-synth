@@ -83,15 +83,14 @@ namespace menu
         return false;
     }
 
-
     /// Simple [min,max] for an encoder knob.
     struct EncoderRange
     {
         int16_t min;
         int16_t max;
         int16_t value = 0;
+        uint8_t increment = 1;
     };
-  
 
     struct MenuState
     {

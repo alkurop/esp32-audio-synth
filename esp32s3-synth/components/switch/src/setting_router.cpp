@@ -85,6 +85,13 @@ void SettingRouter::setUpdate(const FieldUpdate &update)
             update.value);
         break;
 
+    case Page::AmpLFO:
+        settings::setAmpLfoPage(
+            soundModule.getVoice(update.voiceIndex),
+            update.field,
+            update.value);
+        break;
+
     case Page::Global:
         settings::setGlobalPage(soundModule, update.field, update.value);
         break;

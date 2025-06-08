@@ -2,6 +2,8 @@
 #include <freertos/task.h>
 #include <esp_log.h>
 #include <cstdio>
+#include <array>
+#include <functional>  // for std::reference_wrapper, std::ref
 
 #include "rotary.hpp"
 #include "button.hpp"

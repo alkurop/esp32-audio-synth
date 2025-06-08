@@ -60,22 +60,24 @@ namespace menu
         const MenuState &state)
     {
         std::array<EncoderRange, KNOB_COUNT> R;
-        const auto &pi = menuPages[size_t(page)];
+        const auto &pageItem = menuPages[size_t(page)];
 
         for (int k = 0; k < KNOB_COUNT; ++k)
         {
-            if (k < pi.fieldCount)
+            if (k < pageItem.fieldCount)
             {
-                const auto &fi = pi.fields[k];
-                if (fi.type == FieldType::Range)
+                const auto &fieldItem = pageItem.fields[k];
+                if (fieldItem.type == FieldType::Range)
                     R[k] = EncoderRange{
-                        .min = static_cast<int16_t>(fi.min),
-                        .max = static_cast<int16_t>(fi.max),
-                        .value = state.fieldValues[k]};
+                        .min = static_cast<int16_t>(fieldItem.min),
+                        .max = static_cast<int16_t>(fieldItem.max),
+                        .value = state.fieldValues[k],
+                        .increment = static_cast<uint8_t>(fieldItem.increment),
+                    };
                 else
                     R[k] = EncoderRange{
                         .min = 0,
-                        .max = static_cast<int16_t>(fi.optCount - 1),
+                        .max = static_cast<int16_t>(fieldItem.optCount - 1),
                         .value = state.fieldValues[k]};
             }
             else
@@ -93,12 +95,13 @@ namespace menu
 
         // clear all knobs
         for (int k = 0; k < KNOB_COUNT; ++k)
-            R[k] = EncoderRange{.min = 0, .max = 0, .value = 0};
+            R[k] = EncoderRange{
+                .min = 0,
+                .max = 0,
+                .value = 0};
 
         // only knob 0 is used here
-        uint8_t maxSlot = st.listItems.empty()
-                              ? 0
-                              : static_cast<int8_t>(st.listItems.size() - 1);
+        uint8_t maxSlot = st.listItems.empty() ? 0 : static_cast<int8_t>(st.listItems.size() - 1);
         R[0] = EncoderRange{
             .min = 0,
             .max = maxSlot,

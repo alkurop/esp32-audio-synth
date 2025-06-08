@@ -60,6 +60,11 @@ namespace ui
             config.maxValue = maxValue;
         }
 
+        inline void setIncrement(uint8_t increment)
+        {
+            config.increment = increment;
+        }
+
         /**
          * @brief Force the current position (will invoke callback)
          * @param value  New position to set

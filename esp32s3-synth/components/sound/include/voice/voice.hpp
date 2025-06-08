@@ -43,15 +43,18 @@ namespace sound_module
         // Voice-level controls
         void setVolume(uint8_t volume);
         void setMidiChannel(uint8_t ch);
-
         void setBpm(uint16_t bpm);
 
         const voice::AudioConfig config;
         voice::VolumeSettings volumeSettings;
         voice::PitchSettings pitchSettings;
+
         Envelope envelope; // shared ADSR envelope
+
+        
         LFO pitch_lfo;
         LFO amp_lfo;
+
     private:
         size_t midi_channel = 0;
         uint16_t bpm;

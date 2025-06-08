@@ -9,17 +9,17 @@ namespace protocol
     enum class FieldType
     {
         Range,
-        Options,
-        Autosave
+        Options
     };
 
     struct FieldInfo
     {
         const char *label;
         FieldType type;
-        int min, max;
+        int16_t min, max;
         const char *const *opts;
         uint8_t optCount;
+        int16_t increment = 1;
     };
 
     // option lists

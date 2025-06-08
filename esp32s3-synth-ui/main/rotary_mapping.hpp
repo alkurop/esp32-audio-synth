@@ -11,5 +11,6 @@ namespace ui
     {
         encoder->setRange(range.min, range.max);
         encoder->setPosition(range.value);
+        encoder->setIncrement(range.increment);
     }
 }
