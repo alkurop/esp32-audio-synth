@@ -13,7 +13,7 @@ namespace sound_module
         explicit Sound(uint32_t sample_rate);
 
         /// Trigger the oscillator: set frequency, velocity, and reset phase
-        void trigger(float frequency, float velocity_in, uint8_t midi_note);
+        void trigger(float frequency, uint8_t velocity_in, uint8_t midi_note);
 
         /// Release the oscillator: mark inactive
         void release();
@@ -40,7 +40,7 @@ namespace sound_module
         /// Public state for introspection or external use
         bool active = false;         ///< true if currently playing
         float base_frequency = 0.0f; ///< unmodulated frequency in Hz
-        float velocity = 1.0f;       ///< note velocity (gain)
+        uint8_t velocity = 0;       ///< note velocity (gain)
         uint8_t midi_note = 0;
 
     private:

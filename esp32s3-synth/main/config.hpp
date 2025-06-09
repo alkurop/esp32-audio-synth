@@ -11,9 +11,9 @@ using namespace protocol;
 using namespace ui;
 
 // ESP32-S3 Pin Mapping for I2S
-#define I2S_BCK_IO GPIO_NUM_17
-#define I2S_WS_IO GPIO_NUM_18
-#define I2S_DO_IO GPIO_NUM_21
+#define I2S_BCK_IO GPIO_NUM_38
+#define I2S_WS_IO GPIO_NUM_40
+#define I2S_DO_IO GPIO_NUM_39
 
 // ESP32-S3 Pin Mapping for I2C
 #define SDA_PIN   GPIO_NUM_13  // red
@@ -23,11 +23,11 @@ using namespace ui;
 
 // Configure sound engine
 SoundConfig config{
-    .sampleRate = 192000,
-    .tableSize = 1024,
+    .sampleRate = 96000,
+    .tableSize = 2048,
     .amplitude = 24000,
-    .bufferSize = 128,
-    .numVoices = 8,
+    .bufferSize = 1024,
+    .numVoices = 1,
     .i2s = {
         .bclk_io = I2S_BCK_IO,
         .lrclk_io = I2S_WS_IO,

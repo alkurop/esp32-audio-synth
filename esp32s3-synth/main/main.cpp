@@ -25,7 +25,10 @@ settings::SettingRouter settingSwitch(soundModule);
 Knob masterKnob(masterKnobConfig);
 
 auto masterKnobCallback = [](uint8_t value)
-{ settingSwitch.setMasterVolume(value); };
+{
+    // ESP_LOGD(TAG, "Master volume: %d", value);
+    settingSwitch.setMasterVolume(value);
+};
 
 // MIDI packet callback
 MidiReadCallback midiReadCallback = [](const uint8_t packet[4])
@@ -38,7 +41,10 @@ MidiControllerCallback controllerCallback = [](const ControllerChange &cc)
 };
 
 MidiNoteMessageCallback noteMessageCallback = [](const NoteMessage &note)
-{ soundModule.handle_note(note); };
+{
+    ESP_LOGD(TAG, "Note on=%d channel %d velocity %d", note.on, note.channel, note.velocity);
+    soundModule.handle_note(note);
+};
 
 MidiSongPositionCallback songPositionCallback = [](const SongPosition &sp)
 { ESP_LOGI(TAG, "Song Position: %d", sp.position); };
@@ -47,9 +53,7 @@ MidiTransportCallback transportCallback = [](const TransportEvent &ev)
 { settingSwitch.setTransportState(ev.command); };
 
 BpmCounter::BpmCallback bpmCallback = [](uint8_t bpm)
-{
-    return settingSwitch.getMidiBpm();
-};
+{ return settingSwitch.getMidiBpm(); };
 
 uint16_t sendBpm() { return settingSwitch.getMidiBpm(); };
 
@@ -60,15 +64,15 @@ extern "C" void app_main()
 {
 
     // // // Initialize modules
-    // midiModule.init(midiReadCallback);
-    // soundModule.init();
+    midiModule.init(midiReadCallback);
+    soundModule.init();
 
-    // // Set MIDI parser callbacks
-    // midiParser.setControllerCallback(controllerCallback);
-    // midiParser.setNoteMessageCallback(noteMessageCallback);
-    // midiParser.setSongPositionCallback(songPositionCallback);
-    // midiParser.setTransportCallback(transportCallback);
-    // midiParser.setBpmCallback(bpmCallback);
+    // Set MIDI parser callbacks
+    midiParser.setControllerCallback(controllerCallback);
+    midiParser.setNoteMessageCallback(noteMessageCallback);
+    midiParser.setSongPositionCallback(songPositionCallback);
+    midiParser.setTransportCallback(transportCallback);
+    midiParser.setBpmCallback(bpmCallback);
 
     masterKnob.init(masterKnobCallback);
     ESP_ERROR_CHECK(i2cReceiver.init(updateCallback, sendBpm));

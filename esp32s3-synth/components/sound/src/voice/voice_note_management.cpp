@@ -31,8 +31,9 @@ Sound *Voice::find_active_note(uint8_t midi_note)
 }
 
 // Note on: trigger new sound, retrigger LFOs, and envelope
-void Voice::noteOn(uint8_t ch, uint8_t midi_note, float velocity)
+void Voice::noteOn(uint8_t ch, uint8_t midi_note, uint8_t velocity)
 {
+
     if (ch != midi_channel)
         return;
 
@@ -64,8 +65,8 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
     Sound *match = find_active_note(midi_note);
     if (match)
     {
+    
         match->release();
-        envelope.gateOff();
     }
 }
 

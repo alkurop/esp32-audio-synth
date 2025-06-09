@@ -1,28 +1,29 @@
 #include "sound/sound.hpp"
 #include <cmath>
-#include <cstdlib> // for std::rand, RAND_MAX
+#include <cstdlib>   // for std::rand, RAND_MAX
+#include "esp_log.h" // for std::rand, RAND_MAX
 
 using namespace sound_module;
 using namespace protocol;
-
+const char *TAG = "Voice";
 
 Sound::Sound(uint32_t sample_rate)
-    : sample_rate(sample_rate)
-{
-}
+    : sample_rate(sample_rate) {}
 
-void Sound::trigger(float frequency, float velocity_in, uint8_t midi_note)
+void Sound::trigger(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
 {
+    ESP_LOGD(TAG, "Sound trigger freq %f velocity %u note %u", frequency, velocity_in, midi_note);
     base_frequency = frequency;
     velocity = velocity_in;
     phase = 0.0f;
     phase_increment = base_frequency / sample_rate;
     active = true;
-    midi_note = midi_note;
+    midi_note = midi_note_in;
 }
 
 void Sound::release()
 {
+    ESP_LOGD(TAG, "Sound release note %u", midi_note);
     active = false;
     midi_note = 0;
 }
@@ -34,6 +35,11 @@ void Sound::set_frequency(float frequency)
 
 float Sound::get_sample()
 {
+    // Advance phase
+    phase += phase_increment;
+    if (phase >= 1.0f)
+        phase -= 1.0f;
+
     if (!active)
         return 0.0f;
     // Generate raw samples for current and next waveform for morphing
@@ -83,12 +89,7 @@ float Sound::get_sample()
             sample = (1.0f - t) * rawA + t * squareSample;
     }
 
-    // Advance phase
-    phase += phase_increment;
-    if (phase >= 1.0f)
-        phase -= 1.0f;
-
-    // Apply velocity
+    // Apply velocity (amplitude) and return
     return sample * velocity;
 }
 

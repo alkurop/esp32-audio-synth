@@ -32,7 +32,7 @@ namespace sound_module
          * Note on/off handlers.
          * velocity: normalized 0.0–1.0
          */
-        void noteOn(uint8_t channel, uint8_t midi_note, float velocity);
+        void noteOn(uint8_t channel, uint8_t midi_note, uint8_t velocity);
         void noteOff(uint8_t channel, uint8_t midi_note);
 
         /**
