@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "oscillator_settings.hpp" // for OscillatorShape, oscShapes, yesNo
+#include <math.h>
 
 namespace sound_module
 {
@@ -54,4 +55,14 @@ namespace sound_module
         uint8_t pwm = 0;
         bool sync = false;
     };
+
+    inline float fast_sinf(float x)
+{
+    const float B = 4.0f / M_PI;
+    const float C = -4.0f / (M_PI * M_PI);
+    const float P = 0.225f;
+
+    float y = B * x + C * x * std::fabsf(x);
+    return P * (y * std::fabsf(y) - y) + y;
+}
 } // namespace sound_module

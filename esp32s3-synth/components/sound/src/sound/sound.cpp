@@ -1,5 +1,7 @@
 #include "sound/sound.hpp"
 #include "protocol.hpp"
+#include "sound/sine_table.hpp"
+#include "sound/saw_tooth_table.hpp"
 #include <cmath>
 #include <cstdlib>   // for std::rand, RAND_MAX
 #include "esp_log.h" // for std::rand, RAND_MAX
@@ -49,9 +51,28 @@ float Sound::get_sample()
         switch (wf)
         {
         case protocol::OscillatorShape::Sine:
-            return std::sinf(2.0f * static_cast<float>(M_PI) * phase);
+        {
+            float fidx = phase * TABLE_SIZE;
+            int idx = static_cast<int>(fidx);
+            float frac = fidx - idx;
+
+            float a = sineTable[idx % TABLE_SIZE];
+            float b = sineTable[(idx + 1) % TABLE_SIZE];
+
+            return a + frac * (b - a);  
+        }
+
         case protocol::OscillatorShape::Saw:
-            return 2.0f * (phase - std::floor(phase + 0.5f));
+        {
+            float fidx = phase * TABLE_SIZE;
+            int idx = static_cast<int>(fidx);
+            float frac = fidx - idx;
+
+            float a = sawTable[idx % TABLE_SIZE];
+            float b = sawTable[(idx + 1) % TABLE_SIZE];
+
+            float sample = a + frac * (b - a);  
+        };
         case protocol::OscillatorShape::Square:
             return (phase < 0.5f) ? 1.0f : -1.0f;
         case protocol::OscillatorShape::Tri:
