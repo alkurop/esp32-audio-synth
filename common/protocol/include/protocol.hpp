@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include "config.hpp"
+#include "audio_config.hpp"
 #include "menu_struct.hpp"
 
 namespace protocol
