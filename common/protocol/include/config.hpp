@@ -3,6 +3,6 @@
 namespace protocol
 {
     constexpr const float VELOCITY_GLOBAL_SCALER = 1.6;
-    constexpr const int TABLE_SIZE = 1024;
+    constexpr const int LOOKUP_TABLE_SIZE = 1024;
 
 }

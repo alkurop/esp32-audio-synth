@@ -24,7 +24,7 @@ using namespace ui;
 // Configure sound engine
 SoundConfig config{
     .sampleRate = 96000,
-    .tableSize = TABLE_SIZE,
+    .tableSize = LOOKUP_TABLE_SIZE,
     .amplitude = 24000,
     .bufferSize = 1024,
     .numVoices = 1,

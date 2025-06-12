@@ -22,7 +22,7 @@ namespace protocol
         constexpr uint8_t VOL_MAX = 31;
         constexpr float MIN_DB = -60.0f;
         constexpr float MAX_DB = 0.0f;
-        constexpr uint8_t MAX_POLYPHONY = 16;
+        constexpr uint8_t MAX_POLYPHONY = 8;
 
         struct SmoothedValue
         {

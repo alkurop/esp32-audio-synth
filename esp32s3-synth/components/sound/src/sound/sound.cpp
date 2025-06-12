@@ -2,6 +2,9 @@
 #include "protocol.hpp"
 #include "sound/sine_table.hpp"
 #include "sound/saw_tooth_table.hpp"
+#include "sound/triangle_table.hpp"
+#include "sound/square_table.hpp"
+#include "sound/lookup.hpp"
 #include <cmath>
 #include <cstdlib>   // for std::rand, RAND_MAX
 #include "esp_log.h" // for std::rand, RAND_MAX
@@ -51,32 +54,13 @@ float Sound::get_sample()
         switch (wf)
         {
         case protocol::OscillatorShape::Sine:
-        {
-            float fidx = phase * TABLE_SIZE;
-            int idx = static_cast<int>(fidx);
-            float frac = fidx - idx;
-
-            float a = sineTable[idx % TABLE_SIZE];
-            float b = sineTable[(idx + 1) % TABLE_SIZE];
-
-            return a + frac * (b - a);  
-        }
-
+            return interpolateLookup(phase, sineTable);
         case protocol::OscillatorShape::Saw:
-        {
-            float fidx = phase * TABLE_SIZE;
-            int idx = static_cast<int>(fidx);
-            float frac = fidx - idx;
-
-            float a = sawTable[idx % TABLE_SIZE];
-            float b = sawTable[(idx + 1) % TABLE_SIZE];
-
-            float sample = a + frac * (b - a);  
-        };
+            return interpolateLookup(phase, sawTable);
         case protocol::OscillatorShape::Square:
-            return (phase < 0.5f) ? 1.0f : -1.0f;
+            return interpolateLookup(phase, squareTable);
         case protocol::OscillatorShape::Tri:
-            return 2.0f * std::fabsf(2.0f * (phase - std::floor(phase + 0.5f))) - 1.0f;
+            return interpolateLookup(phase, triangleTable);
         case protocol::OscillatorShape::Noise:
             return 2.0f * (static_cast<float>(std::rand()) / RAND_MAX) - 1.0f;
         default:
