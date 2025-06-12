@@ -10,16 +10,16 @@ void settings::setEnvelopePage(Voice &voice, uint8_t field, int16_t value)
         switch (fieldType)
         {
         case EnvelopeField::A:
-                voice.envelope.setAttack(castValue);
+                voice.setAttack(castValue);
                 break;
         case EnvelopeField::D:
-                voice.envelope.setDecay(castValue);
+                voice.setDecay(castValue);
                 break;
         case EnvelopeField::S:
-                voice.envelope.setSustain(castValue);
+                voice.setSustain(castValue);
                 break;
         case EnvelopeField::R:
-                voice.envelope.setRelease(castValue);
+                voice.setRelease(castValue);
                 break;
         default:
                 break;

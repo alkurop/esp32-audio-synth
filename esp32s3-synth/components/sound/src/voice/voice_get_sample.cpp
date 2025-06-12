@@ -20,7 +20,7 @@ float Voice::getSample()
     float mix = 0.0f;
     for (auto &sound : sounds)
     {
-        if (!sound.active)
+        if (!sound.isActive())
             continue;
 
         sound.set_frequency(sound.base_frequency); // with vibrato etc.

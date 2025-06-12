@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "oscillator_settings.hpp" // for OscillatorShape, oscShapes, yesNo
+#include "../nodes/envelope.hpp"
 #include <math.h>
 
 namespace sound_module
@@ -11,7 +12,7 @@ namespace sound_module
     class Sound
     {
     public:
-        explicit Sound(uint32_t sample_rate);
+        explicit Sound(uint32_t sample_rate, uint16_t initial_bpm);
 
         /// Trigger the oscillator: set frequency, velocity, and reset phase
         void trigger(float frequency, uint8_t velocity_in, uint8_t midi_note);
@@ -31,21 +32,24 @@ namespace sound_module
         void set_morph(uint8_t morph); // 0–31
         void set_pwm(uint8_t pwm);     // 0–31
         void set_sync(bool sync_on);
+        void setBpm(uint16_t bpm);
 
         /// Configuration getters
         protocol::OscillatorShape get_shape() const;
         uint8_t get_morph() const;
         uint8_t get_pwm() const;
         void setVelocity(uint8_t midiVelocity);
-        bool get_sync() const;
 
         /// Public state for introspection or external use
-        bool active = false;         ///< true if currently playing
         float base_frequency = 0.0f; ///< unmodulated frequency in Hz
         uint8_t midi_note = 0;
         float velNorm = 0;
+        Envelope envelope; // shared ADSR envelope
+        bool isActive();
 
     private:
+        bool active = false; ///< true if currently playing
+        bool sync = false;
         const uint32_t sample_rate;   ///< samples per second
         float phase = 0.0f;           ///< oscillator phase [0,1)
         float phase_increment = 0.0f; ///< increment per sample
@@ -53,16 +57,15 @@ namespace sound_module
         protocol::OscillatorShape shape = protocol::OscillatorShape::Sine;
         uint8_t morph = 0;
         uint8_t pwm = 0;
-        bool sync = false;
     };
 
     inline float fast_sinf(float x)
-{
-    const float B = 4.0f / M_PI;
-    const float C = -4.0f / (M_PI * M_PI);
-    const float P = 0.225f;
+    {
+        const float B = 4.0f / M_PI;
+        const float C = -4.0f / (M_PI * M_PI);
+        const float P = 0.225f;
 
-    float y = B * x + C * x * std::fabsf(x);
-    return P * (y * std::fabsf(y) - y) + y;
-}
+        float y = B * x + C * x * std::fabsf(x);
+        return P * (y * std::fabsf(y) - y) + y;
+    }
 } // namespace sound_module

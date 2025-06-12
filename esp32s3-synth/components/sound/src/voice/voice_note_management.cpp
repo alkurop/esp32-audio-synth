@@ -10,7 +10,7 @@ Sound &Voice::find_available_slot()
 {
     for (auto &s : sounds)
     {
-        if (!s.active)
+        if (!s.isActive())
             return s;
     }
     // All slots full — steal the first one
@@ -23,7 +23,7 @@ Sound *Voice::find_active_note(uint8_t midi_note)
 {
     for (auto &s : sounds)
     {
-        if (s.active && s.midi_note == midi_note)
+        if (s.isActive() && s.midi_note == midi_note)
             return &s;
     }
     return nullptr;
@@ -47,9 +47,6 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, uint8_t velocity)
     // 3) Retrigger both LFOs so they start from phase=0 on every new note
     pitch_lfo.reset_phase();
     amp_lfo.reset_phase();
-
-    // 4) Configure envelope for this note
-    envelope.gateOn();
 
     // 5) Start the sound with the calculated frequency and velocity
     slot.trigger(freq, velocity, midi_note);
@@ -75,6 +72,6 @@ void Voice::all_notes_off()
     for (auto &s : sounds)
     {
         s.release();
-        envelope.gateOff();
+        s.envelope.gateOff();
     }
 }

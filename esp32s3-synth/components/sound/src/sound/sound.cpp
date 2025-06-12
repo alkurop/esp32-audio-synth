@@ -13,8 +13,8 @@ using namespace sound_module;
 using namespace protocol;
 static const char *TAG = "Sound";
 
-Sound::Sound(uint32_t sample_rate)
-    : sample_rate(sample_rate) {}
+Sound::Sound(uint32_t sample_rate, uint16_t initial_bpm)
+    : envelope(sample_rate, initial_bpm), sample_rate(sample_rate) {}
 
 void Sound::trigger(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
 {
@@ -25,6 +25,7 @@ void Sound::trigger(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
     phase_increment = base_frequency / sample_rate;
     active = true;
     midi_note = midi_note_in;
+    envelope.gateOn();
 }
 
 void Sound::release()
@@ -46,7 +47,7 @@ float Sound::get_sample()
     if (phase >= 1.0f)
         phase -= 1.0f;
 
-    if (!active)
+    if (!active && envelope.is_idle())
         return 0.0f;
     // Generate raw samples for current and next waveform for morphing
     auto generate_wave = [&](protocol::OscillatorShape wf)
@@ -71,7 +72,7 @@ float Sound::get_sample()
 
     // Primary waveform sample
     float rawA = generate_wave(shape);
-    return rawA;
+    return rawA * envelope.next();
 }
 
 void Sound::set_shape(protocol::OscillatorShape newShape)
@@ -114,12 +115,17 @@ uint8_t Sound::get_pwm() const
     return pwm;
 }
 
-bool Sound::get_sync() const
-{
-    return sync;
-}
-
 void Sound::setVelocity(uint8_t velocity)
 {
     velNorm = std::pow(static_cast<float>(velocity) / 127.0f, 1.5f) * VELOCITY_GLOBAL_SCALER;
+}
+
+void Sound::setBpm(uint16_t bpm)
+{
+    envelope.setBpm(bpm);
+}
+
+bool Sound::isActive()
+{
+    return active || !envelope.is_idle();
 }

@@ -5,7 +5,6 @@
 #include "sound/note_freq_table.hpp"
 #include "../utils.hpp"
 #include "sound/sound.hpp"
-#include "../nodes/envelope.hpp"
 #include "menu_struct.hpp"
 #include "nodes/lfo.hpp"
 #include "nodes/filter.hpp"
@@ -45,14 +44,18 @@ namespace sound_module
         void setVolume(uint8_t volume);
         void setMidiChannel(uint8_t ch);
         void setBpm(uint16_t bpm);
+
+        // Envelope settings per sound
+        void setAttack(uint8_t value);
+        void setDecay(uint8_t value);
+        void setSustain(uint8_t value);
+        void setRelease(uint8_t value);
+
         std::vector<Sound> &getSounds();
 
         const voice::AudioConfig config;
         voice::VolumeSettings volumeSettings;
         voice::PitchSettings pitchSettings;
-
-        Envelope envelope; // shared ADSR envelope
-
         LFO pitch_lfo;
         LFO amp_lfo;
         Filter filter;

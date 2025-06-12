@@ -9,7 +9,7 @@ Voice::Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel, uint16
     : config({.sample_rate = sample_rate, .max_polyphony = max_polyphony}),
       volumeSettings(),
       pitchSettings(),
-      envelope(sample_rate, initial_bpm),
+
       pitch_lfo(sample_rate, initial_bpm),
       amp_lfo(sample_rate, initial_bpm),
       filter(sample_rate, initial_bpm),
@@ -20,17 +20,20 @@ Voice::Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel, uint16
     sounds.reserve(max_polyphony);
     for (size_t i = 0; i < max_polyphony; ++i)
     {
-        sounds.emplace_back(config.sample_rate);
+        sounds.emplace_back(config.sample_rate, initial_bpm);
     }
 }
 
 void Voice::setBpm(uint16_t bpm)
 {
     bpm = bpm;
-    envelope.setBpm(bpm);
     amp_lfo.setBpm(bpm);
     pitch_lfo.setBpm(bpm);
     filter.setBpm(bpm);
+    for (auto &s : sounds)
+    {
+        s.setBpm(bpm);
+    }
 }
 
 void Voice::setMidiChannel(uint8_t midiChannel)
@@ -42,4 +45,32 @@ void Voice::setMidiChannel(uint8_t midiChannel)
 std::vector<Sound> &Voice::getSounds()
 {
     return sounds;
+}
+void Voice::setAttack(uint8_t value)
+{
+    for (auto &s : sounds)
+    {
+        s.envelope.setAttack(value);
+    }
+}
+void Voice::setDecay(uint8_t value)
+{
+    for (auto &s : sounds)
+    {
+        s.envelope.setDecay(value);
+    }
+}
+void Voice::setSustain(uint8_t value)
+{
+    for (auto &s : sounds)
+    {
+        s.envelope.setSustain(value);
+    }
+}
+void Voice::setRelease(uint8_t value)
+{
+    for (auto &s : sounds)
+    {
+        s.envelope.setRelease(value);
+    }
 }
