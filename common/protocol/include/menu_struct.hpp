@@ -14,8 +14,6 @@
 namespace protocol
 {
 
-    constexpr const uint8_t NUM_VOICES = 1;
-
     enum class AppMode : uint8_t
     {
         MenuList, // page/voice selector

@@ -23,11 +23,11 @@ using namespace ui;
 
 // Configure sound engine
 SoundConfig config{
-    .sampleRate = 96000,
+    .sampleRate = SAMPLE_RATE,
     .tableSize = LOOKUP_TABLE_SIZE,
-    .amplitude = 24000,
-    .bufferSize = 1024,
-    .numVoices = 4,
+    .amplitude = AMPLITUDE,
+    .bufferSize = BUFFER_SIZE,
+    .numVoices = VOICE_COUNT,
     .i2s = {
         .bclk_io = I2S_BCK_IO,
         .lrclk_io = I2S_WS_IO,

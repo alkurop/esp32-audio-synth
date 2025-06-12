@@ -2,7 +2,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <esp_log.h>
-#include "config.hpp"
+#include "synth_config.hpp"
 #include "midi_module.hpp"
 #include "sound_module.hpp"
 #include "protocol.hpp"
