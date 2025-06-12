@@ -35,12 +35,12 @@ namespace sound_module
         protocol::OscillatorShape get_shape() const;
         uint8_t get_morph() const;
         uint8_t get_pwm() const;
+        void setVelocity(uint8_t midiVelocity);
         bool get_sync() const;
 
         /// Public state for introspection or external use
         bool active = false;         ///< true if currently playing
         float base_frequency = 0.0f; ///< unmodulated frequency in Hz
-        uint8_t velocity = 0;       ///< note velocity (gain)
         uint8_t midi_note = 0;
 
     private:
@@ -52,5 +52,6 @@ namespace sound_module
         uint8_t morph = 0;
         uint8_t pwm = 0;
         bool sync = false;
+        float velNorm = 0;
     };
 } // namespace sound_module

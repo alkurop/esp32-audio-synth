@@ -29,22 +29,22 @@ float Voice::getSample()
 
     // 3) Mix all active voices with per-voice vibrato
     float mix = 0.0f;
-    int active_count = 0;
+    int activeCount = 0;
     for (auto &sound : sounds)
     {
         if (!sound.active)
             continue;
 
-        // Apply vibrato to this voice’s stored base_frequency
-        float modFreq = sound.base_frequency;
-        // float modFreq = sound.base_frequency * pitchMul;
+        float modFreq = sound.base_frequency; // or with vibrato mod
         sound.set_frequency(modFreq);
 
-        mix += sound.get_sample();
-        ++active_count;
+        // Pre-attenuate to handle polyphony headroom (e.g. 5 voices max)
+        mix += sound.get_sample() * 0.2f; // or (1.0f / max_polyphony)
+        ++activeCount;
     }
-    if (active_count > 0)
-        mix /= static_cast<float>(active_count);
+
+    if (activeCount > 0)
+        mix /= static_cast<float>(activeCount); // ✅ average
 
     // 4) ADSR envelope
     float envAmp = envelope.next();

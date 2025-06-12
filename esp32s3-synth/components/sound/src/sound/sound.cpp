@@ -1,4 +1,5 @@
 #include "sound/sound.hpp"
+#include "protocol.hpp"
 #include <cmath>
 #include <cstdlib>   // for std::rand, RAND_MAX
 #include "esp_log.h" // for std::rand, RAND_MAX
@@ -14,7 +15,7 @@ void Sound::trigger(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
 {
     ESP_LOGD(TAG, "Sound trigger freq %f velocity %u note %u", frequency, velocity_in, midi_note);
     base_frequency = frequency;
-    velocity = velocity_in;
+    setVelocity(velocity_in);
     phase = 0.0f;
     phase_increment = base_frequency / sample_rate;
     active = true;
@@ -65,32 +66,32 @@ float Sound::get_sample()
 
     // Primary waveform sample
     float rawA = generate_wave(shape);
-    // Determine next shape for morph (wrap around _Count)
-    uint8_t idx = static_cast<uint8_t>(shape);
-    uint8_t nextIdx = (idx + 1) % static_cast<uint8_t>(protocol::OscillatorShape::_Count);
-    protocol::OscillatorShape nextShape = static_cast<protocol::OscillatorShape>(nextIdx);
-    float rawB = generate_wave(nextShape);
+    // // Determine next shape for morph (wrap around _Count)
+    // uint8_t idx = static_cast<uint8_t>(shape);
+    // uint8_t nextIdx = (idx + 1) % static_cast<uint8_t>(protocol::OscillatorShape::_Count);
+    // protocol::OscillatorShape nextShape = static_cast<protocol::OscillatorShape>(nextIdx);
+    // float rawB = generate_wave(nextShape);
 
-    // Morph between rawA and rawB based on morph (0..MORPH_MAX)
-    float t = static_cast<float>(morph) / static_cast<float>(OSCILLATOR_MORPH_MAX);
-    float sample = (1.0f - t) * rawA + t * rawB;
+    // // Morph between rawA and rawB based on morph (0..MORPH_MAX)
+    // float t = static_cast<float>(morph) / static_cast<float>(OSCILLATOR_MORPH_MAX);
+    // float sample = (1.0f - t) * rawA + t * rawB;
 
-    // Apply PWM if square wave in morph targets
-    if (shape == protocol::OscillatorShape::Square || nextShape == protocol::OscillatorShape::Square)
-    {
-        // Compute duty cycle from pwm (0–PWM_MAX) into [0.01 … 0.99]
-        float duty = static_cast<float>(pwm) / static_cast<float>(OSCILLATOR_PWM_MAX);
-        duty = std::fmax(0.01f, std::fmin(0.99f, duty));
-        float squareSample = (phase < duty) ? 1.0f : -1.0f;
-        // Blend square contributions according to morph position
-        if (shape == protocol::OscillatorShape::Square)
-            sample = (1.0f - t) * squareSample + t * rawB;
-        else // nextShape is square
-            sample = (1.0f - t) * rawA + t * squareSample;
-    }
+    // // Apply PWM if square wave in morph targets
+    // if (shape == protocol::OscillatorShape::Square || nextShape == protocol::OscillatorShape::Square)
+    // {
+    //     // Compute duty cycle from pwm (0–PWM_MAX) into [0.01 … 0.99]
+    //     float duty = static_cast<float>(pwm) / static_cast<float>(OSCILLATOR_PWM_MAX);
+    //     duty = std::fmax(0.01f, std::fmin(0.99f, duty));
+    //     float squareSample = (phase < duty) ? 1.0f : -1.0f;
+    //     // Blend square contributions according to morph position
+    //     if (shape == protocol::OscillatorShape::Square)
+    //         sample = (1.0f - t) * squareSample + t * rawB;
+    //     else // nextShape is square
+    //         sample = (1.0f - t) * rawA + t * squareSample;
+    // }
 
     // Apply velocity (amplitude) and return
-    return sample * velocity;
+    return rawA * velNorm;
 }
 
 void Sound::set_shape(protocol::OscillatorShape newShape)
@@ -136,4 +137,9 @@ uint8_t Sound::get_pwm() const
 bool Sound::get_sync() const
 {
     return sync;
+}
+
+void Sound::setVelocity(uint8_t velocity)
+{
+    velNorm = std::pow(static_cast<float>(velocity) / 127.0f, 1.5f) * VELOCITY_GLOBAL_SCALER;
 }

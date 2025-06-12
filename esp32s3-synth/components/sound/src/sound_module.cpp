@@ -78,25 +78,30 @@ void SoundModule::process()
     size_t num_samples = config.bufferSize;
     std::vector<int16_t> buffer(num_samples * 2);
 
-    float invNumVoices = 1.0f / static_cast<float>(config.numVoices);
     float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
 
     for (size_t i = 0; i < num_samples; ++i)
     {
         float mix = 0.0f;
+        int activeCount = 0;
+
         for (auto &voice : voices)
         {
-            mix += voice.getSample();
+            float s = voice.getSample();
+            mix += s;
+            if (s != 0.0f)
+                activeCount++;
         }
 
-        mix *= invNumVoices;
+        if (activeCount > 0)
+            mix /= static_cast<float>(activeCount);
+
         float clamped = clamp(mix, -1.0f, 1.0f);
         int16_t sample = static_cast<int16_t>(clamped * config.amplitude * volumeScale);
 
         buffer[2 * i] = sample;     // Left
         buffer[2 * i + 1] = sample; // Right
     }
-
     size_t bytes_written;
     i2s_channel_write(txChan, buffer.data(), buffer.size() * sizeof(int16_t), &bytes_written, portMAX_DELAY);
 }
