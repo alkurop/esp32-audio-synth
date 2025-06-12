@@ -1,7 +1,6 @@
 // voice.cpp
 #include "voice/voice.hpp"
 #include <cmath>
-#include "tag.hpp"
 
 using namespace sound_module;
 

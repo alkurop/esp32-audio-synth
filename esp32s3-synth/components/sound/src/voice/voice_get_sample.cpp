@@ -2,12 +2,13 @@
 // voice.cpp
 #include "voice/voice.hpp"
 #include <cmath>
-#include "tag.hpp"
 #include <esp_log.h>
 #include <channel_settings.hpp>
 
 using namespace sound_module;
 using namespace protocol;
+
+static const char *TAG = "Voice";
 
 float Voice::getSample()
 {
@@ -64,9 +65,10 @@ void Voice::setVolume(uint8_t newVolume)
     float normalized = static_cast<float>(volumeSettings.volume) / static_cast<float>(voice::VOL_MAX);
 
     // 2) Map normalized → dB:
-    float volume_dB = voice::VOL_MAX + normalized * (voice::VOL_MAX - voice::MIN_DB);
+    float volume_dB = voice::MIN_DB + normalized * (0.0f - voice::MIN_DB);
 
     // 3) Convert dB → linear and feed into the smoother:
     float linearGain = std::pow(10.0f, volume_dB * 0.05f);
+    ESP_LOGD(TAG, "Linear gain %f Volume_db %f", linearGain, volume_dB);
     volumeSettings.gain_smoothed.setTarget(linearGain);
 }

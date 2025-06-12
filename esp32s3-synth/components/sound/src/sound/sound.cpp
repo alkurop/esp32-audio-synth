@@ -5,7 +5,7 @@
 
 using namespace sound_module;
 using namespace protocol;
-const char *TAG = "Voice";
+static const char *TAG = "Sound";
 
 Sound::Sound(uint32_t sample_rate)
     : sample_rate(sample_rate) {}

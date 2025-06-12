@@ -1,7 +1,8 @@
 #include "midi_parser.hpp"
-#include "tag.hpp"
 
 using namespace midi_module;
+
+static constexpr const char *TAG = "MIDI_PARSER";
 
 MidiParser::MidiParser() = default;
 

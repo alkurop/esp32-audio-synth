@@ -1,7 +1,6 @@
 // sound_module.cpp
 #include "sound_module.hpp"
 #include "utils.hpp"
-#include "tag.hpp"
 #include <esp_log.h>
 #include <driver/i2s_std.h>
 #include <freertos/FreeRTOS.h>

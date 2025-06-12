@@ -42,7 +42,7 @@ MidiControllerCallback controllerCallback = [](const ControllerChange &cc)
 
 MidiNoteMessageCallback noteMessageCallback = [](const NoteMessage &note)
 {
-    ESP_LOGD(TAG, "Note on=%d channel %d velocity %d", note.on, note.channel, note.velocity);
+    // ESP_LOGD(TAG, "Note on=%d channel %d velocity %d", note.on, note.channel, note.velocity);
     soundModule.handle_note(note);
 };
 
