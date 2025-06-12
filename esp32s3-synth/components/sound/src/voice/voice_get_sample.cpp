@@ -29,25 +29,14 @@ float Voice::getSample()
 
     // 3) Mix all active voices with per-voice vibrato
     float mix = 0.0f;
-    float totalWeight = 0.0f;
-
     for (auto &sound : sounds)
     {
         if (!sound.active)
             continue;
 
-        float modFreq = sound.base_frequency; // or with vibrato mod
-        sound.set_frequency(modFreq);
-
-        // Convert MIDI velocity (0–127) to perceptual gain
-         
-        // Weighted accumulation
+        sound.set_frequency(sound.base_frequency); // with vibrato etc.
         mix += sound.get_sample() * sound.velNorm;
-        totalWeight += sound.velNorm;
     }
-
-    if (totalWeight > 0.0f)
-        mix /= totalWeight;
     return mix * sm_gain;
 
     // 4) ADSR envelope
