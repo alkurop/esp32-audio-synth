@@ -71,31 +71,6 @@ float Sound::get_sample()
 
     // Primary waveform sample
     float rawA = generate_wave(shape);
-    // // Determine next shape for morph (wrap around _Count)
-    // uint8_t idx = static_cast<uint8_t>(shape);
-    // uint8_t nextIdx = (idx + 1) % static_cast<uint8_t>(protocol::OscillatorShape::_Count);
-    // protocol::OscillatorShape nextShape = static_cast<protocol::OscillatorShape>(nextIdx);
-    // float rawB = generate_wave(nextShape);
-
-    // // Morph between rawA and rawB based on morph (0..MORPH_MAX)
-    // float t = static_cast<float>(morph) / static_cast<float>(OSCILLATOR_MORPH_MAX);
-    // float sample = (1.0f - t) * rawA + t * rawB;
-
-    // // Apply PWM if square wave in morph targets
-    // if (shape == protocol::OscillatorShape::Square || nextShape == protocol::OscillatorShape::Square)
-    // {
-    //     // Compute duty cycle from pwm (0–PWM_MAX) into [0.01 … 0.99]
-    //     float duty = static_cast<float>(pwm) / static_cast<float>(OSCILLATOR_PWM_MAX);
-    //     duty = std::fmax(0.01f, std::fmin(0.99f, duty));
-    //     float squareSample = (phase < duty) ? 1.0f : -1.0f;
-    //     // Blend square contributions according to morph position
-    //     if (shape == protocol::OscillatorShape::Square)
-    //         sample = (1.0f - t) * squareSample + t * rawB;
-    //     else // nextShape is square
-    //         sample = (1.0f - t) * rawA + t * squareSample;
-    // }
-
-    // Apply velocity (amplitude) and return
     return rawA;
 }
 
