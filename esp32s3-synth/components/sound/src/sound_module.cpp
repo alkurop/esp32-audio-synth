@@ -53,9 +53,9 @@ void SoundModule::init()
         xTaskCreatePinnedToCore(
             audio_task_entry,
             "audio_task",
-            4096,
+            8192,
             this,
-            5,
+            configMAX_PRIORITIES - 1,
             &audioTask,
             1 // core 1
         );
@@ -96,8 +96,7 @@ void SoundModule::process()
         if (activeCount > 0)
             mix /= static_cast<float>(activeCount);
 
-        float clamped = clamp(mix, -1.0f, 1.0f);
-        int16_t sample = static_cast<int16_t>(clamped * config.amplitude * volumeScale);
+        int16_t sample = static_cast<int16_t>(mix * config.amplitude * volumeScale);
 
         buffer[2 * i] = sample;     // Left
         buffer[2 * i + 1] = sample; // Right
@@ -111,7 +110,10 @@ void SoundModule::audio_task_entry(void *arg)
     auto *self = static_cast<SoundModule *>(arg);
     while (true)
     {
+        int64_t start = esp_timer_get_time();
         self->process();
+        int64_t elapsed_us = esp_timer_get_time() - start;
+        ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
     }
 }
 

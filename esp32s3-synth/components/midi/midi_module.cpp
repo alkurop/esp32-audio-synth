@@ -29,17 +29,17 @@ static void midiReader(void *arg)
   }
 }
 
-MidiModule::MidiModule( )
+MidiModule::MidiModule()
     : handle(NULL), cable_num(0x00), channel(0x00) {};
 
 void MidiModule::init(MidiReadCallback readCallback)
 {
   this->readCallback = readCallback;
   static const char *s_str_desc[] = {
-      (char[]){0x09, 0x04},         // Language (English)
+      (char[]){0x09, 0x04},     // Language (English)
       CONFIG_MIDI_COMPANY_NAME, // Manufacturer
-      CONFIG_MIDI_PRODUCT_NAME,      // Product
-      CONFIG_MIDI_DEVICE_ID,       // Serial number
+      CONFIG_MIDI_PRODUCT_NAME, // Product
+      CONFIG_MIDI_DEVICE_ID,    // Serial number
       CONFIG_MIDI_PRODUCT_NAME};
   tinyusb_config_t const midi_config = {
       .device_descriptor = NULL, // If device_descriptor is NULL,
@@ -58,15 +58,15 @@ void MidiModule::init(MidiReadCallback readCallback)
       .rx_unread_buf_sz = 64,        // Buffer size for incoming data (optional)
       .callback_rx = NULL,           // Callback for RX (optional)
       .callback_rx_wanted_char = NULL,
-      .callback_line_state_changed = NULL,   
-      .callback_line_coding_changed = NULL,  
+      .callback_line_state_changed = NULL,
+      .callback_line_coding_changed = NULL,
   };
   tusb_cdc_acm_init(&acm_cfg);
   tinyusb_driver_install(&midi_config);
   esp_tusb_init_console(TINYUSB_CDC_ACM_0); // log to usb
 
-  xTaskCreate(midiReader, "midiReader", 4 * 1024, this,
-              configMAX_PRIORITIES - 2, &handle);
+  xTaskCreatePinnedToCore(midiReader, "midiReader", 4 * 1024, this,
+                          configMAX_PRIORITIES - 2, &handle, 0);
 };
 
 void MidiModule::sendValue(uint8_t program, uint8_t value)

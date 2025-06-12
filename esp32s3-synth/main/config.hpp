@@ -27,7 +27,7 @@ SoundConfig config{
     .tableSize = LOOKUP_TABLE_SIZE,
     .amplitude = 24000,
     .bufferSize = 1024,
-    .numVoices = 1,
+    .numVoices = 4,
     .i2s = {
         .bclk_io = I2S_BCK_IO,
         .lrclk_io = I2S_WS_IO,
