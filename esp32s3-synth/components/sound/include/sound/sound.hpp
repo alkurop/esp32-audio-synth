@@ -42,6 +42,7 @@ namespace sound_module
         bool active = false;         ///< true if currently playing
         float base_frequency = 0.0f; ///< unmodulated frequency in Hz
         uint8_t midi_note = 0;
+        float velNorm = 0;
 
     private:
         const uint32_t sample_rate;   ///< samples per second
@@ -52,6 +53,5 @@ namespace sound_module
         uint8_t morph = 0;
         uint8_t pwm = 0;
         bool sync = false;
-        float velNorm = 0;
     };
 } // namespace sound_module

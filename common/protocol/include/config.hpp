@@ -1,2 +1,2 @@
 #pragma once
-#define VELOCITY_GLOBAL_SCALER 2.7
+#define VELOCITY_GLOBAL_SCALER 2.3

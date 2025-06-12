@@ -91,7 +91,7 @@ float Sound::get_sample()
     // }
 
     // Apply velocity (amplitude) and return
-    return rawA * velNorm;
+    return rawA;
 }
 
 void Sound::set_shape(protocol::OscillatorShape newShape)

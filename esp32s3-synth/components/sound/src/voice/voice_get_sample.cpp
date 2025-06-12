@@ -29,7 +29,8 @@ float Voice::getSample()
 
     // 3) Mix all active voices with per-voice vibrato
     float mix = 0.0f;
-    int activeCount = 0;
+    float totalWeight = 0.0f;
+
     for (auto &sound : sounds)
     {
         if (!sound.active)
@@ -38,19 +39,21 @@ float Voice::getSample()
         float modFreq = sound.base_frequency; // or with vibrato mod
         sound.set_frequency(modFreq);
 
-        // Pre-attenuate to handle polyphony headroom (e.g. 5 voices max)
-        mix += sound.get_sample() * 0.2f; // or (1.0f / max_polyphony)
-        ++activeCount;
+        // Convert MIDI velocity (0–127) to perceptual gain
+         
+        // Weighted accumulation
+        mix += sound.get_sample() * sound.velNorm;
+        totalWeight += sound.velNorm;
     }
 
-    if (activeCount > 0)
-        mix /= static_cast<float>(activeCount); // ✅ average
+    if (totalWeight > 0.0f)
+        mix /= totalWeight;
+    return mix * sm_gain;
 
     // 4) ADSR envelope
-    float envAmp = envelope.next();
+    // float envAmp = envelope.next();
 
     // 5) Final output: mix → envelope → master gain → tremolo
-    return mix * sm_gain;
     // return mix * envAmp * sm_gain * tremGain;
 }
 
