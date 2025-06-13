@@ -65,7 +65,7 @@ namespace sound_module
         uint16_t bpm;
 
         std::vector<Sound> sounds; // dynamic polyphony set by constructor
-        Sound &find_available_slot();
+        Sound *find_available_slot();
         Sound *find_active_note(uint8_t midi_note); // can be a nullptr
         void all_notes_off();
     };
