@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "oscillator_settings.hpp" // for OscillatorShape, oscShapes, yesNo
-#include "../nodes/envelope.hpp"
+#include "envelope.hpp"
 #include <math.h>
 
 namespace sound_module

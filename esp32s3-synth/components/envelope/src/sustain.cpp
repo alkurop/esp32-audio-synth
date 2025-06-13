@@ -1,8 +1,8 @@
 #include "sustain.hpp"
+#include "esp_log.h"
 static const char *TAG = "Sustain";
 
-SustainPhase::SustainPhase(float sampleRate):EnvelopePhase(sampleRate)
-
+SustainPhase::SustainPhase(float sampleRate) : EnvelopePhase(sampleRate) {};
 
 void SustainPhase::recalculate(uint8_t param, float /*bpm*/, float)
 {

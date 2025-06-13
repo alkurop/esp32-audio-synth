@@ -22,7 +22,7 @@ void AttackPhase::recalculate(uint8_t param, float bpm, float)
 
 void AttackPhase::enter(float /*startLevel*/)
 {
-    ESP_LOGI(TAG."enter");
+    ESP_LOGI(TAG, "enter");
     cursor = 0.0f;
     currentLevel = 0.0f;
 }

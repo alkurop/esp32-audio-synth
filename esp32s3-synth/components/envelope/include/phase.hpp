@@ -1,6 +1,10 @@
 #pragma once
 #include <cstdint>
 #include "protocol.hpp"
+#include <cmath>
+
+
+using namespace protocol;
 
 class EnvelopePhase
 {

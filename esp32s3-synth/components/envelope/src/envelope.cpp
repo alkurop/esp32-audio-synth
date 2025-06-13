@@ -45,10 +45,10 @@ void Envelope::recalculate()
 {
     sustainLevel = static_cast<float>(params.sustain) / static_cast<float>(envelope::MAX);
 
-    attack.recalculate(params.attack, bpm);
+    attack.recalculate(params.attack, bpm, sustainLevel);
     decay.recalculate(params.decay, bpm, sustainLevel);
-    sustain.recalculate(params.sustain, bpm);
-    release.recalculate(params.release, bpm);
+    sustain.recalculate(params.sustain, bpm, sustainLevel);
+    release.recalculate(params.release, bpm, sustainLevel);
 }
 
 void Envelope::gateOn()
@@ -59,7 +59,8 @@ void Envelope::gateOn()
 
 void Envelope::gateOff()
 {
-    if (active && active != &release) {
+    if (active && active != &release)
+    {
         float level = active->currentValue();
         release.enter(level);
         active = &release;
@@ -68,31 +69,40 @@ void Envelope::gateOff()
 
 float Envelope::next()
 {
-    if (!active) {
+    if (!active)
+    {
         return 0.0f;
     }
 
     float value = active->next();
 
-    if (active->isFinished()) {
-        if (active == &attack) {
+    if (active->isFinished())
+    {
+        if (active == &attack)
+        {
             float level = attack.currentValue();
-            if (level <= sustainLevel) {
+            if (level <= sustainLevel)
+            {
                 sustain.enter(level);
                 active = &sustain;
-            } else {
+            }
+            else
+            {
                 decay.enter(level);
                 active = &decay;
             }
         }
-        else if (active == &decay) {
+        else if (active == &decay)
+        {
             sustain.enter(decay.currentValue());
             active = &sustain;
         }
-        else if (active == &sustain) {
+        else if (active == &sustain)
+        {
             // Should only transition via gateOff
         }
-        else if (active == &release) {
+        else if (active == &release)
+        {
             active = nullptr;
         }
     }
