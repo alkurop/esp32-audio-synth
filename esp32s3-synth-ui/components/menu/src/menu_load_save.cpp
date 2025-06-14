@@ -202,12 +202,12 @@ void Menu::loadProject(int16_t slotIndex)
     if (slotIndex != AUTOSAVE_SLOT)
     {
         state.shouldAutoSave = true;
+        notify();
     }
     else
     {
-        state.mode = AppMode::MenuList;
+        updateAfterAutoLoad();
     }
-    notify();
 }
 
 void Menu::saveProject(int16_t slotIndex, const std::string &name)

@@ -37,6 +37,7 @@ namespace menu
         void enterPopup();
         void rotateKnob(uint8_t knob, int16_t value);
         void saveProject(int16_t slotIndex, const std::string &name);
+        void updateAfterAutoLoad();
 
         // for autosave task
         ParamStore paramStore;

@@ -34,6 +34,13 @@ void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
     loadProject(-1);
 }
 
+void Menu::updateAfterAutoLoad()
+{
+    state.mode = AppMode::MenuList;
+    state.encoderRanges = calcEncoderRanges();
+    notify();
+}
+
 void Menu::enterMenuPage()
 {
     if (state.mode == AppMode::Popup)
