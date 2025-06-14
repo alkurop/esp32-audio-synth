@@ -199,12 +199,15 @@ void Menu::loadProject(int16_t slotIndex)
     // Apply all updates at once
     cache.set(updates);
 
-    notify();
-
     if (slotIndex != AUTOSAVE_SLOT)
     {
         state.shouldAutoSave = true;
     }
+    else
+    {
+        state.mode = AppMode::MenuList;
+    }
+    notify();
 }
 
 void Menu::saveProject(int16_t slotIndex, const std::string &name)

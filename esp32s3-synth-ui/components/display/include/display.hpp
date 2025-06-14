@@ -60,6 +60,7 @@ namespace ui
         esp_err_t init();
 
         // Main menu entry point
+        void renderLoading();
         void renderMenuList(const menu::MenuState &st);
         void showMenuList(uint8_t page);
         void showPage();
@@ -92,7 +93,7 @@ namespace ui
         esp_err_t configureI2C();
         esp_err_t configureSSD1306();
         esp_err_t configureLVGL();
-        void renderTopBar(const menu::MenuState &st, lv_obj_t *scr);
+        void renderTopBar(const char *text, lv_obj_t *scr);
 
         // Menu building and selection
         void initMenuList(lv_obj_t *scr);

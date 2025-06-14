@@ -20,6 +20,20 @@ using namespace menu;
 
 static constexpr int ITEM_H = 16;
 
+void Display::renderLoading()
+{
+    // 0) Try to lock LVGL
+    if (!lvgl_port_lock(0))
+        return;
+    lv_obj_t *scr = lv_scr_act();
+
+    char buf[32];
+    std::snprintf(buf, sizeof(buf), "Loading ...");
+    renderTopBar(buf, scr);
+    lv_timer_handler();
+    lvgl_port_unlock();
+}
+
 void Display::initMenuList(lv_obj_t *scr)
 {
     static constexpr int ITEM_H = 16;
@@ -89,7 +103,9 @@ void Display::renderMenuList(const menu::MenuState &st)
 
     lv_obj_t *scr = lv_scr_act();
     // Update title bar
-    renderTopBar(st, scr);
+    char buf[32];
+    std::snprintf(buf, sizeof(buf), "Voice %u  Ch %u  Vol %u", st.voiceIndex + CONFIG_HUMAN_INT_OFFSET, st.channel + CONFIG_HUMAN_INT_OFFSET, st.volume);
+    renderTopBar(buf, scr);
     // One-time build of the menu
     if (!menuContainer)
     {
@@ -236,7 +252,7 @@ void Display::selectMenuItem(uint8_t page)
     menuLastSelected = page;
 }
 
-void Display::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
+void Display::renderTopBar(const char *text, lv_obj_t *scr)
 {
     if (!topbar_label)
     {
@@ -255,9 +271,7 @@ void Display::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
         lv_obj_align(topbar_label, LV_ALIGN_TOP_LEFT, 4, 0);
     }
 
-    char buf[32];
-    std::snprintf(buf, sizeof(buf), "Voice %u  Ch %u  Vol %u", st.voiceIndex + CONFIG_HUMAN_INT_OFFSET, st.channel + CONFIG_HUMAN_INT_OFFSET, st.volume);
-    lv_label_set_text(topbar_label, buf);
+    lv_label_set_text(topbar_label, text);
     lv_obj_invalidate(topbar_label);
 };
 

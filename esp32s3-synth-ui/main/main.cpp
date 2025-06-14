@@ -3,7 +3,7 @@
 #include <esp_log.h>
 #include <cstdio>
 #include <array>
-#include <functional>  // for std::reference_wrapper, std::ref
+#include <functional> // for std::reference_wrapper, std::ref
 
 #include "rotary.hpp"
 #include "button.hpp"
@@ -96,6 +96,8 @@ static void render_task(void *arg)
             case AppMode::Popup:
                 disp->renderPopup(st);
                 break;
+            case AppMode::Loading:
+                disp->renderLoading();
             default:
                 break;
             }
@@ -149,14 +151,11 @@ extern "C" void app_main()
     button3.install();
     ESP_ERROR_CHECK(display.init());
     ESP_ERROR_CHECK(sender.init());
+    display.renderLoading();
 
     createMenuRenderTask();
-
-   
-
     menuHolder.init([](const MenuState &state)
                     {
         // overwrite any pending state so we only keep the latest
-        xQueueOverwrite(menuRenderQueue, &state); 
-        }, updateCallback);
+        xQueueOverwrite(menuRenderQueue, &state); }, updateCallback);
 }

@@ -48,7 +48,7 @@ esp_err_t Display::init()
         ESP_LOGE(TAG, "LVGL config failed (%s)", esp_err_to_name(err));
         return err;
     }
-
+    renderLoading();
     return ESP_OK;
 }
 

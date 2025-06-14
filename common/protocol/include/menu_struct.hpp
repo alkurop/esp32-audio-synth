@@ -16,6 +16,7 @@ namespace protocol
 
     enum class AppMode : uint8_t
     {
+        Loading, // page/voice selector
         MenuList, // page/voice selector
         Page,     // parameter editing
         Popup     // load/save dialog

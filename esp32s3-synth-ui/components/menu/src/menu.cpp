@@ -17,18 +17,19 @@ using namespace menu;
 Menu::Menu(uint8_t voiceCount)
     : paramStore(), state{}, voiceCount(voiceCount), cache(voiceCount) // value‐initialize everything
 {
-    state.mode = AppMode::MenuList;
+    state.mode = AppMode::Loading;
 }
 
 void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
 {
     displayCallback = std::move(displayCb);
     cache.setCallback(updateCb);
+    notify();
     // prime the encoder ranges & draw initial screen
     state.encoderRanges = calcEncoderRanges();
     initAutosaveTask();
-      // wait for synth device to init, because initing menu will cause sending
-     // the synth settings over i2c
+    // wait for synth device to init, because initing menu will cause sending
+    // the synth settings over i2c
     vTaskDelay(pdMS_TO_TICKS(1000));
     loadProject(-1);
 }
@@ -93,6 +94,8 @@ void Menu::rotateKnob(uint8_t knob, int16_t pos)
         break;
     case AppMode::Popup:
         changeValuePopup(knob, pos);
+        break;
+    default:
         break;
     }
 }
