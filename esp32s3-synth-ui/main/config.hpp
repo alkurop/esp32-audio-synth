@@ -27,19 +27,19 @@
 
 // Rotary encoder 0
 #define ROTARY0_CLK GPIO_NUM_41
-#define ROTARY0_DT  GPIO_NUM_40
+#define ROTARY0_DT GPIO_NUM_40
 
 // Rotary encoder 1
 #define ROTARY1_CLK GPIO_NUM_39
-#define ROTARY1_DT  GPIO_NUM_38
+#define ROTARY1_DT GPIO_NUM_38
 
 // Rotary encoder 2
 #define ROTARY2_CLK GPIO_NUM_45
-#define ROTARY2_DT  GPIO_NUM_48
+#define ROTARY2_DT GPIO_NUM_48
 
 // Rotary encoder 3
 #define ROTARY3_CLK GPIO_NUM_47
-#define ROTARY3_DT  GPIO_NUM_21
+#define ROTARY3_DT GPIO_NUM_21
 
 #define ENCODER_COUNT 4
 #define RENDER_TASK_STACK 8 * 1024 // 8 KB
@@ -55,8 +55,7 @@ SenderConfig senderConfig = {
     .scl_pin = PROTOCOL_SCL_PIN,
     .i2c_port = PROTOCOL_I2C_PORT,
     .receiver_address = RECEIVER_ARRDESS,
-    .clock_speed= I2C_CLOCK_SPEED
-    };
+    .clock_speed = I2C_CLOCK_SPEED};
 
 SSD1306Config displayConfig = {
     .sda_pin = DISPLAY_SDA_PIN,
@@ -71,25 +70,25 @@ RotaryConfig cfg0 = {
     .pin_clk = ROTARY0_CLK,
     .pin_dt = ROTARY0_DT,
     .increment = 1,
-};
+    .wrapAround = false};
 
 RotaryConfig cfg1 = {
     .id = 1,
     .pin_clk = ROTARY1_CLK,
     .pin_dt = ROTARY1_DT,
     .increment = 1,
-};
+    .wrapAround = false};
 
 RotaryConfig cfg2 = {
     .id = 2,
     .pin_clk = ROTARY2_CLK,
     .pin_dt = ROTARY2_DT,
     .increment = 1,
-};
+    .wrapAround = false};
 
 RotaryConfig cfg3 = {
     .id = 3,
     .pin_clk = ROTARY3_CLK,
     .pin_dt = ROTARY3_DT,
     .increment = 1,
-};
+    .wrapAround = false};

@@ -256,7 +256,7 @@ void Display::renderTopBar(const menu::MenuState &st, lv_obj_t *scr)
     }
 
     char buf[32];
-    std::snprintf(buf, sizeof(buf), "Voice %u  Ch %u  Vol %u", st.voice + CONFIG_HUMAN_INT_OFFSET, st.channel + CONFIG_HUMAN_INT_OFFSET, st.volume);
+    std::snprintf(buf, sizeof(buf), "Voice %u  Ch %u  Vol %u", st.voiceIndex + CONFIG_HUMAN_INT_OFFSET, st.channel + CONFIG_HUMAN_INT_OFFSET, st.volume);
     lv_label_set_text(topbar_label, buf);
     lv_obj_invalidate(topbar_label);
 };

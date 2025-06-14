@@ -32,7 +32,7 @@ namespace menu
         R[MENU_POSITION_VOICE] = {
             .min = 0,
             .max = static_cast<int16_t>(voiceCount - 1),
-            .value = state.voice};
+            .value = state.voiceIndex};
 
         // channel on Main List (always numeric)
         {

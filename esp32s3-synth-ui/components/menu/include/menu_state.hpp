@@ -96,7 +96,7 @@ namespace menu
     {
         AppMode mode;                   // which of the 3 modes we’re in
         uint8_t menuItemIndex;          ///< Current menu page
-        uint8_t voice;                  ///< Current voice number (1..N)
+        uint8_t voiceIndex;                  ///< Current voice number (1..N)
         uint8_t channel;                ///< Current channel for that voice
         uint8_t volume;                 ///< Current volume for that voice
         int8_t fieldValues[MAX_FIELDS]; ///< Current values for each knob

@@ -27,7 +27,6 @@ void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
     // prime the encoder ranges & draw initial screen
     state.encoderRanges = calcEncoderRanges();
     initAutosaveTask();
-    notify();
       // wait for synth device to init, because initing menu will cause sending
      // the synth settings over i2c
     vTaskDelay(pdMS_TO_TICKS(1000));
@@ -106,12 +105,12 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
         state.menuItemIndex = pos;
         break;
     case 1:
-        state.voice = pos;
+        state.voiceIndex = pos;
         break;
     case 2:
     {
         FieldUpdateList updates = {
-            FieldUpdate{state.voice, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Chan), pos}};
+            FieldUpdate{state.voiceIndex, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Chan), pos}};
         cache.set(updates);
         state.shouldAutoSave = true;
         break;
@@ -119,7 +118,7 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
     case 3:
     {
         FieldUpdateList updates = {
-            FieldUpdate{state.voice, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Vol), pos}};
+            FieldUpdate{state.voiceIndex, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Vol), pos}};
         cache.set(updates);
         state.shouldAutoSave = true;
         break;
@@ -129,8 +128,8 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
     }
 
     // refresh dependent values
-    state.channel = cache.get(state.voice, Page::Channel, 0);
-    state.volume = cache.get(state.voice, Page::Channel, 1);
+    state.channel = cache.get(state.voiceIndex, Page::Channel, 0);
+    state.volume = cache.get(state.voiceIndex, Page::Channel, 1);
     state.encoderRanges = calcEncoderRanges();
     notify();
 }
@@ -154,14 +153,14 @@ void Menu::changeValuePage(uint8_t knob, int16_t pos)
 
     FieldUpdateList updates = {
         FieldUpdate{
-            .voiceIndex = state.voice,
+            .voiceIndex = state.voiceIndex,
             .pageByte = static_cast<uint8_t>(itemToPage(state.menuItemIndex)),
             .field = knob,
             .value = newVal}};
     cache.set(updates);
     // update snapshot
     state.fieldValues[knob] = cache.get(
-        state.voice,
+        state.voiceIndex,
         itemToPage(state.menuItemIndex),
         knob);
     state.encoderRanges = calcEncoderRanges();
@@ -201,6 +200,6 @@ void Menu::updatePageFromCache()
     // Pull each one from the cache…
     for (uint8_t knob = 0; knob < count; ++knob)
     {
-        state.fieldValues[knob] = cache.get(state.voice, page, knob);
+        state.fieldValues[knob] = cache.get(state.voiceIndex, page, knob);
     }
 }

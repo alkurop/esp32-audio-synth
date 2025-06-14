@@ -3,6 +3,9 @@
 
 namespace protocol
 {
+
+    static constexpr int AUTOSAVE_INTERVAL_MS = (1 * 20 * 1000); // 20 seconds
+
     // BpmFields
     static constexpr FieldInfo bpmInfo[] = {
         {"Sync", FieldType::Options, 0, 0, yesNo, 2},
