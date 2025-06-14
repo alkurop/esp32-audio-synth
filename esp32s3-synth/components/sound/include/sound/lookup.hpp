@@ -18,4 +18,22 @@ namespace sound_module
 
         return a + frac * (b - a); // linear interpolation
     }
+
+    inline float poly_blep(float t, float dt)
+    {
+        if (t < dt)
+        {
+            float x = t / dt;
+            return x + x - x * x - 1.0f;
+        }
+        else if (t > 1.0f - dt)
+        {
+            float x = (t - 1.0f) / dt;
+            return x * x + x + 1.0f;
+        }
+        else
+        {
+            return 0.0f;
+        }
+    }
 }

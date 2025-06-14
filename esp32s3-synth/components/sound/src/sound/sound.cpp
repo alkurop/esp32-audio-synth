@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdlib>   // for std::rand, RAND_MAX
 #include "esp_log.h" // for std::rand, RAND_MAX
+#include <algorithm>
 
 using namespace sound_module;
 using namespace protocol;
@@ -45,34 +46,67 @@ float Sound::get_sample()
     // Advance phase
     phase += phase_increment;
     if (phase >= 1.0f)
+    {
         phase -= 1.0f;
+        if (sync)
+            phase = 0.0f;
+    }
 
     if (!active && envelope.is_idle())
         return 0.0f;
-    // Generate raw samples for current and next waveform for morphing
-    auto generate_wave = [&](protocol::OscillatorShape wf)
+
+    auto generate_wave = [&](protocol::OscillatorShape wf, float phaseOffset = 0.0f)
     {
+        float ph = phase + phaseOffset;
+        if (ph >= 1.0f)
+            ph -= 1.0f;
+
         switch (wf)
         {
         case protocol::OscillatorShape::Sine:
-            return interpolateLookup(phase, sineTable);
+            return interpolateLookup(ph, sineTable);
         case protocol::OscillatorShape::Saw:
-            return interpolateLookup(phase, sawTable);
+        {
+            float t = ph;
+            float dt = phase_increment; // normalized increment per sample
+            float value = 2.0f * t - 1.0f;
+            value -= poly_blep(t, dt);
+            return value;
+        }
         case protocol::OscillatorShape::Square:
-            return interpolateLookup(phase, squareTable);
+        {
+            float pw = std::clamp(static_cast<float>(pwm) / static_cast<float>(protocol::OSCILLATOR_PWM_MAX), 0.05f, 0.95f);
+            float t = ph;
+            float dt = phase_increment;
+
+            float out = (t < pw) ? 1.0f : -1.0f;
+
+            // Apply PolyBLEP at both transitions
+            out += poly_blep(t, dt);               // Rising edge
+            float t2 = fmodf(t - pw + 1.0f, 1.0f); // Correct wraparound
+            out -= poly_blep(t2, dt);              // Falling edge
+
+            return out;
+        }
         case protocol::OscillatorShape::Tri:
-            return interpolateLookup(phase, triangleTable);
+            return interpolateLookup(ph, triangleTable);
         case protocol::OscillatorShape::Noise:
             return 2.0f * (static_cast<float>(std::rand()) / RAND_MAX) - 1.0f;
         default:
             return 0.0f;
         }
-        return 0.0f;
     };
 
-    // Primary waveform sample
-    float rawA = generate_wave(shape);
-    return rawA * envelope.next();
+    // Morph between current shape and next shape
+    auto shapeA = shape;
+    auto shapeB = static_cast<protocol::OscillatorShape>((static_cast<int>(shape) + 1) % static_cast<int>(protocol::OscillatorShape::_Count));
+
+    float morphNorm = std::clamp(static_cast<float>(morph) / static_cast<float>(protocol::OSCILLATOR_MORPH_MAX), 0.0f, 1.0f);
+    float waveA = generate_wave(shapeA);
+    float waveB = generate_wave(shapeB);
+
+    float morphed = (1.0f - morphNorm) * waveA + morphNorm * waveB;
+    return morphed * envelope.next();
 }
 
 void Sound::set_shape(protocol::OscillatorShape newShape)
