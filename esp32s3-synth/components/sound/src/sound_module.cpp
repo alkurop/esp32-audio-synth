@@ -110,10 +110,10 @@ void SoundModule::audio_task_entry(void *arg)
     auto *self = static_cast<SoundModule *>(arg);
     while (true)
     {
-        int64_t start = esp_timer_get_time();
+        // int64_t start = esp_timer_get_time();
         self->process();
-        int64_t elapsed_us = esp_timer_get_time() - start;
-        ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
+        // int64_t elapsed_us = esp_timer_get_time() - start;
+        // ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
     }
 }
 

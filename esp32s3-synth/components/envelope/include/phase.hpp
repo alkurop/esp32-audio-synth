@@ -22,8 +22,7 @@ protected:
     float calcBeats(uint8_t param, float bpm) const
     {
         float norm = float(param) / float(envelope::MAX);
-        float curved = 1.0f - norm; // More precision on short durations
-        return envelope::MIN_BEAT_LENGTH * std::pow(envelope::MAX_BEAT_LENGTH / envelope::MIN_BEAT_LENGTH, curved);
+        return envelope::MIN_BEAT_LENGTH * std::pow(envelope::MAX_BEAT_LENGTH / envelope::MIN_BEAT_LENGTH, norm);
     }
 
     float beatsToSamples(float beats, float bpm) const

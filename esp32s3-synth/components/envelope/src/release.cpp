@@ -36,9 +36,7 @@ float ReleasePhase::next()
         return 0.0f;
 
     float t = cursor * reciprocal;
-    // currentLevel = startLevel * (1.0f - t);  linear, next line is exponential
-    currentLevel = startLevel * std::pow(0.001f, t);
-
+    currentLevel = startLevel * (1.0f - t);   
     cursor += 1.0f;
 
     if (cursor >= totalSamples || currentLevel <= 0.0f)

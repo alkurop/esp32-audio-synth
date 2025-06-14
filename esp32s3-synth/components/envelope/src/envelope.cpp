@@ -1,4 +1,6 @@
 #include "envelope.hpp"
+#include "esp_log.h" // for std::rand, RAND_MAX
+static const char *TAG = "Envelope";
 
 Envelope::Envelope(float sampleRate, uint16_t initialBpm)
     : sampleRate(sampleRate),
@@ -103,6 +105,8 @@ float Envelope::next()
         }
         else if (active == &release)
         {
+            ESP_LOGI(TAG, "set to idle");
+
             active = nullptr;
         }
     }

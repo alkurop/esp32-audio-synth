@@ -61,7 +61,6 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
     Sound *match = find_active_note(midi_note);
     if (match)
     {
-    
         match->release();
     }
 }

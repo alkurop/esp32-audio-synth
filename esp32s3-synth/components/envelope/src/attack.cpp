@@ -25,6 +25,7 @@ void AttackPhase::enter(float /*startLevel*/)
     ESP_LOGI(TAG, "enter");
     cursor = 0.0f;
     currentLevel = 0.0f;
+    finished = false;
 }
 
 float AttackPhase::next()
@@ -32,12 +33,7 @@ float AttackPhase::next()
     if (finished)
         return 1.0f;
 
-    //     currentLevel = cursor * reciprocal; this is linear. next is exponential
-
-    float t = cursor * reciprocal;
-    constexpr float kAttackStartRatio = 0.001f;
-    currentLevel = 1.0f - std::pow(kAttackStartRatio, t);
-
+    currentLevel = cursor * reciprocal;
     cursor += 1.0f;
     if (cursor >= totalSamples || currentLevel >= 1.0f)
     {

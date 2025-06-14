@@ -32,7 +32,7 @@ void Sound::release()
 {
     ESP_LOGD(TAG, "Sound release note %u", midi_note);
     active = false;
-    midi_note = 0;
+    envelope.gateOff();
 }
 
 void Sound::set_frequency(float frequency)

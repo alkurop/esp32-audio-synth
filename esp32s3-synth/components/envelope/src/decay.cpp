@@ -41,9 +41,7 @@ float DecayPhase::next()
         return targetLevel;
 
     float t = cursor * reciprocal;
-    // currentLevel = startLevel + (targetLevel - startLevel) * t;  //linear. next is exponential
-    float norm = std::pow(0.001f, t); // smooth tailing
-    currentLevel = targetLevel + (startLevel - targetLevel) * norm;
+    currentLevel = startLevel + (targetLevel - startLevel) * t;  
 
     ++cursor;
     if (cursor >= totalSamples || currentLevel <= targetLevel)
