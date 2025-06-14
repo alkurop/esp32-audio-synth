@@ -117,7 +117,7 @@ uint8_t Sound::get_pwm() const
 
 void Sound::setVelocity(uint8_t velocity)
 {
-    velNorm = std::pow(static_cast<float>(velocity) / 127.0f, 1.5f) * VELOCITY_GLOBAL_SCALER;
+    velNorm = (static_cast<float>(velocity) / 127.0f) * VELOCITY_GLOBAL_SCALER;
 }
 
 void Sound::setBpm(uint16_t bpm)
@@ -130,6 +130,7 @@ bool Sound::isPlaying()
     return active || !envelope.is_idle();
 }
 
-bool Sound::isNoteOn(){
+bool Sound::isNoteOn()
+{
     return active;
 }
