@@ -22,7 +22,7 @@ namespace ui
         int16_t maxValue = 127; ///< Maximum allowed encoder value
         uint8_t increment = 1;
         uint16_t glitchFilterNs = 100;
-        bool wrapAround = true;
+        bool wrapAround = false;
     };
 
     /**
