@@ -127,7 +127,7 @@ void Receiver::receiveTask()
                 // ⛳ Deserialization happens here!
                 FieldUpdateList updates = protocol::deserializeFieldUpdates(msg->buffer, msg->length);
 
-                ESP_LOGI(TAG, "Something happened of lengths %d", msg->length);
+                // ESP_LOGI(TAG, "Something happened of lengths %d", msg->length);
                 // 👇 User-defined callback gets parsed data
                 callback(updates);
                 heap_caps_free(msg->buffer);

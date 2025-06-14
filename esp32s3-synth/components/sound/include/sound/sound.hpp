@@ -15,10 +15,10 @@ namespace sound_module
         explicit Sound(uint32_t sample_rate, uint16_t initial_bpm);
 
         /// Trigger the oscillator: set frequency, velocity, and reset phase
-        void trigger(float frequency, uint8_t velocity_in, uint8_t midi_note);
+        void noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note);
 
         /// Release the oscillator: mark inactive
-        void release();
+        void noteOff();
 
         /// Update the oscillator’s phase increment to match a new frequency
         void set_frequency(float frequency);
@@ -45,7 +45,8 @@ namespace sound_module
         uint8_t midi_note = 0;
         float velNorm = 0;
         Envelope envelope; // shared ADSR envelope
-        bool isActive();
+        bool isPlaying();
+        bool isNoteOn();
 
     private:
         bool active = false; ///< true if currently playing

@@ -5,24 +5,24 @@
 
 using namespace sound_module;
 
-// Find a free Sound slot or steal the oldest
+// Find a free Sound slot
 Sound *Voice::find_available_slot()
 {
     for (auto &s : sounds)
     {
-        if (!s.isActive())
+        if (!s.isPlaying())
             return &s;
     }
-    // All slots full — steal the first one
+    // All slots full
     return nullptr;
 }
 
 // Find an active Sound by MIDI note
-Sound *Voice::find_active_note(uint8_t midi_note)
+Sound *Voice::find_note_to_release(uint8_t midi_note)
 {
     for (auto &s : sounds)
     {
-        if (s.isActive() && s.midi_note == midi_note)
+        if (s.isNoteOn() && s.midi_note == midi_note)
             return &s;
     }
     return nullptr;
@@ -31,25 +31,26 @@ Sound *Voice::find_active_note(uint8_t midi_note)
 // Note on: trigger new sound, retrigger LFOs, and envelope
 void Voice::noteOn(uint8_t ch, uint8_t midi_note, uint8_t velocity)
 {
-
     if (ch != midi_channel)
         return;
 
-    // 1) Find an available slot by reference
+    // 1. Skip if this note is already active
+    for (auto &s : sounds)
+    {
+        if (s.midi_note == midi_note && s.isNoteOn())
+        {
+            // Note is already playing – ignore new noteOn
+            return;
+        }
+    }
+
+    // 2. Find an available voice (Idle or Releasing)
     Sound *slot = find_available_slot();
-    if(slot == nullptr) return;
+    if (!slot)
+        return; // all voices are active — skip or add stealing logic later
 
-    // 2) Compute transposed MIDI note and base frequency
-    int transposed = clamp_midi_note(int(midi_note) + pitchSettings.transpose_semitones);
-    float base_freq = midi_note_freq[transposed];
-    float freq = base_freq * std::pow(2.0f, pitchSettings.fine_tuning / 1200.0f); // fine_tuning in cents
-
-    // 3) Retrigger both LFOs so they start from phase=0 on every new note
-    pitch_lfo.reset_phase();
-    amp_lfo.reset_phase();
-
-    // 5) Start the sound with the calculated frequency and velocity
-    slot->trigger(freq, velocity, midi_note);
+    float base_freq = midi_note_freq[midi_note];
+    slot->noteOn(base_freq, velocity, midi_note);
 }
 
 // Note off: release matching sound and envelope
@@ -58,10 +59,10 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
     if (ch != midi_channel)
         return;
 
-    Sound *match = find_active_note(midi_note);
+    Sound *match = find_note_to_release(midi_note);
     if (match)
     {
-        match->release();
+        match->noteOff();
     }
 }
 
@@ -70,7 +71,7 @@ void Voice::all_notes_off()
 {
     for (auto &s : sounds)
     {
-        s.release();
+        s.noteOff();
         s.envelope.gateOff();
     }
 }

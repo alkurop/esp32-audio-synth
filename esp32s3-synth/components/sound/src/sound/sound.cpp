@@ -16,7 +16,7 @@ static const char *TAG = "Sound";
 Sound::Sound(uint32_t sample_rate, uint16_t initial_bpm)
     : envelope(sample_rate, initial_bpm), sample_rate(sample_rate) {}
 
-void Sound::trigger(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
+void Sound::noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
 {
     ESP_LOGD(TAG, "Sound trigger freq %f velocity %u note %u", frequency, velocity_in, midi_note);
     base_frequency = frequency;
@@ -28,7 +28,7 @@ void Sound::trigger(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
     envelope.gateOn();
 }
 
-void Sound::release()
+void Sound::noteOff()
 {
     ESP_LOGD(TAG, "Sound release note %u", midi_note);
     active = false;
@@ -125,7 +125,11 @@ void Sound::setBpm(uint16_t bpm)
     envelope.setBpm(bpm);
 }
 
-bool Sound::isActive()
+bool Sound::isPlaying()
 {
     return active || !envelope.is_idle();
+}
+
+bool Sound::isNoteOn(){
+    return active;
 }
