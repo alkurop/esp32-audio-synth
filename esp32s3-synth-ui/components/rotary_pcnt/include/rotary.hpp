@@ -71,10 +71,10 @@ namespace ui
          */
         inline void setPosition(int16_t value, bool send = false)
         {
-            position = value;
+            currentPosition = value;
             if (send && callback)
             {
-                callback(config.id, position);
+                callback(config.id, currentPosition);
             }
         }
 
@@ -89,7 +89,7 @@ namespace ui
 
     private:
         RotaryCallback callback = nullptr;
-        int16_t position = 0;
+        int16_t currentPosition = 0;
 
         pcnt_unit_handle_t unit = nullptr;
         void initGPIOInterrupt();

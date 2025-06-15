@@ -114,27 +114,32 @@ void Rotary::processEvents()
                 int delta = detents - prevCount;
                 prevCount = detents;
 
-                int next = static_cast<int>(position) + (delta > 0 ? config.increment : -static_cast<int>(config.increment));
+                int next = static_cast<int>(currentPosition) + (delta > 0 ? config.increment : -static_cast<int>(config.increment));
 
                 if (config.wrapAround)
                 {
                     // wrap behavior
                     if (next > static_cast<int>(config.maxValue))
-                        position = config.minValue;
+                        currentPosition = config.minValue;
                     else if (next < static_cast<int>(config.minValue))
-                        position = config.maxValue;
+                        currentPosition = config.maxValue;
                     else
-                        position = static_cast<int16_t>(next);
+                        currentPosition = static_cast<int16_t>(next);
+                    if (callback)
+                        callback(config.id, currentPosition);
                 }
                 else
                 {
                     // clamp behavior
                     next = std::clamp(next, static_cast<int>(config.minValue), static_cast<int>(config.maxValue));
-                    position = static_cast<int16_t>(next);
+                    auto castNext = static_cast<int16_t>(next);
+                    if (castNext != currentPosition)
+                    {
+                        currentPosition = castNext;
+                        if (callback)
+                            callback(config.id, currentPosition);
+                    }
                 }
-
-                if (callback)
-                    callback(config.id, position);
             }
         }
     }
