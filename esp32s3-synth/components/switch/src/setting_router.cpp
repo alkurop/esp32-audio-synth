@@ -1,5 +1,7 @@
 #include "setting_router.hpp"
 #include "set_page.hpp"
+#include "esp_log.h"
+static constexpr char *TAG = "Settings Router";
 
 using namespace settings;
 
@@ -31,6 +33,7 @@ void SettingRouter::setUpdate(const FieldUpdate &update)
 {
     // Cast the raw byte to our Page enum
     Page page = static_cast<Page>(update.pageByte);
+    ESP_LOGI(TAG, "Update voice %d page %s fields %d value %d", update.voiceIndex, menuPages[update.pageByte].title, update.field, update.value);
 
     // Dispatch to the right “setXPage” function based on which page it is:
 

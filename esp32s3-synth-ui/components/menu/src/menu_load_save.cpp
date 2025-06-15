@@ -130,8 +130,15 @@ void Menu::loadProject(int16_t slotIndex)
     const auto projectEntry = paramStore.loadProject(slotIndex);
     if (projectEntry.voices.empty())
     {
-        notify();
-        return;
+        if (slotIndex != AUTOSAVE_SLOT)
+        {
+            state.shouldAutoSave = true;
+            notify();
+        }
+        else
+        {
+            updateAfterAutoLoad();
+        }
     }
 
     FieldUpdateList updates;

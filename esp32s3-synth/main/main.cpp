@@ -19,7 +19,7 @@ static const char *TAG = "Main";
 SoundModule soundModule(config);
 MidiParser midiParser;
 MidiModule midiModule;
-Receiver i2cReceiver(receiverConfig);
+Receiver receiver(receiverConfig);
 settings::SettingRouter settingSwitch(soundModule);
 
 Knob masterKnob(masterKnobConfig);
@@ -60,12 +60,10 @@ uint16_t sendBpm() { return settingSwitch.getMidiBpm(); };
 auto updateCallback = [](const FieldUpdateList &updates)
 { settingSwitch.setUpdateFromUi(updates); };
 
-extern "C" void app_main()
+void initMidi()
 {
-
     // // // Initialize modules
     midiModule.init(midiReadCallback);
-    soundModule.init();
 
     // Set MIDI parser callbacks
     midiParser.setControllerCallback(controllerCallback);
@@ -73,7 +71,11 @@ extern "C" void app_main()
     midiParser.setSongPositionCallback(songPositionCallback);
     midiParser.setTransportCallback(transportCallback);
     midiParser.setBpmCallback(bpmCallback);
-
+}
+extern "C" void app_main()
+{
+    soundModule.init();
+    // initMidi();
     masterKnob.init(masterKnobCallback);
-    ESP_ERROR_CHECK(i2cReceiver.init(updateCallback, sendBpm));
+    ESP_ERROR_CHECK(receiver.init(updateCallback, sendBpm));
 }

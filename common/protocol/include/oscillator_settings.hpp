@@ -19,7 +19,6 @@ namespace protocol
     static constexpr const char *oscShapes[] = {"Sine", "Tri", "Square", "Saw", "Noise"};
     static constexpr FieldInfo oscInfo[] = {
         {"Shape", FieldType::Options, 0, 0, oscShapes, 5},
-        {"Morph", FieldType::Range, 0, OSCILLATOR_MORPH_MAX, nullptr, 0},
         {"PWM", FieldType::Range, 0, OSCILLATOR_PWM_MAX, nullptr, 0},
         {"Sync", FieldType::Options, 0, 0, yesNo, 2},
     };
@@ -27,7 +26,6 @@ namespace protocol
     enum class OscillatorField : uint8_t
     {
         Shape,
-        Morph,
         PWM,
         Sync,
         _Count

@@ -4,7 +4,7 @@
 #include "serialize.hpp"
 #include <cstring>
 
-constexpr char *TAG = "Receiver";
+static constexpr char *TAG = "Receiver";
 using namespace protocol;
 
 static bool IRAM_ATTR i2c_slave_receive_cb(
@@ -126,8 +126,6 @@ void Receiver::receiveTask()
             {
                 // ⛳ Deserialization happens here!
                 FieldUpdateList updates = protocol::deserializeFieldUpdates(msg->buffer, msg->length);
-
-                // ESP_LOGI(TAG, "Something happened of lengths %d", msg->length);
                 // 👇 User-defined callback gets parsed data
                 callback(updates);
                 heap_caps_free(msg->buffer);

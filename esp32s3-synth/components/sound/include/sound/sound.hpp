@@ -29,14 +29,12 @@ namespace sound_module
 
         /// Configuration setters
         void set_shape(protocol::OscillatorShape newShape);
-        void set_morph(uint8_t morph); // 0–31
         void set_pwm(uint8_t pwm);     // 0–31
         void set_sync(bool sync_on);
         void setBpm(uint16_t bpm);
 
         /// Configuration getters
         protocol::OscillatorShape get_shape() const;
-        uint8_t get_morph() const;
         uint8_t get_pwm() const;
         void setVelocity(uint8_t midiVelocity);
 
@@ -56,17 +54,6 @@ namespace sound_module
         float phase_increment = 0.0f; ///< increment per sample
         // Oscillator settings
         protocol::OscillatorShape shape = protocol::OscillatorShape::Sine;
-        uint8_t morph = 0;
         uint8_t pwm = 0;
     };
-
-    inline float fast_sinf(float x)
-    {
-        const float B = 4.0f / M_PI;
-        const float C = -4.0f / (M_PI * M_PI);
-        const float P = 0.225f;
-
-        float y = B * x + C * x * std::fabsf(x);
-        return P * (y * std::fabsf(y) - y) + y;
-    }
 } // namespace sound_module

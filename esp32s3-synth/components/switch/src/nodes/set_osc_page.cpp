@@ -21,22 +21,14 @@ void settings::setOscillatorPage(Voice &voice, uint8_t field, int16_t value)
             break;
         }
         break;
-        case OscillatorField::Morph:
-        {
-            auto idx = std::clamp<int16_t>(
-                value,
-                0,
-                OSCILLATOR_MORPH_MAX);
-            sound.set_morph(static_cast<uint8_t>(idx));
-            break;
-        }
+
         case OscillatorField::PWM:
         {
             auto idx = std::clamp<int16_t>(
                 value,
                 0,
                 OSCILLATOR_PWM_MAX);
-            sound.set_morph(static_cast<uint8_t>(idx));
+            sound.set_pwm(static_cast<uint8_t>(idx));
             break;
         }
         case OscillatorField::Sync:
