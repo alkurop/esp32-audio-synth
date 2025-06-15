@@ -2,8 +2,10 @@
 
 #include <vector>
 #include "menu_struct.hpp" // for MAX_FIELDS
+#include "param_struct.hpp"
 
 using namespace protocol;
+using namespace store;
 
 namespace menu
 {
@@ -71,5 +73,78 @@ namespace menu
         }
 
         return globalData;
+    }
+
+    FieldUpdateList mapVoiceStoreEntryToUpdates(const VoiceStoreEntry &ve)
+    {
+        FieldUpdateList updates;
+
+        const auto &flat = ve.voiceParams;
+        size_t pageCount = flat.size() / MAX_FIELDS;
+
+        for (size_t pageIndex = 0; pageIndex < pageCount; ++pageIndex)
+        {
+            const auto &pageItem = menuPages[pageIndex];
+            size_t fields = pageItem.fieldCount;
+
+            for (size_t field = 0; field < fields; ++field)
+            {
+                size_t idx = pageIndex * MAX_FIELDS + field;
+                if (idx >= flat.size())
+                    break;
+
+                int16_t value = flat[idx];
+                updates.push_back(FieldUpdate{
+                    ve.index,
+                    static_cast<uint8_t>(pageIndex),
+                    static_cast<uint8_t>(field),
+                    value});
+            }
+        }
+
+        return updates;
+    }
+
+    FieldUpdateList mapProjectEntryToUpdates(const ProjectStoreEntry &projectEntry)
+    {
+        FieldUpdateList updates;
+
+        // Voice parameter updates
+        for (const auto &ve : projectEntry.voices)
+        {
+            FieldUpdateList voiceUpdates = mapVoiceStoreEntryToUpdates(ve);
+            updates.insert(updates.end(), voiceUpdates.begin(), voiceUpdates.end());
+        }
+
+        // Global parameter updates
+        const auto &flatGlobal = projectEntry.globalParams;
+        if (!flatGlobal.empty())
+        {
+            for (size_t p = 0; p < GLOBAL_PAGE_COUNT; ++p)
+            {
+                size_t pageIndex = VOICE_PAGE_COUNT + p;
+                if (pageIndex >= PAGE_COUNT)
+                    break;
+
+                const auto &pi = menuPages[pageIndex];
+                size_t fields = std::min<size_t>(pi.fieldCount, MAX_FIELDS);
+
+                for (size_t f = 0; f < fields; ++f)
+                {
+                    size_t idx = p * MAX_FIELDS + f;
+                    if (idx >= flatGlobal.size())
+                        break;
+
+                    int16_t value = flatGlobal[idx];
+                    updates.push_back(FieldUpdate{
+                        static_cast<uint8_t>(-1),
+                        static_cast<uint8_t>(pageIndex),
+                        static_cast<uint8_t>(f),
+                        value});
+                }
+            }
+        }
+
+        return updates;
     }
 }

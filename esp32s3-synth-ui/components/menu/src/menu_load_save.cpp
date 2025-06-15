@@ -132,6 +132,7 @@ void Menu::loadProject(int16_t slotIndex)
     {
         if (slotIndex != AUTOSAVE_SLOT)
         {
+            
             state.shouldAutoSave = true;
             notify();
         }

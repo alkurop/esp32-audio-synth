@@ -35,6 +35,10 @@ FieldUpdateList Presets::loadDefaultVoice(uint8_t voiceIndex)
         case Page::Channel:
         {
             auto fieldDefaults = loadFieldDefaults(voiceIndex, page, channelInfo);
+            if (voiceIndex == 0)
+            {
+                fieldDefaults[static_cast<uint8_t>(ChannelField::Vol)].value = voice::VOL_MAX;
+            }
             result.insert(result.end(), fieldDefaults.begin(), fieldDefaults.end());
             break;
         }
