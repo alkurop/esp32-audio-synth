@@ -9,7 +9,6 @@
 using namespace protocol;
 namespace store
 {
-    static constexpr int8_t AUTOSAVE_SLOT = -1;
     static constexpr char NVS_NAMESPACE[] = "synth";
     static constexpr char KEY_PROJ_NAME[] = "pn_";
     static constexpr char KEY_VOICE_NAME[] = "vn_";

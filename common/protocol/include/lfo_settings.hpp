@@ -5,6 +5,7 @@ namespace protocol
 {
 
     constexpr const uint8_t LFO_DEPTH_MAX = 127;
+    
     enum class LfoSubdivision : uint8_t
     {
         Double = 128,       // "2/1"
@@ -32,12 +33,6 @@ namespace protocol
     static constexpr const char *form[] =
         {"Sine", "Triangle", "Sawtooth", "Pulse"};
 
-    static constexpr FieldInfo lfoInfo[] = {
-        {"Form", FieldType::Options, 0, 0, subdivisions, 8},
-        {"Subd", FieldType::Options, 0, 0, form, 4},
-        {"Dept", FieldType::Range, 0, LFO_DEPTH_MAX, nullptr, 0, 4},
-    };
-
     enum class LFOField : uint8_t
     {
         Form,
@@ -45,4 +40,38 @@ namespace protocol
         Depth,
         _Count
     };
+
+    static constexpr FieldInfo lfoInfo[] = {
+        {
+            .label = "Form",
+            .type = FieldType::Options,
+            .min = 0,
+            .max = 0,
+            .opts = subdivisions,
+            .optCount = 8,
+            .defaultValue = 0,
+            .increment = 1,
+        },
+        {
+            .label = "Subd",
+            .type = FieldType::Options,
+            .min = 0,
+            .max = 0,
+            .opts = form,
+            .optCount = 4,
+            .defaultValue = 0,
+            .increment = 1,
+        },
+        {
+            .label = "Dept",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = LFO_DEPTH_MAX,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 4,
+            .increment = 1,
+        },
+    };
+
 }

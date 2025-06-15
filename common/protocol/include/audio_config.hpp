@@ -8,6 +8,6 @@ namespace protocol
     constexpr const int SAMPLE_RATE = 48000;
     constexpr const int AMPLITUDE = 32000;
     constexpr const int BUFFER_SIZE = 512;
+    constexpr const int BPM_DEFAULT = 120;
 
 }
- 

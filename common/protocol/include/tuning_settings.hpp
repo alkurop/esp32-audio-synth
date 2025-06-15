@@ -13,8 +13,36 @@ namespace protocol
 
     // tuning fields
     static constexpr FieldInfo tuningInfo[] = {
-        {"Oct", FieldType::Range, -2, 2, nullptr, 0},
-        {"Semi", FieldType::Range, -12, 12, nullptr, 0},
-        {"Fine", FieldType::Range, -50, 50, nullptr, 0},
+        {
+            .label = "Oct",
+            .type = FieldType::Range,
+            .min = -2,
+            .max = 2,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 0,
+            .increment = 1,
+        },
+        {
+            .label = "Semi",
+            .type = FieldType::Range,
+            .min = -12,
+            .max = 12,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 0,
+            .increment = 1,
+        },
+        {
+            .label = "Fine",
+            .type = FieldType::Range,
+            .min = -50,
+            .max = 50,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 0,
+            .increment = 1,
+        },
     };
+
 }

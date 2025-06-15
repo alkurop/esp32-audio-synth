@@ -6,5 +6,5 @@ file(GLOB_RECURSE MENU_SRCS
 idf_component_register(
   SRCS ${MENU_SRCS}
   INCLUDE_DIRS "include"
-  REQUIRES log protocol store cache_comp
+  REQUIRES log protocol store cache_comp presets
 )

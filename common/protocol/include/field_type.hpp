@@ -19,10 +19,11 @@ namespace protocol
         int16_t min, max;
         const char *const *opts;
         uint8_t optCount;
+        int16_t defaultValue;
         int16_t increment = 1;
     };
 
     // option lists
-    static constexpr const char *yesNo[] = {"Off", "On"};
+    static constexpr const char *noYes[] = {"Off", "On"};
 
 } // namespace protocol

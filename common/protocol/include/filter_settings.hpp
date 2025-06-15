@@ -25,9 +25,35 @@ namespace protocol
     // filter fields
     static constexpr const char *filtTypes[] = {"LP12", "HP12", "BP12", "Notch"};
     static constexpr FieldInfo filterInfo[] = {
-        {"Type", FieldType::Options, 0, 0, filtTypes, 4},
-        {"Cuto", FieldType::Range, 0, MAX_CUTOFF_RAW, nullptr, 0, 4},
-        {"Res", FieldType::Range, 0, MAX_CUTOFF_RAW, nullptr, 0, 4},
+        {
+            .label = "Type",
+            .type = FieldType::Options,
+            .min = 0,
+            .max = 0,
+            .opts = filtTypes,
+            .optCount = 4,
+            .defaultValue = 0,
+            .increment = 1,
+        },
+        {
+            .label = "Cuto",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = MAX_CUTOFF_RAW,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 4,
+            .increment = 1,
+        },
+        {
+            .label = "Res",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = MAX_RESONANCE_RAW,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 4,
+            .increment = 1,
+        },
     };
-
 }

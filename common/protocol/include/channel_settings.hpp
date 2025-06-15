@@ -66,7 +66,25 @@ namespace protocol
     }
     // channel fields
     static constexpr FieldInfo channelInfo[] = {
-        {"Chan", FieldType::Range, 0, channel::CHANNEL_MAX, nullptr, 0},
-        {"Vol", FieldType::Range, 0, voice::VOL_MAX, nullptr, 0},
+        {
+            .label = "Chan",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = channel::CHANNEL_MAX,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 0,
+            .increment = 1,
+        },
+        {
+            .label = "Vol",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = voice::VOL_MAX,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 0,
+            .increment = 1,
+        },
     };
 }

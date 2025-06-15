@@ -9,6 +9,7 @@ namespace protocol
     constexpr const uint32_t i2c_frequency = 100 * 1000;
     constexpr const uint32_t I2C_CLOCK_SPEED = i2c_frequency;
     
+    static constexpr int8_t AUTOSAVE_SLOT = -1;
 
 
     template <class... Ts>

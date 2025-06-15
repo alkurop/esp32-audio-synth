@@ -17,16 +17,52 @@ namespace protocol
     namespace envelope
     {
         static constexpr uint8_t MAX = 31;
-        static constexpr float MIN_BEAT_LENGTH = 0.00001; //sharp attack
-        static constexpr float MAX_BEAT_LENGTH = 8.0f;        // 8 beats
+        static constexpr float MIN_BEAT_LENGTH = 0.00001; // sharp attack
+        static constexpr float MAX_BEAT_LENGTH = 8.0f;    // 8 beats
     }
 
     // envelope fields
     static constexpr FieldInfo envInfo[] = {
-        {"A", FieldType::Range, 0, envelope::MAX, nullptr, 0},
-        {"D", FieldType::Range, 0, envelope::MAX, nullptr, 0},
-        {"S", FieldType::Range, 0, envelope::MAX, nullptr, 0},
-        {"R", FieldType::Range, 0, envelope::MAX, nullptr, 0},
+        {
+            .label = "A",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = envelope::MAX,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 1,
+            .increment = 1,
+        },
+        {
+            .label = "D",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = envelope::MAX,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 1,
+            .increment = 1,
+        },
+        {
+            .label = "S",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = envelope::MAX,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = envelope::MAX,
+            .increment = 1,
+        },
+        {
+            .label = "R",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = envelope::MAX,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 1,
+            .increment = 1,
+        },
     };
 
 }

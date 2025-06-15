@@ -12,6 +12,7 @@
 #include "cache.hpp"
 #include "param_store.hpp"
 #include "popup_struct.hpp"
+#include "presets.hpp"
 
 
 using namespace protocol;
@@ -71,6 +72,7 @@ namespace menu
         Cache cache;
 
         DisplayCallback displayCallback;
+        Presets presets;
     };
 
 } // namespace menu

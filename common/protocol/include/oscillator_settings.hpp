@@ -3,7 +3,14 @@
 
 namespace protocol
 {
-
+    enum class OscillatorField : uint8_t
+    {
+        Shape,
+        PWM,
+        Sync,
+        _Count
+    };
+    
     enum OscillatorShape
     {
         Sine,
@@ -17,18 +24,38 @@ namespace protocol
     constexpr const uint8_t OSCILLATOR_PWM_MAX = 31;
     // oscillator fields
     static constexpr const char *oscShapes[] = {"Sine", "Tri", "Square", "Saw", "Noise"};
-    static constexpr FieldInfo oscInfo[] = {
-        {"Shape", FieldType::Options, 0, 0, oscShapes, 5},
-        {"PWM", FieldType::Range, 0, OSCILLATOR_PWM_MAX, nullptr, 0},
-        {"Sync", FieldType::Options, 0, 0, yesNo, 2},
-    };
 
-    enum class OscillatorField : uint8_t
-    {
-        Shape,
-        PWM,
-        Sync,
-        _Count
+    static constexpr FieldInfo oscInfo[] = {
+        {
+            .label = "Shape",
+            .type = FieldType::Options,
+            .min = 0,
+            .max = 0,
+            .opts = oscShapes,
+            .optCount = 5,
+            .defaultValue = 0,
+            .increment = 1,
+        },
+        {
+            .label = "PWM",
+            .type = FieldType::Range,
+            .min = 0,
+            .max = OSCILLATOR_PWM_MAX,
+            .opts = nullptr,
+            .optCount = 0,
+            .defaultValue = 0,
+            .increment = 1,
+        },
+        {
+            .label = "Sync",
+            .type = FieldType::Options,
+            .min = 0,
+            .max = 0,
+            .opts = noYes,
+            .optCount = 2,
+            .defaultValue = 0,
+            .increment = 1,
+        },
     };
 
 };
