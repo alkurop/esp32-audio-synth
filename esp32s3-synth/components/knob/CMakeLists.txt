@@ -6,7 +6,7 @@ file(GLOB_RECURSE SRC
 idf_component_register(
     SRCS ${SRC}
     INCLUDE_DIRS "include"
-    REQUIRES protocol sound driver log esp_adc
+    REQUIRES protocol  driver log esp_adc
 )
 
 

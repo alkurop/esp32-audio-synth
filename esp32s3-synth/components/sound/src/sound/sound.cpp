@@ -89,7 +89,9 @@ float Sound::get_sample()
         return 0.0f;
     };
 
-    return shape * envelope.next();
+    auto waveform = generate_wave(shape);
+
+    return waveform * envelope.next();
 }
 
 void Sound::set_shape(protocol::OscillatorShape newShape)

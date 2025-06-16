@@ -6,7 +6,7 @@ file(GLOB_RECURSE SRCS
 idf_component_register(
     SRCS ${SRCS}
     INCLUDE_DIRS "include"
-    REQUIRES log protocol driver
+    REQUIRES log protocol driver esp_driver_i2c
 )
 
 
