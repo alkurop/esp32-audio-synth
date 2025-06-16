@@ -49,58 +49,21 @@ void Menu::initAutosaveTask()
 void Menu::loadVoice(uint8_t slotIndex)
 {
     // 1) Pull back the stored entry
-    const auto entry = paramStore.loadVoice(slotIndex);
+    auto entry = paramStore.loadVoice(slotIndex);
     ESP_LOGI(TAG, "loadVoice(%d): name=%s, params.size=%d",
              slotIndex,
              entry.name ? entry.name->c_str() : "<none>",
              static_cast<int>(entry.voiceParams.size()));
 
-    if (entry.voiceParams.empty())
+    FieldUpdateList updates = entry.voiceParams.empty()
+                                  ? presets.loadDefaultVoice(slotIndex)
+                                  : mapVoiceStoreEntryToUpdates(entry);
+
+    if (auto channelPage = parseChannelPage(entry.voiceParams))
     {
-        notify();
-        return;
-    }
-
-    // 2) Compute page & field counts
-    size_t totalEntries = entry.voiceParams.size();
-    size_t pageCount = totalEntries / MAX_FIELDS;
-    const size_t maxPages = static_cast<size_t>(Page::_Count);
-    pageCount = std::min(pageCount, maxPages);
-
-    FieldUpdateList updates;
-
-    // 3) Walk each page
-    for (size_t p = 0; p < pageCount; ++p)
-    {
-        const auto &pi = menuPages[p];
-        size_t fields = pi.fieldCount;
-
-        ESP_LOGI(TAG, "  Page %2d (%s): %d fields", static_cast<int>(p), pi.title, static_cast<int>(fields));
-
-        // 4) Walk each field
-        for (size_t f = 0; f < fields; ++f)
-        {
-            size_t idx = p * MAX_FIELDS + f;
-            if (idx >= entry.voiceParams.size())
-                continue;
-
-            int16_t v = entry.voiceParams[idx];
-
-            updates.push_back(FieldUpdate{
-                .voiceIndex = static_cast<uint8_t>(state.voiceIndex),
-                .pageByte = static_cast<uint8_t>(p),
-                .field = static_cast<uint8_t>(f),
-                .value = v});
-
-            // c) Update channel/volume state
-            if (p == static_cast<size_t>(Page::Channel))
-            {
-                if (f == static_cast<size_t>(ChannelField::Chan))
-                    state.channel = static_cast<uint8_t>(v);
-                else if (f == static_cast<size_t>(ChannelField::Vol))
-                    state.volume = static_cast<uint8_t>(v);
-            }
-        }
+        state.channel = channelPage->channel;
+        state.volume = channelPage->volume;
+        ESP_LOGI(TAG, "Loaded voice. Setting volume and channel in menu topbar");
     }
 
     // 5) Apply updates to cache
@@ -127,83 +90,16 @@ void Menu::saveVoice(uint8_t slotIndex, const std::string &name)
 
 void Menu::loadProject(int16_t slotIndex)
 {
-    const auto projectEntry = paramStore.loadProject(slotIndex);
-    if (projectEntry.voices.empty())
+    const ProjectStoreEntry projectEntry = paramStore.loadProject(slotIndex);
+    auto updates = projectEntry.voices.empty() ? presets.loadDefaultProject() : mapProjectEntryToUpdates(projectEntry);
+    // todo Update channel/volume state
+    if (auto channelPage = parseChannelPage(projectEntry.voices[0].voiceParams))
     {
-        if (slotIndex != AUTOSAVE_SLOT)
-        {
-            
-            state.shouldAutoSave = true;
-            notify();
-        }
-        else
-        {
-            updateAfterAutoLoad();
-        }
+        ESP_LOGI(TAG, "Loaded project. Setting volume and channel in menu topbar");
+
+        state.channel = channelPage->channel;
+        state.volume = channelPage->volume;
     }
-
-    FieldUpdateList updates;
-
-    // Voice parameter updates
-    for (size_t voiceIndex = 0; voiceIndex < projectEntry.voices.size(); ++voiceIndex)
-    {
-        const auto &ve = projectEntry.voices[voiceIndex];
-        const auto &flat = ve.voiceParams;
-        size_t pageCount = flat.size() / MAX_FIELDS;
-
-        for (size_t pageIndex = 0; pageIndex < pageCount; ++pageIndex)
-        {
-            const auto &pageItem = menuPages[pageIndex];
-            size_t fields = pageItem.fieldCount;
-
-            for (size_t field = 0; field < fields; ++field)
-            {
-                size_t idx = pageIndex * MAX_FIELDS + field;
-                if (idx >= flat.size())
-                    break;
-
-                int16_t value = flat[idx];
-                updates.push_back(FieldUpdate{ve.index, static_cast<uint8_t>(pageIndex), static_cast<uint8_t>(field), value});
-
-                if (voiceIndex == state.voiceIndex)
-                {
-                    if (pageIndex == static_cast<size_t>(Page::Channel))
-                    {
-                        if (field == static_cast<size_t>(ChannelField::Chan))
-                            state.channel = static_cast<uint8_t>(value);
-                        else if (field == static_cast<size_t>(ChannelField::Vol))
-                            state.volume = static_cast<uint8_t>(value);
-                    }
-                }
-            }
-        }
-    }
-
-    // Global parameter updates
-    const auto &flatGlobal = projectEntry.globalParams;
-    if (!flatGlobal.empty())
-    {
-        for (size_t p = 0; p < GLOBAL_PAGE_COUNT; ++p)
-        {
-            size_t pageIndex = VOICE_PAGE_COUNT + p;
-            if (pageIndex >= PAGE_COUNT)
-                break;
-
-            const auto &pi = menuPages[pageIndex];
-            size_t fields = std::min<size_t>(pi.fieldCount, MAX_FIELDS);
-
-            for (size_t f = 0; f < fields; ++f)
-            {
-                size_t idx = p * MAX_FIELDS + f;
-                if (idx >= flatGlobal.size())
-                    break;
-
-                int16_t value = flatGlobal[idx];
-                updates.push_back(FieldUpdate{static_cast<uint8_t>(-1), static_cast<uint8_t>(pageIndex), static_cast<uint8_t>(f), value});
-            }
-        }
-    }
-
     // Apply all updates at once
     cache.set(updates);
 

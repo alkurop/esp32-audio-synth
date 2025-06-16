@@ -1,6 +1,8 @@
 #include "presets.hpp"
+#include "esp_log.h"
 
 using namespace store;
+static const char *TAG = "Presets";
 
 FieldUpdateList Presets::loadDefaultProject()
 {
@@ -12,6 +14,8 @@ FieldUpdateList Presets::loadDefaultProject()
     }
     auto globalFields = loadGlobalFields();
     result.insert(result.end(), globalFields.begin(), globalFields.end());
+    ESP_LOGI(TAG, "Load default project size of fields %d", result.size());
+
     return result;
 }
 
@@ -20,6 +24,8 @@ FieldUpdateList Presets::loadGlobalFields()
     FieldUpdateList result;
     auto fieldDefaults = loadFieldDefaults(AUTOSAVE_SLOT, Page::Global, channelInfo);
     result.insert(result.end(), fieldDefaults.begin(), fieldDefaults.end());
+    ESP_LOGI(TAG, "Load default global fields size of fields %d", result.size());
+
     return result;
 }
 
@@ -79,6 +85,7 @@ FieldUpdateList Presets::loadDefaultVoice(uint8_t voiceIndex)
             break;
         }
     }
+    ESP_LOGI(TAG, "Load default voice fields size of fields %d", result.size());
 
     return result;
 }

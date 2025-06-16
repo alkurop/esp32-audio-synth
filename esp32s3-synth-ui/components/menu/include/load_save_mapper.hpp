@@ -147,4 +147,24 @@ namespace menu
 
         return updates;
     }
+
+    struct ChannelPage
+    {
+        uint8_t channel = 0;
+        uint8_t volume = 0;
+    };
+
+    std::optional<ChannelPage> parseChannelPage(const std::vector<int16_t> &flat)
+    {
+        size_t base = static_cast<size_t>(Page::Channel) * MAX_FIELDS;
+        if (base + std::max(
+                       static_cast<size_t>(ChannelField::Chan),
+                       static_cast<size_t>(ChannelField::Vol)) >=
+            flat.size())
+            return std::nullopt;
+
+        return ChannelPage{
+            .channel = static_cast<uint8_t>(flat[base + static_cast<size_t>(ChannelField::Chan)]),
+            .volume = static_cast<uint8_t>(flat[base + static_cast<size_t>(ChannelField::Vol)])};
+    }
 }
