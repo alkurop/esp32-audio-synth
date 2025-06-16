@@ -59,7 +59,7 @@ void Menu::loadVoice(uint8_t slotIndex)
                                   ? presets.loadDefaultVoice(slotIndex)
                                   : mapVoiceStoreEntryToUpdates(entry);
 
-    if (auto channelPage = parseChannelPage(entry.voiceParams))
+    if (auto channelPage = parseChannelPage(updates))
     {
         state.channel = channelPage->channel;
         state.volume = channelPage->volume;
@@ -93,7 +93,7 @@ void Menu::loadProject(int16_t slotIndex)
     const ProjectStoreEntry projectEntry = paramStore.loadProject(slotIndex);
     auto updates = projectEntry.voices.empty() ? presets.loadDefaultProject() : mapProjectEntryToUpdates(projectEntry);
     // todo Update channel/volume state
-    if (auto channelPage = parseChannelPage(projectEntry.voices[0].voiceParams))
+    if (auto channelPage = parseChannelPage(updates))
     {
         ESP_LOGI(TAG, "Loaded project. Setting volume and channel in menu topbar");
 

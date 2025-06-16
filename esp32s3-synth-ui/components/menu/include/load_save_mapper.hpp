@@ -154,17 +154,28 @@ namespace menu
         uint8_t volume = 0;
     };
 
-    std::optional<ChannelPage> parseChannelPage(const std::vector<int16_t> &flat)
+    std::optional<ChannelPage> parseChannelPage(const FieldUpdateList &updates, uint8_t voiceIndex = 0)
     {
-        size_t base = static_cast<size_t>(Page::Channel) * MAX_FIELDS;
-        if (base + std::max(
-                       static_cast<size_t>(ChannelField::Chan),
-                       static_cast<size_t>(ChannelField::Vol)) >=
-            flat.size())
-            return std::nullopt;
+        std::optional<uint8_t> channel;
+        std::optional<uint8_t> volume;
 
-        return ChannelPage{
-            .channel = static_cast<uint8_t>(flat[base + static_cast<size_t>(ChannelField::Chan)]),
-            .volume = static_cast<uint8_t>(flat[base + static_cast<size_t>(ChannelField::Vol)])};
+        for (const auto &u : updates)
+        {
+            if (u.voiceIndex != voiceIndex)
+                continue;
+
+            if (u.pageByte == static_cast<uint8_t>(Page::Channel))
+            {
+                if (u.field == static_cast<uint8_t>(ChannelField::Chan))
+                    channel = static_cast<uint8_t>(u.value);
+                else if (u.field == static_cast<uint8_t>(ChannelField::Vol))
+                    volume = static_cast<uint8_t>(u.value);
+            }
+        }
+
+        if (channel && volume)
+            return ChannelPage{*channel, *volume};
+
+        return std::nullopt;
     }
 }
