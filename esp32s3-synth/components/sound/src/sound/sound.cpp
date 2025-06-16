@@ -36,12 +36,12 @@ void Sound::noteOff()
     envelope.gateOff();
 }
 
-void Sound::set_frequency(float frequency)
+void Sound::setFrequency(float frequency)
 {
     phase_increment = frequency / sample_rate;
 }
 
-float Sound::get_sample()
+float Sound::getSample()
 {
     phase += phase_increment;
     if (phase >= 1.0f)
@@ -94,35 +94,24 @@ float Sound::get_sample()
     return waveform * envelope.next();
 }
 
-void Sound::set_shape(protocol::OscillatorShape newShape)
+void Sound::setShape(protocol::OscillatorShape newShape)
 {
     shape = newShape;
     // restart waveform on shape change
     phase = 0.0f;
 }
 
-void Sound::set_sync(bool sync_on)
+void Sound::setSync(bool sync_on)
 {
     sync = sync_on;
     // if enabling sync, restart phase
     if (sync)
         phase = 0.0f;
 }
- 
-void Sound::set_pwm(uint8_t newPwm)
+
+void Sound::setPwm(uint8_t newPwm)
 {
     pwm = newPwm;
-}
-
-// Configuration getters
-protocol::OscillatorShape Sound::get_shape() const
-{
-    return shape;
-}
-
-uint8_t Sound::get_pwm() const
-{
-    return pwm;
 }
 
 void Sound::setVelocity(uint8_t velocity)

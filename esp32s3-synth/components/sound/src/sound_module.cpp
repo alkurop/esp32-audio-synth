@@ -12,12 +12,22 @@ using namespace midi_module;
 SoundModule::SoundModule(const SoundConfig &config)
     : config(config)
 {
-    // Initialize voices vector with configured polyphony
+
+    soundPool.reserve(config.maxPoliphony);
+    for (size_t i = 0; i < config.maxPoliphony; ++i)
+    {
+        soundPool.emplace_back(config.sampleRate, state.settingsBpm); // ✅ safe and direct
+    }
+
     voices.reserve(config.numVoices);
+
+    auto allocator = [this]() -> std::optional<Sound *>
+    {
+        return allocateSound();
+    };
     for (size_t i = 0; i < config.numVoices; ++i)
     {
-        Voice v(config.sampleRate, voice::MAX_POLYPHONY, i, state.settingsBpm);
-        voices.push_back(v);
+        voices.emplace_back(config.sampleRate, i, state.settingsBpm, allocator);
     }
 }
 
@@ -119,9 +129,24 @@ void SoundModule::audio_task_entry(void *arg)
 
 void SoundModule::updateBpmSetting()
 {
+    uint16_t bpm = state.usesSettingsBmp ? state.settingsBpm : state.midiBpm;
     for (auto &voice : voices)
     {
-        uint16_t bpm = state.usesSettingsBmp ? state.settingsBpm : state.midiBpm;
         voice.setBpm(bpm);
     }
+    for (auto &s : soundPool)
+    {
+        s.setBpm(bpm);
+    }
+}
+
+Sound *SoundModule::allocateSound()
+{
+    for (auto &s : soundPool)
+    {
+        if (!s.isPlaying())
+            return &s;
+    }
+    // All slots full
+    return nullptr;
 }

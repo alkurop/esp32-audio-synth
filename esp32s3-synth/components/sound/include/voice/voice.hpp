@@ -2,12 +2,15 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <functional>
+#include <optional>
 #include "sound/note_freq_table.hpp"
 #include "../utils.hpp"
 #include "sound/sound.hpp"
 #include "menu_struct.hpp"
 #include "nodes/lfo.hpp"
 #include "nodes/filter.hpp"
+#include "protocol.hpp"
 
 using namespace protocol;
 namespace sound_module
@@ -20,12 +23,14 @@ namespace sound_module
     class Voice
     {
     public:
+        using SoundAllocator = std::function<std::optional<Sound *>()>;
+
         /**
          * Construct a voice engine.
          * @param sample_rate Audio sample rate in Hz.
          * @param max_polyphony Maximum simultaneous notes.
          */
-        Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel, uint16_t initial_bpm);
+        Voice(uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundAllocator allocator);
 
         /**
          * Note on/off handlers.
@@ -51,11 +56,12 @@ namespace sound_module
         void setSustain(uint8_t value);
         void setRelease(uint8_t value);
 
-        std::vector<Sound> &getSounds();
+        void setOscillatorShape(protocol::OscillatorShape value);
+        void setOscillatorPwm(uint8_t value);
+        void setOscillatorSync(bool value);
 
-        const voice::AudioConfig config;
-        voice::VolumeSettings volumeSettings;
-        voice::PitchSettings pitchSettings;
+        const uint16_t sampleRate;
+
         LFO pitch_lfo;
         LFO amp_lfo;
         Filter filter;
@@ -64,9 +70,17 @@ namespace sound_module
         size_t midi_channel = 0;
         uint16_t bpm;
 
-        std::vector<Sound> sounds; // dynamic polyphony set by constructor
-        Sound *find_available_slot();
+        voice::VolumeSettings volumeSettings;
+        voice::PitchSettings pitchSettings;
+        voice::EnvelopeSettings envelopeSettings;
+        voice::OscillatorSettings oscillatorSettings;
+
+        SoundAllocator allocateSound;
+        std::vector<Sound *> activeSounds;
+
         Sound *find_note_to_release(uint8_t midi_note); // can be a nullptr
+        Sound * find_available_slot();
+
         void all_notes_off();
     };
 

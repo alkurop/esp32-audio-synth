@@ -8,22 +8,29 @@ using namespace sound_module;
 // Find a free Sound slot
 Sound *Voice::find_available_slot()
 {
-    for (auto &s : sounds)
+    if (auto soundOpt = allocateSound(); soundOpt.has_value())
     {
-        if (!s.isPlaying())
-            return &s;
+        Sound *sound = *soundOpt;
+        sound->setPwm(oscillatorSettings.pwm);
+        sound->setShape(oscillatorSettings.shape);
+        sound->setSync(oscillatorSettings.syncOn);
+        sound->envelope.setAttack(envelopeSettings.attack);
+        sound->envelope.setDecay(envelopeSettings.decay);
+        sound->envelope.setSustain(envelopeSettings.sustain);
+        sound->envelope.setRelease(envelopeSettings.release);
+        return sound;
     }
-    // All slots full
+
     return nullptr;
 }
 
 // Find an active Sound by MIDI note
 Sound *Voice::find_note_to_release(uint8_t midi_note)
 {
-    for (auto &s : sounds)
+    for (auto *s : activeSounds)
     {
-        if (s.isNoteOn() && s.midi_note == midi_note)
-            return &s;
+        if (s->isNoteOn() && s->midi_note == midi_note)
+            return s;
     }
     return nullptr;
 }
@@ -35,9 +42,9 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, uint8_t velocity)
         return;
 
     // 1. Skip if this note is already active
-    for (auto &s : sounds)
+    for (auto *s : activeSounds)
     {
-        if (s.midi_note == midi_note && s.isNoteOn())
+        if (s->midi_note == midi_note && s->isNoteOn())
         {
             // Note is already playing – ignore new noteOn
             return;
@@ -49,6 +56,7 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, uint8_t velocity)
     if (!slot)
         return; // all voices are active — skip or add stealing logic later
 
+    activeSounds.push_back(slot);
     float base_freq = midi_note_freq[midi_note];
     slot->noteOn(base_freq, velocity, midi_note);
 }
@@ -69,9 +77,9 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
 // Turn off all notes immediately
 void Voice::all_notes_off()
 {
-    for (auto &s : sounds)
+    for (auto *s : activeSounds)
     {
-        s.noteOff();
-        s.envelope.gateOff();
+        s->noteOff();
+        s->envelope.gateOff();
     }
 }

@@ -11,6 +11,7 @@
 #include "voice/voice.hpp"
 #include "midi_parser.hpp"
 #include "menu_struct.hpp"
+#include "sound/sound.hpp"
 
 namespace sound_module
 {
@@ -30,8 +31,9 @@ namespace sound_module
         size_t tableSize;    // Wavetable resolution
         uint16_t amplitude;  // Peak amplitude for 16-bit audio
         size_t bufferSize;   // Samples per I2S buffer
-        size_t numVoices;    // Polyphony
-        I2SParams i2s;       // I2S pin configuration
+        size_t numVoices;
+        uint8_t maxPoliphony;
+        I2SParams i2s; // I2S pin configuration
     };
 
     struct GlobalState
@@ -65,9 +67,11 @@ namespace sound_module
         std::vector<Voice> voices;
         TaskHandle_t audioTask = nullptr;
         GlobalState state;
+        std::vector<Sound> soundPool;
 
         // Internal audio task entry point
         static void audio_task_entry(void *arg);
+        Sound *allocateSound();
     };
 
 } // namespace sound_module

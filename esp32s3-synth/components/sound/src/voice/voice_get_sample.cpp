@@ -16,15 +16,23 @@ float Voice::getSample()
     float sm_gain = volumeSettings.gain_smoothed.next();
     if (sm_gain <= 1e-6f)
         return 0.0f;
- 
-    float mix = 0.0f;
-    for (auto &sound : sounds)
-    {
-        if (!sound.isPlaying())
-            continue;
 
-        sound.set_frequency(sound.base_frequency); // with vibrato etc.
-        mix += sound.get_sample() * sound.velNorm;
+    float mix = 0.0f;
+    for (auto it = activeSounds.begin(); it != activeSounds.end();)
+    {
+        Sound *sound = *it;
+
+        if (!sound->isPlaying())
+        {
+            it = activeSounds.erase(it); // erase returns the next valid iterator
+            continue;
+        }
+
+        // Process sound
+        sound->setFrequency(sound->base_frequency);
+        mix += sound->getSample() * sound->velNorm;
+
+        ++it;
     }
     return mix * sm_gain;
 }

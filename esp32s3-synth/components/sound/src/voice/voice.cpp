@@ -5,23 +5,17 @@
 using namespace sound_module;
 
 // Constructor: set sample rate, polyphony, initialize sounds and envelope
-Voice::Voice(uint32_t sample_rate, size_t max_polyphony, uint8_t channel, uint16_t initial_bpm)
-    : config({.sample_rate = sample_rate, .max_polyphony = max_polyphony}),
-      volumeSettings(),
-      pitchSettings(),
-
+Voice::Voice(uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundAllocator allocator)
+    : sampleRate(sample_rate),
       pitch_lfo(sample_rate, initial_bpm),
       amp_lfo(sample_rate, initial_bpm),
       filter(sample_rate, initial_bpm),
       midi_channel(channel),
-      sounds()
-
+      bpm(initial_bpm),
+      volumeSettings(),
+      pitchSettings(),
+      allocateSound(allocator)
 {
-    sounds.reserve(max_polyphony);
-    for (size_t i = 0; i < max_polyphony; ++i)
-    {
-        sounds.emplace_back(config.sample_rate, initial_bpm);
-    }
 }
 
 void Voice::setBpm(uint16_t bpm)
@@ -30,10 +24,6 @@ void Voice::setBpm(uint16_t bpm)
     amp_lfo.setBpm(bpm);
     pitch_lfo.setBpm(bpm);
     filter.setBpm(bpm);
-    for (auto &s : sounds)
-    {
-        s.setBpm(bpm);
-    }
 }
 
 void Voice::setMidiChannel(uint8_t midiChannel)
@@ -42,35 +32,64 @@ void Voice::setMidiChannel(uint8_t midiChannel)
     all_notes_off();
 };
 
-std::vector<Sound> &Voice::getSounds()
-{
-    return sounds;
-}
 void Voice::setAttack(uint8_t value)
 {
-    for (auto &s : sounds)
+    envelopeSettings.attack = value;
+    for (auto *s : activeSounds)
     {
-        s.envelope.setAttack(value);
+        s->envelope.setAttack(value);
     }
 }
 void Voice::setDecay(uint8_t value)
 {
-    for (auto &s : sounds)
+    envelopeSettings.decay = value;
+    for (auto *s : activeSounds)
     {
-        s.envelope.setDecay(value);
+        s->envelope.setDecay(value);
     }
 }
 void Voice::setSustain(uint8_t value)
 {
-    for (auto &s : sounds)
+    envelopeSettings.sustain = value;
+
+    for (auto *s : activeSounds)
     {
-        s.envelope.setSustain(value);
+        s->envelope.setSustain(value);
     }
 }
 void Voice::setRelease(uint8_t value)
 {
-    for (auto &s : sounds)
+    envelopeSettings.release = value;
+    for (auto *s : activeSounds)
     {
-        s.envelope.setRelease(value);
+        s->envelope.setRelease(value);
     }
 }
+
+void Voice::setOscillatorPwm(uint8_t value)
+{
+    oscillatorSettings.pwm = value;
+    for (auto *s : activeSounds)
+    {
+        s->setPwm(value);
+    }
+}
+
+void Voice::setOscillatorShape(protocol::OscillatorShape value)
+{
+    oscillatorSettings.shape = value;
+    for (auto *s : activeSounds)
+    {
+        s->setShape(value);
+    }
+}
+
+void Voice::setOscillatorSync(bool value)
+{
+    oscillatorSettings.syncOn = value;
+    for (auto *s : activeSounds)
+    {
+        s->setSync(value);
+    }
+}
+

@@ -22,7 +22,6 @@ namespace protocol
         constexpr uint8_t VOL_MAX = 31;
         constexpr float MIN_DB = -60.0f;
         constexpr float MAX_DB = 0.0f;
-        constexpr uint8_t MAX_POLYPHONY = 8;
 
         struct SmoothedValue
         {
@@ -50,10 +49,18 @@ namespace protocol
             SmoothedValue gain_smoothed;
         };
 
-        struct AudioConfig
+        struct OscillatorSettings
         {
-            uint32_t sample_rate; // in Hz
-            size_t max_polyphony; // number of simultaneous sounds;
+            protocol::OscillatorShape shape;
+            uint8_t pwm;
+            bool syncOn;
+        };
+        struct EnvelopeSettings
+        {
+            uint8_t attack;
+            uint8_t decay;
+            uint8_t sustain;
+            uint8_t release;
         };
 
         struct PitchSettings

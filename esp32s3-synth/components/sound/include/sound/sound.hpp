@@ -21,21 +21,19 @@ namespace sound_module
         void noteOff();
 
         /// Update the oscillator’s phase increment to match a new frequency
-        void set_frequency(float frequency);
+        void setFrequency(float frequency);
 
         /// Generate and return one sample at the current phase;
         /// returns zero if inactive
-        float get_sample();
+        float getSample();
 
         /// Configuration setters
-        void set_shape(protocol::OscillatorShape newShape);
-        void set_pwm(uint8_t pwm);     // 0–31
-        void set_sync(bool sync_on);
+        void setShape(protocol::OscillatorShape newShape);
+        void setPwm(uint8_t pwm);     // 0–31
+        void setSync(bool sync_on);
         void setBpm(uint16_t bpm);
 
         /// Configuration getters
-        protocol::OscillatorShape get_shape() const;
-        uint8_t get_pwm() const;
         void setVelocity(uint8_t midiVelocity);
 
         /// Public state for introspection or external use
@@ -45,6 +43,7 @@ namespace sound_module
         Envelope envelope; // shared ADSR envelope
         bool isPlaying();
         bool isNoteOn();
+        void reset();
 
     private:
         bool active = false; ///< true if currently playing
