@@ -38,8 +38,8 @@ void Sound::noteOff()
 
 void Sound::setFrequency(float frequency)
 {
+    
     phase_increment = frequency / sample_rate;
-    ESP_LOGD(TAG, "Set frequency %f", frequency);
 }
 
 float Sound::getSample()

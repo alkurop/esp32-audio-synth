@@ -72,13 +72,13 @@ namespace sound_module
         CachedLFO panLfoC;
 
         Filter filter;
+        voice::PitchSettings pitchSettings;
 
     private:
         size_t midi_channel = 0;
         uint16_t bpm;
 
         voice::VolumeSettings volumeSettings;
-        voice::PitchSettings pitchSettings;
         voice::EnvelopeSettings envelopeSettings;
         voice::OscillatorSettings oscillatorSettings;
 

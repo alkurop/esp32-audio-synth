@@ -34,7 +34,7 @@ Sender sender(senderConfig);
 
 Menu menuHolder(protocol::NUM_VOICES);
 
-auto rotaryCallback = [](uint8_t id, uint8_t newValue)
+auto rotaryCallback = [](uint8_t id, int16_t newValue)
 {
     menuHolder.rotateKnob(id, newValue);
 };

@@ -28,6 +28,8 @@ Stereo Voice::getSample()
     // Stereo pan = getPanGains(panMod);
 
     // float totalPitchCents = static_cast<float>(totalTransposeCents) + pitchLfoCents;
+            // sound->setFrequency(modFreq);
+
     float totalPitchCents = static_cast<float>(totalTransposeCents);
     float pitchRatio = sound_module::centsToPitchRatio(totalPitchCents);
 
@@ -49,8 +51,7 @@ Stereo Voice::getSample()
         }
 
         float modFreq = sound->base_frequency * pitchRatio;
-        // float modFreq = sound->base_frequency;
-        // sound->setFrequency(modFreq);
+        sound->setFrequency(modFreq);
 
         float sample = sound->getSample() * sound->velNorm;
         // float sample = sound->getSample() * sound->velNorm * ampScale;

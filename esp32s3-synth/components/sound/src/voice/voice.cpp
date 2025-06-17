@@ -1,5 +1,6 @@
 // voice.cpp
 #include "voice/voice.hpp"
+#include "esp_log.h"
 #include <cmath>
 
 using namespace sound_module;
@@ -106,4 +107,6 @@ void Voice::updatePitchOffset()
         pitchSettings.fine_tuning +
         pitchSettings.transpose_semitones * 100 +
         pitchSettings.transpose_octave * 1200;
+
+    ESP_LOGI(TAG, "Updated pitch offset: %d cents", totalTransposeCents);
 }

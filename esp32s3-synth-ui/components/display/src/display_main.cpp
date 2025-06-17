@@ -204,8 +204,15 @@ void Display::renderMenuPage(const menu::MenuState &st)
         }
         else
         {
-            char buf[4];
-            std::snprintf(buf, sizeof(buf), "%02u", st.fieldValues[k]);
+            char buf[5];
+            if (st.menuItemIndex == static_cast<uint8_t>(Page::Tuning))
+            {
+                std::snprintf(buf, sizeof(buf), "%+03d", st.fieldValues[k]);
+            }
+            else
+            {
+                std::snprintf(buf, sizeof(buf), "%02d", st.fieldValues[k]);
+            }
             lv_obj_set_style_text_font(val, &lv_font_montserrat_14, LV_STATE_DEFAULT);
             lv_label_set_text(val, buf);
             lv_font_glyph_dsc_t g_val;

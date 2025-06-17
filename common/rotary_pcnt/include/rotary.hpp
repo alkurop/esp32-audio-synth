@@ -34,7 +34,7 @@ namespace ui
         RotaryConfig config;
         QueueHandle_t eventQueue = nullptr;
 
-        using RotaryCallback = std::function<void(uint8_t id, uint8_t newValue)>;
+        using RotaryCallback = std::function<void(uint8_t id, int16_t newValue)>;
 
         /**
          * @brief Construct a new Rotary encoder handle
