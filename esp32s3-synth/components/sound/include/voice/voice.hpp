@@ -25,20 +25,18 @@ namespace sound_module
     class Voice
     {
     public:
-        using SoundAllocator = std::function<std::optional<Sound *>()>;
-
         /**
          * Construct a voice engine.
          * @param sample_rate Audio sample rate in Hz.
          * @param max_polyphony Maximum simultaneous notes.
          */
-        Voice(uint8_t index, uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundAllocator allocator);
+        Voice(uint8_t index, uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm);
 
         /**
          * Note on/off handlers.
          * velocity: normalized 0.0–1.0
          */
-        void noteOn(uint8_t channel, uint8_t midi_note, uint8_t velocity);
+        void noteOn(Sound *sound, uint8_t channel, uint8_t midi_note, uint8_t velocity);
         void noteOff(uint8_t channel, uint8_t midi_note);
 
         /**
@@ -84,13 +82,11 @@ namespace sound_module
         voice::EnvelopeSettings envelopeSettings;
         voice::OscillatorSettings oscillatorSettings;
 
-        SoundAllocator allocateSound;
         std::vector<Sound *> activeSounds;
 
         int totalTransposeCents = 0;
 
         Sound *find_note_to_release(uint8_t midi_note); // can be a nullptr
-        Sound *find_available_slot();
 
         void all_notes_off();
     };

@@ -10,6 +10,7 @@
 
 using namespace sound_module;
 using namespace midi_module;
+static const char *TAG = "SOUND_MODULE";
 
 SoundModule::SoundModule(const SoundConfig &config)
     : config(config)
@@ -23,13 +24,9 @@ SoundModule::SoundModule(const SoundConfig &config)
 
     voices.reserve(config.numVoices);
 
-    auto allocator = [this]() -> std::optional<Sound *>
-    {
-        return allocateSound();
-    };
     for (size_t i = 0; i < config.numVoices; ++i)
     {
-        voices.emplace_back(i, config.sampleRate, i, state.settingsBpm, allocator);
+        voices.emplace_back(i, config.sampleRate, i, state.settingsBpm);
     }
 }
 
@@ -76,10 +73,20 @@ void SoundModule::init()
 
 void SoundModule::handle_note(const NoteMessage &msg)
 {
+    std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 lock
+
     for (auto &voice : voices)
     {
         if (msg.on)
-            voice.noteOn(msg.channel, msg.note, msg.velocity);
+        {
+            auto *activeSound = allocateSound();
+            if (activeSound)
+                voice.noteOn(activeSound, msg.channel, msg.note, msg.velocity);
+            else
+            {
+                ESP_LOGI(TAG, "All sound are taken");
+            }
+        }
         else
             voice.noteOff(msg.channel, msg.note);
     }
@@ -91,6 +98,7 @@ void SoundModule::process()
     std::vector<int16_t> buffer(num_samples * 2); // stereo buffer
 
     float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
+    std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 lock
 
     for (size_t i = 0; i < num_samples; ++i)
     {

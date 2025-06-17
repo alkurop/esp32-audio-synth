@@ -12,6 +12,7 @@
 #include "midi_parser.hpp"
 #include "menu_struct.hpp"
 #include "sound/sound.hpp"
+#include <mutex> // add this at the top
 
 namespace sound_module
 {
@@ -72,6 +73,7 @@ namespace sound_module
         // Internal audio task entry point
         static void audio_task_entry(void *arg);
         Sound *allocateSound();
+        std::mutex activeSoundsMutex;
     };
 
 } // namespace sound_module

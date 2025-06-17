@@ -4,25 +4,7 @@
 #include <esp_log.h>
 
 using namespace sound_module;
-
-// Find a free Sound slot
-Sound *Voice::find_available_slot()
-{
-    if (auto soundOpt = allocateSound(); soundOpt.has_value())
-    {
-        Sound *sound = *soundOpt;
-        sound->setPwm(oscillatorSettings.pwm);
-        sound->setShape(oscillatorSettings.shape);
-        sound->setSync(oscillatorSettings.syncOn);
-        sound->envelope.setAttack(envelopeSettings.attack);
-        sound->envelope.setDecay(envelopeSettings.decay);
-        sound->envelope.setSustain(envelopeSettings.sustain);
-        sound->envelope.setRelease(envelopeSettings.release);
-        return sound;
-    }
-
-    return nullptr;
-}
+static const char *TAG = "Voice";
 
 // Find an active Sound by MIDI note
 Sound *Voice::find_note_to_release(uint8_t midi_note)
@@ -36,7 +18,7 @@ Sound *Voice::find_note_to_release(uint8_t midi_note)
 }
 
 // Note on: trigger new sound, retrigger LFOs, and envelope
-void Voice::noteOn(uint8_t ch, uint8_t midi_note, uint8_t velocity)
+void Voice::noteOn(Sound *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity)
 {
     if (ch != midi_channel)
         return;
@@ -51,14 +33,18 @@ void Voice::noteOn(uint8_t ch, uint8_t midi_note, uint8_t velocity)
         }
     }
 
-    // 2. Find an available voice (Idle or Releasing)
-    Sound *slot = find_available_slot();
-    if (!slot)
-        return; // all voices are active — skip or add stealing logic later
-
-    activeSounds.push_back(slot);
+    sound->setPwm(oscillatorSettings.pwm);
+    sound->setShape(oscillatorSettings.shape);
+    sound->setSync(oscillatorSettings.syncOn);
+    sound->envelope.setAttack(envelopeSettings.attack);
+    sound->envelope.setDecay(envelopeSettings.decay);
+    sound->envelope.setSustain(envelopeSettings.sustain);
+    sound->envelope.setRelease(envelopeSettings.release);
     float base_freq = midi_note_freq[midi_note];
-    slot->noteOn(base_freq, velocity, midi_note);
+    sound->noteOn(base_freq, velocity, midi_note);
+    activeSounds.push_back(sound);
+
+    ESP_LOGI(TAG, "Sound added to voice, new count %d", activeSounds.size());
 }
 
 // Note off: release matching sound and envelope

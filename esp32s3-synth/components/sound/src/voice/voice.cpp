@@ -3,9 +3,10 @@
 #include <cmath>
 
 using namespace sound_module;
+static const char *TAG = "Voice";
 
 // Constructor: set sample rate, polyphony, initialize sounds and envelope
-Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundAllocator allocator)
+Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm)
     : sampleRate(sample_rate),
       // lfo
       pitchLfo(sample_rate, initial_bpm),
@@ -19,8 +20,7 @@ Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t
       midi_channel(channel),
       bpm(initial_bpm),
       volumeSettings(),
-      pitchSettings(),
-      allocateSound(allocator)
+      pitchSettings()
 {
 }
 

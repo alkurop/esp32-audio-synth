@@ -42,7 +42,7 @@ MidiControllerCallback controllerCallback = [](const ControllerChange &cc)
 
 MidiNoteMessageCallback noteMessageCallback = [](const NoteMessage &note)
 {
-    // ESP_LOGD(TAG, "Note on=%d channel %d velocity %d", note.on, note.channel, note.velocity);
+    ESP_LOGD(TAG, "Note on=%d channel %d velocity %d note %d", note.on, note.channel, note.velocity, note.note);
     soundModule.handle_note(note);
 };
 
@@ -75,7 +75,7 @@ void initMidi()
 extern "C" void app_main()
 {
     soundModule.init();
-    // initMidi();
+    initMidi();
     masterKnob.init(masterKnobCallback);
     ESP_ERROR_CHECK(receiver.init(updateCallback, sendBpm));
 }
