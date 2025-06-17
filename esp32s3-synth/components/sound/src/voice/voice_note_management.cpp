@@ -35,7 +35,6 @@ void Voice::noteOn(Sound *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity
 
     sound->setPwm(oscillatorSettings.pwm);
     sound->setShape(oscillatorSettings.shape);
-    sound->setSync(oscillatorSettings.syncOn);
     sound->envelope.setAttack(envelopeSettings.attack);
     sound->envelope.setDecay(envelopeSettings.decay);
     sound->envelope.setSustain(envelopeSettings.sustain);

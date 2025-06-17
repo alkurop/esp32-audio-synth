@@ -58,7 +58,6 @@ namespace sound_module
 
         void setOscillatorShape(protocol::OscillatorShape value);
         void setOscillatorPwm(uint8_t value);
-        void setOscillatorSync(bool value);
         void updatePitchOffset();
 
         const uint16_t sampleRate;

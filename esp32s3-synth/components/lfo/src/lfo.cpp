@@ -69,7 +69,7 @@ float LFO::getValue(uint16_t ticks)
         raw = (phase < 0.5f) ? 1.0f : -1.0f;
         break;
     default:
-        raw = interpolateLookup(phase, sineTable);
+        raw = 0.0f;
     }
 
     return raw * float(depth);

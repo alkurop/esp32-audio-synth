@@ -14,7 +14,7 @@ namespace sound_module
     };
 
     // Static sine table initialized once at program startup
-    static std::array<float, protocol::LOOKUP_TABLE_SIZE> sineTable = []()
+    const std::array<float, protocol::LOOKUP_TABLE_SIZE> sineTable = []()
     {
         std::array<float, protocol::LOOKUP_TABLE_SIZE> table = {};
         for (int i = 0; i < protocol::LOOKUP_TABLE_SIZE; ++i)

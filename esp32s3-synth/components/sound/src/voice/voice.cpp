@@ -93,14 +93,6 @@ void Voice::setOscillatorShape(protocol::OscillatorShape value)
     }
 }
 
-void Voice::setOscillatorSync(bool value)
-{
-    oscillatorSettings.syncOn = value;
-    for (auto *s : activeSounds)
-    {
-        s->setSync(value);
-    }
-}
 void Voice::updatePitchOffset()
 
 {
@@ -109,7 +101,7 @@ void Voice::updatePitchOffset()
         pitchSettings.transpose_semitones * 100 +
         pitchSettings.transpose_octave * 1200;
 
-    pitchSettings.pitchRatio = sound_module::centsToPitchRatio( pitchSettings.totalTransposeCents);
+    pitchSettings.pitchRatio = centsToPitchRatio( pitchSettings.totalTransposeCents);
 
     ESP_LOGI(TAG, "Updated pitch offset: %d cents pitchRation %f", pitchSettings.totalTransposeCents, pitchSettings.pitchRatio);
 }

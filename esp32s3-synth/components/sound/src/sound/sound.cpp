@@ -61,26 +61,17 @@ float Sound::getSample()
             return interpolateLookup(phase, sineTable);
         case protocol::OscillatorShape::Saw:
         {
-            float t = phase;
-            float dt = phase_increment; // normalized increment per sample
-            float value = 2.0f * t - 1.0f;
-            value -= poly_blep(t, dt);
-            return value;
+            return interpolateLookup(phase, sawTable);
         }
         case protocol::OscillatorShape::Square:
         {
-            float pw = std::clamp(static_cast<float>(pwm) / static_cast<float>(protocol::OSCILLATOR_PWM_MAX), 0.05f, 0.95f);
-            float t = phase;
-            float dt = phase_increment;
+            int pwmIndex = std::clamp(
+                static_cast<int>(pwm * PWM_STEPS / 128),
+                0,
+                static_cast<int>(PWM_STEPS - 1));
+            float value = interpolateLookup(phase, pwmSquareTables[pwmIndex]);
 
-            float out = (t < pw) ? 1.0f : -1.0f;
-
-            // Apply PolyBLEP at both transitions
-            out += poly_blep(t, dt);               // Rising edge
-            float t2 = fmodf(t - pw + 1.0f, 1.0f); // Correct wraparound
-            out -= poly_blep(t2, dt);              // Falling edge
-
-            return out;
+            return value;
         }
         case protocol::OscillatorShape::Tri:
             return interpolateLookup(phase, triangleTable);
@@ -103,14 +94,6 @@ void Sound::setShape(protocol::OscillatorShape newShape)
     shape = newShape;
     // restart waveform on shape change
     phase = 0.0f;
-}
-
-void Sound::setSync(bool sync_on)
-{
-    sync = sync_on;
-    // if enabling sync, restart phase
-    if (sync)
-        phase = 0.0f;
 }
 
 void Sound::setPwm(uint8_t newPwm)

@@ -6,8 +6,30 @@
 using namespace protocol;
 namespace sound_module
 {
+    constexpr size_t PWM_STEPS = 19;
+    constexpr float PWM_MIN = 0.05f;
+    constexpr float PWM_MAX = 0.95f;
+    constexpr size_t TABLE_SIZE = 512;
 
-    static const std::array<float, LOOKUP_TABLE_SIZE> squareTable = {
+    const std::array<std::array<float, TABLE_SIZE>, PWM_STEPS> pwmSquareTables = []()
+    {
+        std::array<std::array<float, TABLE_SIZE>, PWM_STEPS> tables{};
+
+        for (size_t p = 0; p < PWM_STEPS; ++p)
+        {
+            float pw = PWM_MIN + p * (PWM_MAX - PWM_MIN) / (PWM_STEPS - 1);
+
+            for (size_t i = 0; i < TABLE_SIZE; ++i)
+            {
+                float phase = static_cast<float>(i) / TABLE_SIZE;
+                tables[p][i] = (phase < pw) ? 1.0f : -1.0f;
+            }
+        }
+
+        return tables;
+    }();
+
+    const std::array<float, LOOKUP_TABLE_SIZE> squareTable = {
         0.000000,
         0.105768,
         0.210183,

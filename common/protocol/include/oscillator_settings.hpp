@@ -46,16 +46,7 @@ namespace protocol
             .defaultValue = 0,
             .increment = 1,
         },
-        {
-            .label = "Sync",
-            .type = FieldType::Options,
-            .min = 0,
-            .max = 0,
-            .opts = noYes,
-            .optCount = 2,
-            .defaultValue = 0,
-            .increment = 1,
-        },
+        
     };
 
 };

@@ -10,7 +10,7 @@ namespace sound_module
 {
     constexpr size_t PAN_TABLE_SIZE = 129; // from -1.0 to +1.0 in 128 steps
 
-    inline std::array<Stereo, PAN_TABLE_SIZE> panTable = []()
+    const std::array<Stereo, PAN_TABLE_SIZE> panTable = []()
     {
         std::array<Stereo, PAN_TABLE_SIZE> table = {};
         for (size_t i = 0; i < PAN_TABLE_SIZE; ++i)

@@ -8,7 +8,7 @@ using namespace protocol;
 namespace sound_module
 {
 
-    static std::array<float, LOOKUP_TABLE_SIZE> triangleTable = []()
+    const std::array<float, LOOKUP_TABLE_SIZE> triangleTable = []()
     {
         std::array<float, LOOKUP_TABLE_SIZE> table = {};
         for (size_t i = 0; i < LOOKUP_TABLE_SIZE; ++i)

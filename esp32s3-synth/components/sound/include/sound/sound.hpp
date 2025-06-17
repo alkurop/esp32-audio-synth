@@ -30,7 +30,6 @@ namespace sound_module
         /// Configuration setters
         void setShape(protocol::OscillatorShape newShape);
         void setPwm(uint8_t pwm);     // 0–31
-        void setSync(bool sync_on);
         void setBpm(uint16_t bpm);
 
         /// Configuration getters
@@ -46,7 +45,6 @@ namespace sound_module
 
     private:
         bool active = false; ///< true if currently playing
-        bool sync = false;
         const uint32_t sample_rate;   ///< samples per second
         float phase = 0.0f;           ///< oscillator phase [0,1)
         float phase_increment = 0.0f; ///< increment per sample
