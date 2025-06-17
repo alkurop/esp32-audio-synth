@@ -26,8 +26,8 @@ namespace protocol
         {
             .label = "Semi",
             .type = FieldType::Range,
-            .min = -12,
-            .max = 12,
+            .min = -50,
+            .max = 50,
             .opts = nullptr,
             .optCount = 0,
             .defaultValue = 0,

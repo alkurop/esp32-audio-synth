@@ -22,7 +22,6 @@ void Sound::noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
     ESP_LOGD(TAG, "Sound trigger freq %f velocity %u note %u", frequency, velocity_in, midi_note);
     setVelocity(velocity_in);
     phase = 0.0f;
-    phase_increment = frequency / sample_rate;
     active = true;
     midi_note = midi_note_in;
     envelope.gateOn();

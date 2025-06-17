@@ -7,20 +7,21 @@
 
 namespace sound_module
 {
-    constexpr size_t CENT_PITCH_TABLE_SIZE = 241; // For –120 to +120 cents
-    constexpr int CENT_OFFSET = 120;              // To shift index from –120...+120 → 0...240
+    constexpr int CENT_MIN = -2400;
+    constexpr int CENT_MAX = 2400;
+    constexpr size_t CENT_PITCH_TABLE_SIZE = CENT_MAX - CENT_MIN + 1;
+    constexpr int CENT_OFFSET = -CENT_MIN;
 
     inline const std::array<float, CENT_PITCH_TABLE_SIZE> centPitchTable = []()
     {
         std::array<float, CENT_PITCH_TABLE_SIZE> table = {};
         for (size_t i = 0; i < CENT_PITCH_TABLE_SIZE; ++i)
         {
-            int cents = static_cast<int>(i) - CENT_OFFSET;
+            int cents = static_cast<int>(i) + CENT_MIN;
             table[i] = std::pow(2.0f, cents / 1200.0f);
         }
         return table;
     }();
-    /// Convert cents to pitch ratio using lookup table
     inline float centsToPitchRatio(float cents)
     {
         int index = static_cast<int>(std::round(cents)) + CENT_OFFSET;
