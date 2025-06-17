@@ -12,6 +12,7 @@
 #include "cached_lfo.hpp"
 #include "nodes/filter.hpp"
 #include "protocol.hpp"
+#include "stereo.hpp"
 
 using namespace protocol;
 namespace sound_module
@@ -44,7 +45,7 @@ namespace sound_module
          * Generate the next mixed sample for this voice.
          * @return Sample amplitude in [-1.0, 1.0]
          */
-        float getSample();
+        Stereo getSample();
 
         // Voice-level controls
         void setVolume(uint8_t volume);
@@ -70,7 +71,7 @@ namespace sound_module
         CachedLFO pitchLfoC;
         CachedLFO ampLfoC;
         CachedLFO panLfoC;
-        
+
         Filter filter;
 
     private:

@@ -4,37 +4,55 @@
 #include <cmath>
 #include <esp_log.h>
 #include <channel_settings.hpp>
+#include "cent_pitch_table.hpp"
+#include "pan_table.hpp"
 
 using namespace sound_module;
 using namespace protocol;
 
 static const char *TAG = "Voice";
 
-float Voice::getSample()
+Stereo Voice::getSample()
 {
     // 0) Master gain smoothing
     float sm_gain = volumeSettings.gain_smoothed.next();
     if (sm_gain <= 1e-6f)
-        return 0.0f;
+        return Stereo{0.0f, 0.0f};
 
-    float mix = 0.0f;
+    float pitchModCents = pitchLfoC.getValue();
+    float pitchRatio = sound_module::centsToPitchRatio(pitchModCents);
+
+    float ampMod = ampLfoC.getValue() / 127.0f; // Normalize –1.0 … +1.0
+    float ampScale = 1.0f + ampMod;
+
+    float panMod = panLfoC.getValue() / 127.0f; // Normalize –1.0 … +1.0
+    sound_module::Stereo pan = getPanGains(panMod);
+
+    float mixL = 0.0f;
+    float mixR = 0.0f;
+
     for (auto it = activeSounds.begin(); it != activeSounds.end();)
     {
         Sound *sound = *it;
 
         if (!sound->isPlaying())
         {
-            it = activeSounds.erase(it); // erase returns the next valid iterator
+            it = activeSounds.erase(it);
             continue;
         }
 
-        // Process sound
-        sound->setFrequency(sound->base_frequency);
-        mix += sound->getSample() * sound->velNorm;
+        float modFreq = sound->base_frequency * pitchRatio;
+        sound->setFrequency(modFreq);
+
+        float sample = sound->getSample() * sound->velNorm * ampScale;
+
+        mixL += sample * pan.left;
+        mixR += sample * pan.right;
 
         ++it;
     }
-    return mix * sm_gain;
+
+    return Stereo{mixL * sm_gain, mixR * sm_gain};
 }
 
 void Voice::setVolume(uint8_t newVolume)

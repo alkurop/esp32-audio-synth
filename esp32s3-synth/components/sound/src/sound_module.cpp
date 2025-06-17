@@ -1,10 +1,12 @@
 // sound_module.cpp
-#include "sound_module.hpp"
-#include "utils.hpp"
+
 #include <esp_log.h>
 #include <driver/i2s_std.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include "sound_module.hpp"
+#include "utils.hpp"
+#include "stereo.hpp"
 
 using namespace sound_module;
 using namespace midi_module;
@@ -86,31 +88,41 @@ void SoundModule::handle_note(const NoteMessage &msg)
 void SoundModule::process()
 {
     size_t num_samples = config.bufferSize;
-    std::vector<int16_t> buffer(num_samples * 2);
+    std::vector<int16_t> buffer(num_samples * 2); // stereo buffer
 
     float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
 
     for (size_t i = 0; i < num_samples; ++i)
     {
-        float mix = 0.0f;
+        float mixL = 0.0f;
+        float mixR = 0.0f;
         int activeCount = 0;
 
         for (auto &voice : voices)
         {
-            float s = voice.getSample();
-            mix += s;
-            if (s != 0.0f)
+            Stereo s = voice.getSample();
+
+            if (s.left != 0.0f || s.right != 0.0f)
+            {
+                mixL += s.left;
+                mixR += s.right;
                 activeCount++;
+            }
         }
 
         if (activeCount > 0)
-            mix /= static_cast<float>(activeCount);
+        {
+            mixL /= static_cast<float>(activeCount);
+            mixR /= static_cast<float>(activeCount);
+        }
 
-        int16_t sample = static_cast<int16_t>(mix * config.amplitude * volumeScale);
+        int16_t sampleL = static_cast<int16_t>(mixL * config.amplitude * volumeScale);
+        int16_t sampleR = static_cast<int16_t>(mixR * config.amplitude * volumeScale);
 
-        buffer[2 * i] = sample;     // Left
-        buffer[2 * i + 1] = sample; // Right
+        buffer[2 * i] = sampleL;
+        buffer[2 * i + 1] = sampleR;
     }
+
     size_t bytes_written;
     i2s_channel_write(txChan, buffer.data(), buffer.size() * sizeof(int16_t), &bytes_written, portMAX_DELAY);
 }
