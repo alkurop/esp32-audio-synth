@@ -34,12 +34,12 @@ void setLfo(LFO &lfo, uint8_t field, int16_t value)
 
 void settings::setAmpLfoPage(Voice &voice, uint8_t field, int16_t value)
 {
-    setLfo(voice.amp_lfo, field, value);
+    setLfo(voice.ampLfo, field, value);
 };
 
 void settings::setPitchLfoPage(Voice &voice, uint8_t field, int16_t value)
 {
-    setLfo(voice.pitch_lfo, field, value);
+    setLfo(voice.pitchLfo, field, value);
 };
 
 void settings::setFilterCutoffLfoPage(Voice &voice, uint8_t field, int16_t value)

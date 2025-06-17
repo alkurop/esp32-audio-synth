@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
-#include "nodes/lfo.hpp"
+#include "lfo.hpp"
+#include "cached_lfo.hpp"
 #include "filter_settings.hpp"
 
 using namespace protocol;
@@ -14,7 +15,7 @@ namespace sound_module
         /// Filter types corresponding to protocol::filtTypes
 
         /// Construct with a sample rate and default settings
-        explicit Filter(uint32_t sampleRate, uint8_t init_bpm);
+        explicit Filter(uint32_t sampleRate, uint8_t init_bpm,uint8_t voiceIndex);
 
         /// Set the filter type (LP12, HP12, BP12, Notch)
         void setType(FilterType type)
@@ -43,6 +44,9 @@ namespace sound_module
         LFO cutoffLfo;
         /// LFO for dynamic modulation of resonance
         LFO resonanceLfo;
+
+        CachedLFO cutoffLfoC;
+        CachedLFO resonanceLfoC;
 
     private:
         uint32_t sample_rate;

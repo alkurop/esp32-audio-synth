@@ -27,7 +27,7 @@ SoundModule::SoundModule(const SoundConfig &config)
     };
     for (size_t i = 0; i < config.numVoices; ++i)
     {
-        voices.emplace_back(config.sampleRate, i, state.settingsBpm, allocator);
+        voices.emplace_back(i, config.sampleRate, i, state.settingsBpm, allocator);
     }
 }
 

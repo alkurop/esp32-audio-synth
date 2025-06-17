@@ -1,12 +1,12 @@
 # Grab every .cpp under src/
-file(GLOB_RECURSE SRC
+file(GLOB_RECURSE SRCS
   "${CMAKE_CURRENT_LIST_DIR}/src/*.cpp"
 )
 
 idf_component_register(
-    SRCS ${SRC}
+    SRCS ${SRCS}
     INCLUDE_DIRS "include"
-    REQUIRES protocol sound midi driver envelope lfo lookup
+    REQUIRES log protocol lookup
 )
 
 

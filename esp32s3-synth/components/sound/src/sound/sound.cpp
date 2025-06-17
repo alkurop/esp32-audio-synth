@@ -1,10 +1,10 @@
 #include "sound/sound.hpp"
 #include "protocol.hpp"
-#include "sound/sine_table.hpp"
-#include "sound/saw_tooth_table.hpp"
-#include "sound/triangle_table.hpp"
-#include "sound/square_table.hpp"
-#include "sound/lookup.hpp"
+#include "sine_table.hpp"
+#include "saw_tooth_table.hpp"
+#include "triangle_table.hpp"
+#include "square_table.hpp"
+#include "lookup.hpp"
 #include <cmath>
 #include <cstdlib>   // for std::rand, RAND_MAX
 #include "esp_log.h" // for std::rand, RAND_MAX

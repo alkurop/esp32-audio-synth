@@ -5,11 +5,17 @@
 using namespace sound_module;
 
 // Constructor: set sample rate, polyphony, initialize sounds and envelope
-Voice::Voice(uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundAllocator allocator)
+Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundAllocator allocator)
     : sampleRate(sample_rate),
-      pitch_lfo(sample_rate, initial_bpm),
-      amp_lfo(sample_rate, initial_bpm),
-      filter(sample_rate, initial_bpm),
+      // lfo
+      pitchLfo(sample_rate, initial_bpm),
+      ampLfo(sample_rate, initial_bpm),
+      panLfo(sample_rate, initial_bpm),
+      pitchLfoC(pitchLfo, 8, 2 + voiceIndex),
+      ampLfoC(ampLfo, 8, 3 + voiceIndex),
+      panLfoC(panLfo, 8, 4 + voiceIndex),
+
+      filter(sample_rate, initial_bpm, voiceIndex),
       midi_channel(channel),
       bpm(initial_bpm),
       volumeSettings(),
@@ -21,8 +27,9 @@ Voice::Voice(uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundA
 void Voice::setBpm(uint16_t bpm)
 {
     bpm = bpm;
-    amp_lfo.setBpm(bpm);
-    pitch_lfo.setBpm(bpm);
+    ampLfo.setBpm(bpm);
+    pitchLfo.setBpm(bpm);
+    panLfo.setBpm(bpm);
     filter.setBpm(bpm);
 }
 
@@ -92,4 +99,3 @@ void Voice::setOscillatorSync(bool value)
         s->setSync(value);
     }
 }
-

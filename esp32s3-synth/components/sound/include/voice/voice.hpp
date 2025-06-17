@@ -4,11 +4,12 @@
 #include <vector>
 #include <functional>
 #include <optional>
-#include "sound/note_freq_table.hpp"
+#include "note_freq_table.hpp"
 #include "../utils.hpp"
 #include "sound/sound.hpp"
 #include "menu_struct.hpp"
-#include "nodes/lfo.hpp"
+#include "lfo.hpp"
+#include "cached_lfo.hpp"
 #include "nodes/filter.hpp"
 #include "protocol.hpp"
 
@@ -30,7 +31,7 @@ namespace sound_module
          * @param sample_rate Audio sample rate in Hz.
          * @param max_polyphony Maximum simultaneous notes.
          */
-        Voice(uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundAllocator allocator);
+        Voice(uint8_t index, uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm, SoundAllocator allocator);
 
         /**
          * Note on/off handlers.
@@ -62,8 +63,14 @@ namespace sound_module
 
         const uint16_t sampleRate;
 
-        LFO pitch_lfo;
-        LFO amp_lfo;
+        LFO pitchLfo;
+        LFO ampLfo;
+        LFO panLfo;
+
+        CachedLFO pitchLfoC;
+        CachedLFO ampLfoC;
+        CachedLFO panLfoC;
+        
         Filter filter;
 
     private:
@@ -79,7 +86,7 @@ namespace sound_module
         std::vector<Sound *> activeSounds;
 
         Sound *find_note_to_release(uint8_t midi_note); // can be a nullptr
-        Sound * find_available_slot();
+        Sound *find_available_slot();
 
         void all_notes_off();
     };

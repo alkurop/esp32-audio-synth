@@ -6,9 +6,11 @@ using namespace protocol;
 
 using namespace sound_module;
 
-Filter::Filter(uint32_t sampleRate, uint8_t init_bpm)
+Filter::Filter(uint32_t sampleRate, uint8_t init_bpm, uint8_t voiceIndex)
     : cutoffLfo(sampleRate, init_bpm, LfoSubdivision::Quarter),
       resonanceLfo(sampleRate, init_bpm, LfoSubdivision::Quarter),
+      cutoffLfoC(cutoffLfo, 8, voiceIndex),
+      resonanceLfoC(resonanceLfo, 8, voiceIndex + 1),
       sample_rate(sampleRate),
       filterType(FilterType::LP12),
       baseCutoff(MAX_CUTOFF_RAW / 2),       // midpoint default
@@ -23,6 +25,8 @@ void Filter::resetState()
 {
     z1 = 0.0f;
     z2 = 0.0f;
+    cutoffLfo.resetPhase();
+    resonanceLfo.resetPhase();
 }
 
 float Filter::process(float input)
@@ -30,13 +34,13 @@ float Filter::process(float input)
     if (baseCutoff == 0 && cutoffLfo.getDepth() == 0)
         return input;
     // 1) Modulate cutoff
-    float modCut = static_cast<float>(baseCutoff) + cutoffLfo.get_value();
+    float modCut = static_cast<float>(baseCutoff) + cutoffLfoC.getValue();
     modCut = std::clamp(modCut, 0.0f, static_cast<float>(MAX_CUTOFF_RAW));
     float nyquist = static_cast<float>(sample_rate) * 0.5f;
     float fc = 20.0f + (modCut / static_cast<float>(MAX_CUTOFF_RAW)) * (nyquist - 20.0f);
 
     // 2) Modulate resonance
-    float modRes = static_cast<float>(baseResonance) + resonanceLfo.get_value();
+    float modRes = static_cast<float>(baseResonance) + resonanceLfoC.getValue();
     modRes = std::clamp(modRes, 0.0f, static_cast<float>(MAX_RESONANCE_RAW));
     float q = 0.1f + (modRes / static_cast<float>(MAX_RESONANCE_RAW)) * (10.0f - 0.1f);
 
