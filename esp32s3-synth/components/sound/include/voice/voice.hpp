@@ -10,7 +10,7 @@
 #include "menu_struct.hpp"
 #include "lfo.hpp"
 #include "cached_lfo.hpp"
-#include "nodes/filter.hpp"
+#include "filter.hpp"
 #include "protocol.hpp"
 #include "stereo.hpp"
 
