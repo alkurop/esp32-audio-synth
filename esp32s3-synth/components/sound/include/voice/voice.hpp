@@ -61,6 +61,7 @@ namespace sound_module
         void setOscillatorShape(protocol::OscillatorShape value);
         void setOscillatorPwm(uint8_t value);
         void setOscillatorSync(bool value);
+        void updatePitchOffset();
 
         const uint16_t sampleRate;
 
@@ -85,6 +86,8 @@ namespace sound_module
 
         SoundAllocator allocateSound;
         std::vector<Sound *> activeSounds;
+
+        int totalTransposeCents = 0;
 
         Sound *find_note_to_release(uint8_t midi_note); // can be a nullptr
         Sound *find_available_slot();

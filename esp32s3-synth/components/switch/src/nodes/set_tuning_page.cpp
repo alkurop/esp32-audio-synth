@@ -16,4 +16,5 @@ void settings::setTuningPage(Voice &voice, uint8_t field, int16_t value)
     default:
         break;
     }
+    voice.updatePitchOffset();
 };

@@ -19,15 +19,19 @@ Stereo Voice::getSample()
     if (sm_gain <= 1e-6f)
         return Stereo{0.0f, 0.0f};
 
-    float pitchModCents = pitchLfoC.getValue();
-    float pitchRatio = sound_module::centsToPitchRatio(pitchModCents);
-
+    // 1) Pitch, amplitude, and pan modulation
+    float pitchLfoCents = pitchLfoC.getValue();
     float ampMod = ampLfoC.getValue() / 127.0f; // Normalize –1.0 … +1.0
     float ampScale = 1.0f + ampMod;
 
     float panMod = panLfoC.getValue() / 127.0f; // Normalize –1.0 … +1.0
-    sound_module::Stereo pan = getPanGains(panMod);
+    Stereo pan = getPanGains(panMod);
 
+
+    float totalPitchCents = static_cast<float>(totalTransposeCents) + pitchLfoCents;
+    float pitchRatio = sound_module::centsToPitchRatio(totalPitchCents);
+
+    // 3) Mix active sounds with pitch, amp, pan
     float mixL = 0.0f;
     float mixR = 0.0f;
 
@@ -52,6 +56,11 @@ Stereo Voice::getSample()
         ++it;
     }
 
+    // 4) Filter
+    mixL = filter.process(mixL);
+    mixR = filter.process(mixR);
+
+    // 5) Final gain
     return Stereo{mixL * sm_gain, mixR * sm_gain};
 }
 

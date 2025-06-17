@@ -99,3 +99,11 @@ void Voice::setOscillatorSync(bool value)
         s->setSync(value);
     }
 }
+void Voice::updatePitchOffset()
+
+{
+    totalTransposeCents =
+        pitchSettings.fine_tuning +
+        pitchSettings.transpose_semitones * 100 +
+        pitchSettings.transpose_octave * 1200;
+}
