@@ -1,6 +1,7 @@
 // voice.cpp
 #include "voice/voice.hpp"
 #include "esp_log.h"
+#include "cent_pitch_table.hpp"
 #include <cmath>
 
 using namespace sound_module;
@@ -18,10 +19,10 @@ Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t
       panLfoC(panLfo, 8, 4 + voiceIndex),
 
       filter(sample_rate, initial_bpm, voiceIndex),
+      pitchSettings(),
       midi_channel(channel),
       bpm(initial_bpm),
-      volumeSettings(),
-      pitchSettings()
+      volumeSettings()
 {
 }
 
@@ -103,10 +104,12 @@ void Voice::setOscillatorSync(bool value)
 void Voice::updatePitchOffset()
 
 {
-    totalTransposeCents =
+    pitchSettings.totalTransposeCents =
         pitchSettings.fine_tuning +
         pitchSettings.transpose_semitones * 100 +
         pitchSettings.transpose_octave * 1200;
 
-    ESP_LOGI(TAG, "Updated pitch offset: %d cents", totalTransposeCents);
+    pitchSettings.pitchRatio = sound_module::centsToPitchRatio( pitchSettings.totalTransposeCents);
+
+    ESP_LOGI(TAG, "Updated pitch offset: %d cents pitchRation %f", pitchSettings.totalTransposeCents, pitchSettings.pitchRatio);
 }

@@ -84,7 +84,6 @@ namespace sound_module
 
         std::vector<Sound *> activeSounds;
 
-        int totalTransposeCents = 0;
 
         Sound *find_note_to_release(uint8_t midi_note); // can be a nullptr
 

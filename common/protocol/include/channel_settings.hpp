@@ -68,6 +68,8 @@ namespace protocol
             int16_t fine_tuning;
             int16_t transpose_semitones;
             int16_t transpose_octave;
+            int16_t totalTransposeCents = 0;
+            float pitchRatio = 1.0;
         };
 
     }

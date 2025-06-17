@@ -30,9 +30,9 @@ Stereo Voice::getSample()
     // float totalPitchCents = static_cast<float>(totalTransposeCents) + pitchLfoCents;
             // sound->setFrequency(modFreq);
 
-    float totalPitchCents = static_cast<float>(totalTransposeCents);
-    float pitchRatio = sound_module::centsToPitchRatio(totalPitchCents);
+    // float totalPitchCents = static_cast<float>(pitchSettings.pitchRatio);
 
+    float pitchRatio = pitchSettings.pitchRatio;
 
     // 3) Mix active sounds with pitch, amp, pan
     float mixL = 0.0f;
@@ -50,7 +50,7 @@ Stereo Voice::getSample()
             continue;
         }
 
-        float modFreq = sound->base_frequency * pitchRatio;
+        float modFreq = midi_note_freq[sound->midi_note] * pitchRatio;
         sound->setFrequency(modFreq);
 
         float sample = sound->getSample() * sound->velNorm;

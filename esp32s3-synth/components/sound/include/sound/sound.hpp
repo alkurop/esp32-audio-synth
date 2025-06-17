@@ -37,7 +37,6 @@ namespace sound_module
         void setVelocity(uint8_t midiVelocity);
 
         /// Public state for introspection or external use
-        float base_frequency = 0.0f; ///< unmodulated frequency in Hz
         uint8_t midi_note = 0;
         float velNorm = 0;
         Envelope envelope; // shared ADSR envelope

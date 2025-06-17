@@ -20,10 +20,9 @@ Sound::Sound(uint32_t sample_rate, uint16_t initial_bpm)
 void Sound::noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
 {
     ESP_LOGD(TAG, "Sound trigger freq %f velocity %u note %u", frequency, velocity_in, midi_note);
-    base_frequency = frequency;
     setVelocity(velocity_in);
     phase = 0.0f;
-    phase_increment = base_frequency / sample_rate;
+    phase_increment = frequency / sample_rate;
     active = true;
     midi_note = midi_note_in;
     envelope.gateOn();
@@ -38,8 +37,12 @@ void Sound::noteOff()
 
 void Sound::setFrequency(float frequency)
 {
-    
-    phase_increment = frequency / sample_rate;
+    auto p = frequency / sample_rate;
+    if (p != phase_increment)
+    {
+        phase_increment = frequency / sample_rate;
+        ESP_LOGI(TAG, "Pahse inncdement changed freq %f phase_increment %f", frequency, phase_increment);
+    }
 }
 
 float Sound::getSample()
