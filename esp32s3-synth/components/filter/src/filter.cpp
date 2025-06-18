@@ -2,6 +2,9 @@
 #include <cmath>
 #include <algorithm>
 #include "filter_table_lp12.hpp"
+#include "filter_table_hp12.hpp"
+#include "filter_table_bp12.hpp"
+#include "filter_table_notch.hpp"
 
 using namespace protocol;
 
@@ -29,34 +32,49 @@ void Filter::resetState()
     cutoffLfo.resetPhase();
     resonanceLfo.resetPhase();
 }
-
 float Filter::process(float input)
 {
     if (baseCutoff == 0 && cutoffLfo.getDepth() == 0)
         return input;
 
-    // 1. Modulate and convert cutoff to table index
+    // 1. Modulate cutoff
     float modCut = static_cast<float>(baseCutoff) + cutoffLfoC.getValue();
     modCut = std::clamp(modCut, 0.0f, static_cast<float>(MAX_CUTOFF_RAW));
     int cutoff_index = static_cast<int>((modCut / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
 
-    // 2. Modulate and convert resonance to table index
+    // 2. Modulate resonance
     float modRes = static_cast<float>(baseResonance) + resonanceLfoC.getValue();
     modRes = std::clamp(modRes, 0.0f, static_cast<float>(MAX_RESONANCE_RAW));
     int resonance_index = static_cast<int>((modRes / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
 
-    // 3. Lookup coefficients (only LPF supported currently)
-    if (filterType != FilterType::LP12)
-        return input; // Optional: bypass or implement other types separately
+    const float* coeffs = nullptr;
 
-    const float *coeffs = filterTableLP12[cutoff_index][resonance_index];
+    // 3. Select coefficients from table based on filter type
+    switch (filterType)
+    {
+    case FilterType::LP12:
+        coeffs = filterTableLP12[cutoff_index][resonance_index];
+        break;
+    case FilterType::HP12:
+        coeffs = filterTableHP12[cutoff_index][resonance_index];
+        break;
+    case FilterType::BP12:
+        coeffs = filterTableBP12[cutoff_index][resonance_index];
+        break;
+    case FilterType::Notch:
+        coeffs = filterTableNotch[cutoff_index][resonance_index];
+        break;
+    default:
+        return input; // Unknown type or not yet supported
+    }
+
+    // 4. Apply coefficients using Transposed Direct Form II
     float b0 = coeffs[0];
     float b1 = coeffs[1];
     float b2 = coeffs[2];
     float a1 = coeffs[3];
     float a2 = coeffs[4];
 
-    // 4. Transposed Direct Form II
     float y = b0 * input + z1;
     z1 = b1 * input + z2 - a1 * y;
     z2 = b2 * input - a2 * y;
