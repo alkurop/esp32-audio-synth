@@ -1,16 +1,19 @@
 import numpy as np
 
 # Table dimensions
-cutoff_steps = 128
+cutoff_steps = 64
 resonance_steps = 64
 sample_rate = 48000
 
-# Safe cutoff and Q ranges
-safe_fc_max = sample_rate * 0.45
-safe_q_max = 8.0
+# Safe ranges
+cutoff_min = 20.0
+cutoff_max = sample_rate * 0.45  # ~21.6kHz for 48kHz sampling
+q_min = 0.1
+q_max = 8.0
 
-cutoff_range = np.linspace(20.0, safe_fc_max, cutoff_steps)
-resonance_range = np.linspace(0.1, safe_q_max, resonance_steps)
+# Logarithmic spacing for better perceptual uniformity
+cutoff_range = np.geomspace(cutoff_min, cutoff_max, cutoff_steps)
+resonance_range = np.geomspace(q_min, q_max, resonance_steps)
 
 def compute_biquad_bp12_coeffs(fc, q, sr):
     try:
@@ -29,7 +32,7 @@ def compute_biquad_bp12_coeffs(fc, q, sr):
         a1 = -2.0 * cs
         a2 = 1.0 - alpha
 
-        return [round(b0/a0, 7), round(b1/a0, 7), round(b2/a0, 7), round(a1/a0, 7), round(a2/a0, 7)]
+        return [round(b0 / a0, 7), round(b1 / a0, 7), round(b2 / a0, 7), round(a1 / a0, 7), round(a2 / a0, 7)]
     except Exception as e:
         print(f"Warning: fc={fc}, q={q}, err={e}")
         return [0.0, 0.0, 0.0, 0.0, 0.0]

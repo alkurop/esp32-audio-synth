@@ -5,7 +5,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include "sound_module.hpp"
-#include "stereo.hpp"
+// #include "stereo.hpp"
 
 using namespace sound_module;
 using namespace midi_module;
@@ -40,7 +40,7 @@ void SoundModule::init()
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
     i2s_std_config_t tx_std_cfg = {
         .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(config.sampleRate),
-        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
         .gpio_cfg = {
             .mclk = I2S_GPIO_UNUSED,
             .bclk = config.i2s.bclk_io,
@@ -90,44 +90,36 @@ void SoundModule::handle_note(const NoteMessage &msg)
             voice.noteOff(msg.channel, msg.note);
     }
 }
-
 void SoundModule::process()
 {
     size_t num_samples = config.bufferSize;
-    std::vector<int16_t> buffer(num_samples * 2); // stereo buffer
+    std::vector<int16_t> buffer(num_samples); // MONO output buffer
 
     float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
-    std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 lock
+    std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 protect voices
 
     for (size_t i = 0; i < num_samples; ++i)
     {
-        float mixL = 0.0f;
-        float mixR = 0.0f;
+        float mix = 0.0f;
         int activeCount = 0;
 
         for (auto &voice : voices)
         {
-            Stereo s = voice.getSample();
+            float sample = voice.getSample(); // mono float
 
-            if (s.left != 0.0f || s.right != 0.0f)
+            if (sample != 0.0f)
             {
-                mixL += s.left;
-                mixR += s.right;
+                mix += sample;
                 activeCount++;
             }
         }
 
         if (activeCount > 0)
         {
-            mixL /= static_cast<float>(activeCount);
-            mixR /= static_cast<float>(activeCount);
+            mix /= static_cast<float>(activeCount);
         }
 
-        int16_t sampleL = static_cast<int16_t>(mixL * config.amplitude * volumeScale);
-        int16_t sampleR = static_cast<int16_t>(mixR * config.amplitude * volumeScale);
-
-        buffer[2 * i] = sampleL;
-        buffer[2 * i + 1] = sampleR;
+        buffer[i] = static_cast<int16_t>(mix * config.amplitude * volumeScale);
     }
 
     size_t bytes_written;
@@ -139,10 +131,10 @@ void SoundModule::audio_task_entry(void *arg)
     auto *self = static_cast<SoundModule *>(arg);
     while (true)
     {
-        // int64_t start = esp_timer_get_time();
+        int64_t start = esp_timer_get_time();
         self->process();
-        // int64_t elapsed_us = esp_timer_get_time() - start;
-        // ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
+        int64_t elapsed_us = esp_timer_get_time() - start;
+        ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
     }
 }
 

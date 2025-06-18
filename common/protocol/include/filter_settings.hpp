@@ -4,12 +4,12 @@
 namespace protocol
 {
 
-    const int CUTOFF_TABLE_SIZE = 128;
+    const int CUTOFF_TABLE_SIZE = 64;
     const int RESONANCE_TABLE_SIZE = 64;
     
     // Maximum raw values for modulation parameters
-    static constexpr uint8_t MAX_CUTOFF_RAW = 127;
-    static constexpr uint8_t MAX_RESONANCE_RAW = 127;
+    static constexpr uint8_t MAX_CUTOFF_RAW = 63;
+    static constexpr uint8_t MAX_RESONANCE_RAW = 63;
     enum class FilterField : uint8_t
     {
         Type,

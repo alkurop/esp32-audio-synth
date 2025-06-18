@@ -1,17 +1,19 @@
 import numpy as np
 
 # Table dimensions
-cutoff_steps = 128
+cutoff_steps = 64
 resonance_steps = 64
 sample_rate = 48000
 
-# SAFETY: Clamp to avoid unstable behavior at Nyquist or extreme Q
-safe_fc_max = sample_rate * 0.45  # avoid Nyquist edge
-safe_q_max = 8.0                  # avoid unstable resonance
+# Safe ranges
+cutoff_min = 20.0
+cutoff_max = sample_rate * 0.45  # avoid Nyquist
+q_min = 0.1
+q_max = 8.0
 
-# Cutoff range: 20Hz to ~Nyquist, Resonance Q: 0.1 to safe_q_max
-cutoff_range = np.linspace(20.0, safe_fc_max, cutoff_steps)
-resonance_range = np.linspace(0.1, safe_q_max, resonance_steps)
+# Logarithmic spacing for perceptual uniformity
+cutoff_range = np.geomspace(cutoff_min, cutoff_max, cutoff_steps)
+resonance_range = np.geomspace(q_min, q_max, resonance_steps)
 
 # Precompute coefficients for biquad HP12 filter
 def compute_biquad_hp12_coeffs(fc, q, sr):

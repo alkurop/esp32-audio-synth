@@ -32,52 +32,48 @@ void Filter::resetState()
     cutoffLfo.resetPhase();
     resonanceLfo.resetPhase();
 }
+
 float Filter::process(float input)
 {
-    if (baseCutoff == 0 && cutoffLfo.getDepth() == 0)
+    if (baseCutoff == 0)
         return input;
 
-    // 1. Modulate cutoff
-    float modCut = static_cast<float>(baseCutoff) + cutoffLfoC.getValue();
-    modCut = std::clamp(modCut, 0.0f, static_cast<float>(MAX_CUTOFF_RAW));
-    int cutoff_index = static_cast<int>((modCut / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
+    // Convert cutoff and resonance to table indices
+    int cutoff_index = static_cast<int>((static_cast<float>(baseCutoff) / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
+    int resonance_index = static_cast<int>((static_cast<float>(baseResonance) / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
 
-    // 2. Modulate resonance
-    float modRes = static_cast<float>(baseResonance) + resonanceLfoC.getValue();
-    modRes = std::clamp(modRes, 0.0f, static_cast<float>(MAX_RESONANCE_RAW));
-    int resonance_index = static_cast<int>((modRes / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
+    // Clamp to valid table range
+    cutoff_index = std::clamp(cutoff_index, 0, CUTOFF_TABLE_SIZE - 1);
+    resonance_index = std::clamp(resonance_index, 0, RESONANCE_TABLE_SIZE - 1);
 
-    const float* coeffs = nullptr;
-
-    // 3. Select coefficients from table based on filter type
-    switch (filterType)
+    // Only update coefficients if indices have changed
+    if (cutoff_index != lastCutoffIndex || resonance_index != lastResonanceIndex)
     {
-    case FilterType::LP12:
-        coeffs = filterTableLP12[cutoff_index][resonance_index];
-        break;
-    case FilterType::HP12:
-        coeffs = filterTableHP12[cutoff_index][resonance_index];
-        break;
-    case FilterType::BP12:
-        coeffs = filterTableBP12[cutoff_index][resonance_index];
-        break;
-    case FilterType::Notch:
-        coeffs = filterTableNotch[cutoff_index][resonance_index];
-        break;
-    default:
-        return input; // Unknown type or not yet supported
+        const float (*table)[RESONANCE_TABLE_SIZE][5] = nullptr;
+        switch (filterType)
+        {
+            case FilterType::LP12:  table = filterTableLP12; break;
+            case FilterType::HP12:  table = filterTableHP12; break;
+            case FilterType::BP12:  table = filterTableBP12; break;
+            case FilterType::Notch: table = filterTableNotch; break;
+            default: return input;
+        }
+
+        const float* coeffs = table[cutoff_index][resonance_index];
+        lastB0 = coeffs[0];
+        lastB1 = coeffs[1];
+        lastB2 = coeffs[2];
+        lastA1 = coeffs[3];
+        lastA2 = coeffs[4];
+
+        lastCutoffIndex = cutoff_index;
+        lastResonanceIndex = resonance_index;
     }
 
-    // 4. Apply coefficients using Transposed Direct Form II
-    float b0 = coeffs[0];
-    float b1 = coeffs[1];
-    float b2 = coeffs[2];
-    float a1 = coeffs[3];
-    float a2 = coeffs[4];
-
-    float y = b0 * input + z1;
-    z1 = b1 * input + z2 - a1 * y;
-    z2 = b2 * input - a2 * y;
+    // Apply cached coefficients using Transposed Direct Form II
+    float y = lastB0 * input + z1;
+    z1 = lastB1 * input + z2 - lastA1 * y;
+    z2 = lastB2 * input - lastA2 * y;
 
     return y;
 }

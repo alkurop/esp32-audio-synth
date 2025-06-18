@@ -12,12 +12,12 @@ using namespace protocol;
 
 static const char *TAG = "Voice";
 
-Stereo Voice::getSample()
+float Voice::getSample()
 {
     // 0) Master gain smoothing
     float sm_gain = volumeSettings.gain_smoothed.next();
     if (sm_gain <= 1e-6f)
-        return Stereo{0.0f, 0.0f};
+        return 0.0f;
 
     // // // 1) Pitch, amplitude, and pan modulation
     // float pitchLfoCents = pitchLfoC.getValue();
@@ -28,7 +28,7 @@ Stereo Voice::getSample()
     // Stereo pan = getPanGains(panMod);
 
     // float totalPitchCents = static_cast<float>(totalTransposeCents) + pitchLfoCents;
-            // sound->setFrequency(modFreq);
+    // sound->setFrequency(modFreq);
 
     // float totalPitchCents = static_cast<float>(pitchSettings.pitchRatio);
 
@@ -36,7 +36,6 @@ Stereo Voice::getSample()
 
     // 3) Mix active sounds with pitch, amp, pan
     float mix = 0.0f;
-
 
     for (auto it = activeSounds.begin(); it != activeSounds.end();)
     {
@@ -55,17 +54,18 @@ Stereo Voice::getSample()
         float sample = sound->getSample() * sound->velNorm;
         // float sample = sound->getSample() * sound->velNorm * ampScale;
 
-        mix += sample * 1;
+        mix += sample;
 
         ++it;
     }
 
     // 4) Filter
     // mixR = mixL;
-    // mix = filter.process(mix);
+    // return filter.process(mix) * sm_gain;
+    return mix;
 
     // 5) Final gain
-    return Stereo{mix * sm_gain, mix * sm_gain};
+    // return Stereo{mix * sm_gain, mix * sm_gain};
 }
 
 void Voice::setVolume(uint8_t newVolume)

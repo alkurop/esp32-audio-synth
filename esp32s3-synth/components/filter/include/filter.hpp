@@ -15,7 +15,7 @@ namespace sound_module
         /// Filter types corresponding to protocol::filtTypes
 
         /// Construct with a sample rate and default settings
-        explicit Filter(uint32_t sampleRate, uint8_t init_bpm,uint8_t voiceIndex);
+        explicit Filter(uint32_t sampleRate, uint8_t init_bpm, uint8_t voiceIndex);
 
         /// Set the filter type (LP12, HP12, BP12, Notch)
         void setType(FilterType type)
@@ -56,7 +56,10 @@ namespace sound_module
 
         // Internal filter state (poles, etc.)
         float z1 = 0.0f, z2 = 0.0f;
-
+        int lastCutoffIndex = -1;
+        int lastResonanceIndex = -1;
+        float lastB0 = 0.0f, lastB1 = 0.0f, lastB2 = 0.0f;
+        float lastA1 = 0.0f, lastA2 = 0.0f;
         void resetState();
     };
 

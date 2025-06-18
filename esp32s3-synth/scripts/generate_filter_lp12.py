@@ -1,7 +1,7 @@
 import numpy as np
 
 # Table dimensions
-cutoff_steps = 128
+cutoff_steps = 64
 resonance_steps = 64
 sample_rate = 48000
 
