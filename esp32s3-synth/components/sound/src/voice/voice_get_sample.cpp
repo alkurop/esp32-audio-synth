@@ -35,8 +35,7 @@ Stereo Voice::getSample()
     float pitchRatio = pitchSettings.pitchRatio;
 
     // 3) Mix active sounds with pitch, amp, pan
-    float mixL = 0.0f;
-    float mixR = 0.0f;
+    float mix = 0.0f;
 
 
     for (auto it = activeSounds.begin(); it != activeSounds.end();)
@@ -56,19 +55,17 @@ Stereo Voice::getSample()
         float sample = sound->getSample() * sound->velNorm;
         // float sample = sound->getSample() * sound->velNorm * ampScale;
 
-        mixL += sample * 1;
-        mixR += sample * 1;
+        mix += sample * 1;
 
         ++it;
     }
 
     // 4) Filter
-    // mixL = filter.process(mixL);
     // mixR = mixL;
-    // mixR = filter.process(mixR);
+    // mix = filter.process(mix);
 
     // 5) Final gain
-    return Stereo{mixL * sm_gain, mixR * sm_gain};
+    return Stereo{mix * sm_gain, mix * sm_gain};
 }
 
 void Voice::setVolume(uint8_t newVolume)

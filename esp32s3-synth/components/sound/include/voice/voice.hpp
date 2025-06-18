@@ -5,7 +5,6 @@
 #include <functional>
 #include <optional>
 #include "note_freq_table.hpp"
-#include "../utils.hpp"
 #include "sound/sound.hpp"
 #include "menu_struct.hpp"
 #include "lfo.hpp"

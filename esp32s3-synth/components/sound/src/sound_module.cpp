@@ -5,7 +5,6 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include "sound_module.hpp"
-#include "utils.hpp"
 #include "stereo.hpp"
 
 using namespace sound_module;
