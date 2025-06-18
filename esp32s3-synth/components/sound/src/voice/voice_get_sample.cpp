@@ -51,8 +51,8 @@ float Voice::getSample()
         float modFreq = midi_note_freq[sound->midi_note] * pitchRatio;
         sound->setFrequency(modFreq);
 
+        // float sample = sound->getSample() * sound->velNorm;
         float sample = sound->getSample() * sound->velNorm;
-        // float sample = sound->getSample() * sound->velNorm * ampScale;
 
         mix += sample;
 
@@ -61,8 +61,8 @@ float Voice::getSample()
 
     // 4) Filter
     // mixR = mixL;
-    // return filter.process(mix) * sm_gain;
-    return mix * sm_gain;
+    return filter.process(mix) * sm_gain ;
+    // return mix * sm_gain;
 
     // 5) Final gain
     // return Stereo{mix * sm_gain, mix * sm_gain};

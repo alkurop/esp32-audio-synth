@@ -74,6 +74,7 @@ namespace sound_module
         static void audio_task_entry(void *arg);
         Sound *allocateSound();
         std::mutex activeSoundsMutex;
+        std::vector<int16_t> buffer; // Stereo output buffer (L, R)
     };
 
 } // namespace sound_module

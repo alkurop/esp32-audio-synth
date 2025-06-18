@@ -12,7 +12,7 @@ using namespace midi_module;
 static const char *TAG = "SOUND_MODULE";
 
 SoundModule::SoundModule(const SoundConfig &config)
-    : config(config)
+    : config(config), buffer(config.bufferSize)
 {
 
     soundPool.reserve(config.maxPoliphony);
@@ -40,7 +40,7 @@ void SoundModule::init()
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
     i2s_std_config_t tx_std_cfg = {
         .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(config.sampleRate),
-        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
         .gpio_cfg = {
             .mclk = I2S_GPIO_UNUSED,
             .bclk = config.i2s.bclk_io,
@@ -93,7 +93,6 @@ void SoundModule::handle_note(const NoteMessage &msg)
 void SoundModule::process()
 {
     size_t num_samples = config.bufferSize;
-    std::vector<int16_t> buffer(num_samples * 2); // Stereo output buffer (L, R)
 
     float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
     std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 protect voices
@@ -119,11 +118,12 @@ void SoundModule::process()
             mix /= static_cast<float>(activeCount);
         }
 
+        // int16_t intSample = static_cast<int16_t>(mix  * volumeScale);
         int16_t intSample = static_cast<int16_t>(mix * config.amplitude * volumeScale);
 
         // Duplicate mono sample to both channels
-        buffer[2 * i]     = intSample; // Left
-        buffer[2 * i + 1] = intSample; // Right
+        buffer[i] = intSample; // Left
+        // buffer[2 * i + 1] = intSample; // Right
     }
 
     size_t bytes_written;
