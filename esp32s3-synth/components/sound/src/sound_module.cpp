@@ -5,7 +5,6 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include "sound_module.hpp"
-// #include "stereo.hpp"
 
 using namespace sound_module;
 using namespace midi_module;
@@ -95,37 +94,38 @@ void SoundModule::process()
     size_t num_samples = config.bufferSize;
 
     float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
-    std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 protect voices
-
-    for (size_t i = 0; i < num_samples; ++i)
     {
-        float mix = 0.0f;
-        int activeCount = 0;
+        std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 protect voices
 
-        for (auto &voice : voices)
+        for (size_t i = 0; i < num_samples; ++i)
         {
-            float sample = voice.getSample(); // mono float
+            float mix = 0.0f;
+            int activeCount = 0;
 
-            if (sample != 0.0f)
+            for (auto &voice : voices)
             {
-                mix += sample;
-                activeCount++;
+                float sample = voice.getSample(); // mono float
+
+                if (sample != 0.0f)
+                {
+                    mix += sample;
+                    activeCount++;
+                }
             }
+
+            if (activeCount > 0)
+            {
+                mix /= static_cast<float>(activeCount);
+            }
+
+            // int16_t intSample = static_cast<int16_t>(mix  * volumeScale);
+            int16_t intSample = static_cast<int16_t>(mix * config.amplitude * volumeScale);
+
+            // Duplicate mono sample to both channels
+            buffer[i] = intSample; // Left
+            // buffer[2 * i + 1] = intSample; // Right
         }
-
-        if (activeCount > 0)
-        {
-            mix /= static_cast<float>(activeCount);
-        }
-
-        // int16_t intSample = static_cast<int16_t>(mix  * volumeScale);
-        int16_t intSample = static_cast<int16_t>(mix * config.amplitude * volumeScale);
-
-        // Duplicate mono sample to both channels
-        buffer[i] = intSample; // Left
-        // buffer[2 * i + 1] = intSample; // Right
     }
-
     size_t bytes_written;
     i2s_channel_write(txChan, buffer.data(), buffer.size() * sizeof(int16_t), &bytes_written, portMAX_DELAY);
 }
@@ -138,7 +138,7 @@ void SoundModule::audio_task_entry(void *arg)
         int64_t start = esp_timer_get_time();
         self->process();
         int64_t elapsed_us = esp_timer_get_time() - start;
-        ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
+        // ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
     }
 }
 

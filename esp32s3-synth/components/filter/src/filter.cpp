@@ -5,6 +5,9 @@
 #include "filter_table_hp12.hpp"
 #include "filter_table_bp12.hpp"
 #include "filter_table_notch.hpp"
+#include "esp_log.h"
+
+static const char *TAG = "Filter";
 
 using namespace protocol;
 
@@ -47,27 +50,40 @@ float Filter::process(float input)
     resonance_index = std::clamp(resonance_index, 0, RESONANCE_TABLE_SIZE - 1);
 
     // Only update coefficients if indices have changed
-    if (cutoff_index != lastCutoffIndex || resonance_index != lastResonanceIndex)
+    if (cutoff_index != lastCutoffIndex || resonance_index != lastResonanceIndex ||         filterType != lastFilterType)
+
     {
         const float (*table)[RESONANCE_TABLE_SIZE][5] = nullptr;
         switch (filterType)
         {
-            case FilterType::LP12:  table = filterTableLP12; break;
-            case FilterType::HP12:  table = filterTableHP12; break;
-            case FilterType::BP12:  table = filterTableBP12; break;
-            case FilterType::Notch: table = filterTableNotch; break;
-            default: return input;
+        case FilterType::LP12:
+            table = filterTableLP12;
+            break;
+        case FilterType::HP12:
+            table = filterTableHP12;
+            break;
+        case FilterType::BP12:
+            table = filterTableBP12;
+            break;
+        case FilterType::Notch:
+            table = filterTableNotch;
+            break;
+        default:
+            return input;
         }
 
-        const float* coeffs = table[cutoff_index][resonance_index];
+        const float *coeffs = table[cutoff_index][resonance_index];
         lastB0 = coeffs[0];
         lastB1 = coeffs[1];
         lastB2 = coeffs[2];
         lastA1 = coeffs[3];
         lastA2 = coeffs[4];
 
+        ESP_LOGI(TAG, "cutoff_index %d resonance_index %d lastB0 %f lastB1 %f lastB2 %f lastA1 %f lastA2 %f", cutoff_index, resonance_index, lastB0, lastB1, lastB2, lastA1, lastA2);
+
         lastCutoffIndex = cutoff_index;
         lastResonanceIndex = resonance_index;
+        lastFilterType = filterType;
     }
 
     // Apply cached coefficients using Transposed Direct Form II

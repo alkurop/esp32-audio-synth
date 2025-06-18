@@ -58,6 +58,8 @@ namespace sound_module
         float z1 = 0.0f, z2 = 0.0f;
         int lastCutoffIndex = -1;
         int lastResonanceIndex = -1;
+        FilterType lastFilterType = FilterType::LP12;
+
         float lastB0 = 0.0f, lastB1 = 0.0f, lastB2 = 0.0f;
         float lastA1 = 0.0f, lastA2 = 0.0f;
         void resetState();
