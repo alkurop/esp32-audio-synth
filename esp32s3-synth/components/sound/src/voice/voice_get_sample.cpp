@@ -37,13 +37,13 @@ float Voice::getSample()
     // 3) Mix active sounds with pitch, amp, pan
     float mix = 0.0f;
 
-    for (auto it = activeSounds.begin(); it != activeSounds.end();)
+    for (auto iterator = activeSounds.begin(); iterator != activeSounds.end();)
     {
-        Sound *sound = *it;
+        Sound *sound = *iterator;
 
         if (!sound->isPlaying())
         {
-            it = activeSounds.erase(it);
+            iterator = activeSounds.erase(iterator);
             ESP_LOGI(TAG, "Sound erased from voice, new count %d", activeSounds.size());
             continue;
         }
@@ -56,13 +56,13 @@ float Voice::getSample()
 
         mix += sample;
 
-        ++it;
+        ++iterator;
     }
 
     // 4) Filter
     // mixR = mixL;
     // return filter.process(mix) * sm_gain;
-    return mix;
+    return mix * sm_gain;
 
     // 5) Final gain
     // return Stereo{mix * sm_gain, mix * sm_gain};
