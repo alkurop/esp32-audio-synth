@@ -21,14 +21,17 @@ Sound *Voice::find_note_to_release(uint8_t midi_note)
 void Voice::noteOn(Sound *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity)
 {
     if (ch != midi_channel)
+    {
+        ESP_LOGI(TAG, "Wrong channel");
         return;
+    }
 
     // 1. Skip if this note is already active
     for (auto *s : activeSounds)
     {
         if (s->midi_note == midi_note && s->isNoteOn())
         {
-            // Note is already playing – ignore new noteOn
+            ESP_LOGI(TAG, "Note is already playing – ignore new noteOn");
             return;
         }
     }

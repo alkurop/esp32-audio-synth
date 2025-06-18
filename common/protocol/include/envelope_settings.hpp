@@ -17,8 +17,8 @@ namespace protocol
     namespace envelope
     {
         static constexpr uint8_t MAX = 31;
-        static constexpr float MIN_BEAT_LENGTH = 0.01; // sharp attack
-        static constexpr float MAX_BEAT_LENGTH = 8.0f;    // 8 beats
+        static constexpr float MIN_BEAT_LENGTH = 0.001; // sharp attack
+        static constexpr float MAX_BEAT_LENGTH = 64.0f;    // 8 beats
     }
 
     // envelope fields

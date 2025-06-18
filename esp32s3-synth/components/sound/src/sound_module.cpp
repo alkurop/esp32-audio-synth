@@ -79,7 +79,10 @@ void SoundModule::handle_note(const NoteMessage &msg)
         {
             auto *activeSound = allocateSound();
             if (activeSound)
+            {
                 voice.noteOn(activeSound, msg.channel, msg.note, msg.velocity);
+                ESP_LOGI(TAG, "Handle note");
+            }
             else
             {
                 ESP_LOGI(TAG, "All sound are taken");

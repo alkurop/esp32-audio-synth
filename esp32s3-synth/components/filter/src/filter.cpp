@@ -38,7 +38,7 @@ void Filter::resetState()
 
 float Filter::process(float input)
 {
-    if (baseCutoff == 0)
+    if (baseCutoff == 0 && baseResonance)
         return input;
 
     // Convert cutoff and resonance to table indices
