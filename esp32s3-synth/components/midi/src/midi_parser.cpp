@@ -1,4 +1,5 @@
 #include "midi_parser.hpp"
+#include "esp_log.h"
 
 using namespace midi_module;
 

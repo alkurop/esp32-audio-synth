@@ -14,7 +14,11 @@ void SettingRouter::setMasterVolume(uint8_t volume)
     soundModule.getState().masterVolume = volume;
 };
 
-void SettingRouter::setBpmFromMidi(uint8_t bpm) { this->soundModule.getState().midiBpm = bpm; };
+void SettingRouter::setBpmFromMidi(uint8_t bpm)
+{
+    this->soundModule.getState().midiBpm = bpm;
+    this->soundModule.updateBpmSetting();
+};
 
 void SettingRouter::setUpdateFromUi(const FieldUpdateList &update)
 {

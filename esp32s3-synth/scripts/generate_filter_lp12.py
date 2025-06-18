@@ -1,4 +1,4 @@
-# Full debugged Python script with logging to inspect coefficient variety
+# Updated script with less aggressive resonance (Q halved)
 
 import numpy as np
 
@@ -11,23 +11,26 @@ safe_fc_max = sample_rate * 0.45
 # Inverted log-scaled cutoff (0=open, 1=closed)
 cutoff_range = np.logspace(np.log10(20.0), np.log10(safe_fc_max), cutoff_steps)[::-1]
 
-# Resonance perceptual curve
+# Enhanced perceptual resonance curve with less aggression (Q reduced by half)
 def q_curve(x):
-    return 1.0 + 7.0 * (x ** 2)
+    q = 1.0 + 31.0 * (x ** 2)
+    if x > 0.7:
+        q *= 1 + 5 * ((x - 0.7) ** 2)
+    return q * 0.5  # Reduce aggression
 
 resonance_range = [q_curve(x) for x in np.linspace(0.0, 1.0, resonance_steps)]
 
-# Smarter Q clamping to avoid flat response
+# Gentler dynamic clamping based on cutoff
 def dynamic_q(fc, q):
     fc_norm = fc / safe_fc_max
-    scale = 0.25 + 0.75 * fc_norm
+    scale = 0.5 + 0.5 * fc_norm
     return max(0.1, q * scale)
 
-# Biquad LPF computation without gain scaling for debugging
+# Biquad LPF coefficient computation
 def compute_biquad_lpf_coeffs(fc, q, sr):
     try:
-        if fc >= safe_fc_max * 0.99:
-            return [1.0, 0.0, 0.0, 0.0, 0.0]  # Bypass
+        # Instead of hard bypass, clamp max fc to slightly below Nyquist to allow resonance
+        fc = min(fc, safe_fc_max * 0.98)
 
         q = dynamic_q(fc, q)
 
@@ -51,10 +54,6 @@ def compute_biquad_lpf_coeffs(fc, q, sr):
         b2n = b2 / a0
         a1n = a1 / a0
         a2n = a2 / a0
-
-        # Print debug output for a few representative values
-        if np.isclose(fc, 100.0, atol=10.0) and np.isclose(q, 1.0, atol=0.1):
-            print(f"[DEBUG] fc={fc:.2f}, q={q:.2f} → b0={b0n:.5f}, b1={b1n:.5f}, b2={b2n:.5f}, a1={a1n:.5f}, a2={a2n:.5f}")
 
         return [
             round(b0n, 7),
@@ -82,5 +81,5 @@ formatted_cpp = "{\n" + ",\n".join(
     for row in cpp_friendly_table
 ) + "\n};"
 
-# Print full output for use in C++
+# Print full output
 print(formatted_cpp)

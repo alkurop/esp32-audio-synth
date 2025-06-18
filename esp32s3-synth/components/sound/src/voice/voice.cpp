@@ -28,6 +28,7 @@ Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t
 
 void Voice::setBpm(uint16_t bpm)
 {
+    ESP_LOGI(TAG, "Voice set pbm %d", bpm);
     bpm = bpm;
     ampLfo.setBpm(bpm);
     pitchLfo.setBpm(bpm);

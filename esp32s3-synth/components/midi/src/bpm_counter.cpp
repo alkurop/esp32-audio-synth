@@ -64,6 +64,7 @@ void BpmCounter::onClockTick(uint64_t timestamp_us)
 
     if (roundedBpm != static_cast<int>(currentBpm)) {
         currentBpm = roundedBpm;
+        
         bpmCallback(currentBpm);
     }
 }

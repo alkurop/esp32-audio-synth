@@ -53,7 +53,9 @@ MidiTransportCallback transportCallback = [](const TransportEvent &ev)
 { settingSwitch.setTransportState(ev.command); };
 
 BpmCounter::BpmCallback bpmCallback = [](uint8_t bpm)
-{ return settingSwitch.getMidiBpm(); };
+{
+    settingSwitch.setBpmFromMidi(bpm);
+};
 
 uint16_t sendBpm() { return settingSwitch.getMidiBpm(); };
 
