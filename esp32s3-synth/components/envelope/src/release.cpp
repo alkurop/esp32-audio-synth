@@ -23,7 +23,7 @@ void ReleasePhase::recalculate(uint8_t param, float bpm, float /*unused*/)
 
 void ReleasePhase::enter(float level)
 {
-    ESP_LOGI(TAG, "enter level %f", level);
+    // ESP_LOGI(TAG, "enter level %f", level);
     startLevel = level;
     currentLevel = level;
     cursor = 0.0f;

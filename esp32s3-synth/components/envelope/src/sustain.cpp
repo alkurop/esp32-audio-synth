@@ -11,7 +11,7 @@ void SustainPhase::recalculate(uint8_t param, float /*bpm*/, float)
 
 void SustainPhase::enter(float /*startLevel*/)
 {
-    ESP_LOGI(TAG, "enter level %f", sustainLevel);
+    // ESP_LOGI(TAG, "enter level %f", sustainLevel);
     // Nothing to do — just hold sustain level
 }
 

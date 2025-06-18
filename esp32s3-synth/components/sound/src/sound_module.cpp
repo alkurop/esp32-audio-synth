@@ -81,7 +81,7 @@ void SoundModule::handle_note(const NoteMessage &msg)
             if (activeSound)
             {
                 voice.noteOn(activeSound, msg.channel, msg.note, msg.velocity);
-                ESP_LOGI(TAG, "Handle note");
+                // ESP_LOGI(TAG, "Handle note");
             }
             else
             {

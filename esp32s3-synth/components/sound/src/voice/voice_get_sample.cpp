@@ -31,7 +31,12 @@ float Voice::getSample()
     // sound->setFrequency(modFreq);
 
     // float totalPitchCents = static_cast<float>(pitchSettings.pitchRatio);
+ // 1) Pitch LFO modulation (in cents → ratio)
 
+    // float pitchLfoCents = pitchLfoC.getValue(); // returns e.g., -127 to +127
+    // float pitchLfoRatio = std::pow(2.0f, pitchLfoCents / 1200.0f); // cents → freq ratio
+
+    // float pitchRatio = pitchSettings.pitchRatio * pitchLfoRatio;
     float pitchRatio = pitchSettings.pitchRatio;
 
     // 3) Mix active sounds with pitch, amp, pan
@@ -44,7 +49,7 @@ float Voice::getSample()
         if (!sound->isPlaying())
         {
             iterator = activeSounds.erase(iterator);
-            ESP_LOGI(TAG, "Sound erased from voice, new count %d", activeSounds.size());
+            // ESP_LOGI(TAG, "Sound erased from voice, new count %d", activeSounds.size());
             continue;
         }
 
@@ -83,6 +88,6 @@ void Voice::setVolume(uint8_t newVolume)
 
     // 3) Convert dB → linear and feed into the smoother:
     float linearGain = std::pow(10.0f, volume_dB * 0.05f);
-    ESP_LOGD(TAG, "Linear gain %f Volume_db %f", linearGain, volume_dB);
+    // ESP_LOGD(TAG, "Linear gain %f Volume_db %f", linearGain, volume_dB);
     volumeSettings.gain_smoothed.setTarget(linearGain);
 }

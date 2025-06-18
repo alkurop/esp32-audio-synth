@@ -25,7 +25,7 @@ void DecayPhase::recalculate(uint8_t param, float bpm, float sustainLevel)
 
 void DecayPhase::enter(float level)
 {
-    ESP_LOGI(TAG, "enter level %f", level);
+    // ESP_LOGI(TAG, "enter level %f", level);
 
     startLevel = level;
     cursor = 0.0f;

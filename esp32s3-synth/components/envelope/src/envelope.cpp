@@ -105,7 +105,7 @@ float Envelope::next()
         }
         else if (active == &release)
         {
-            ESP_LOGI(TAG, "set to idle");
+            // ESP_LOGI(TAG, "set to idle");
 
             active = nullptr;
         }

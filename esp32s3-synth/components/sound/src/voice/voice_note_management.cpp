@@ -46,7 +46,7 @@ void Voice::noteOn(Sound *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity
     sound->noteOn(base_freq, velocity, midi_note);
     activeSounds.push_back(sound);
 
-    ESP_LOGI(TAG, "Sound added to voice, new count %d", activeSounds.size());
+    // ESP_LOGI(TAG, "Sound added to voice, new count %d", activeSounds.size());
 }
 
 // Note off: release matching sound and envelope
