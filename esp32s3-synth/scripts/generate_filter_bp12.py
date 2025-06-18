@@ -5,27 +5,34 @@ cutoff_steps = 128
 resonance_steps = 64
 sample_rate = 48000
 
-# Cutoff range: 20Hz to Nyquist (~24kHz), resonance Q: 0.1 to 10.0
-cutoff_range = np.linspace(20.0, sample_rate / 2, cutoff_steps)
-resonance_range = np.linspace(0.1, 10.0, resonance_steps)
+# Safe cutoff and Q ranges
+safe_fc_max = sample_rate * 0.45
+safe_q_max = 8.0
 
-# Precompute coefficients for biquad LPF
+cutoff_range = np.linspace(20.0, safe_fc_max, cutoff_steps)
+resonance_range = np.linspace(0.1, safe_q_max, resonance_steps)
+
 def compute_biquad_bp12_coeffs(fc, q, sr):
-    omega = 2.0 * np.pi * fc / sr
-    sn = np.sin(omega)
-    cs = np.cos(omega)
-    alpha = sn / (2.0 * q)
+    try:
+        omega = 2.0 * np.pi * fc / sr
+        sn = np.sin(omega)
+        cs = np.cos(omega)
+        alpha = sn / (2.0 * q)
 
-    b0 = alpha
-    b1 = 0.0
-    b2 = -alpha
-    a0 = 1.0 + alpha
-    a1 = -2.0 * cs
-    a2 = 1.0 - alpha
+        a0 = 1.0 + alpha
+        if a0 == 0.0 or np.isnan(a0):
+            raise ValueError("Invalid a0")
 
-    # Normalize
-    return [round(b0/a0, 7), round(b1/a0, 7), round(b2/a0, 7), round(a1/a0, 7), round(a2/a0, 7)]
+        b0 = alpha
+        b1 = 0.0
+        b2 = -alpha
+        a1 = -2.0 * cs
+        a2 = 1.0 - alpha
 
+        return [round(b0/a0, 7), round(b1/a0, 7), round(b2/a0, 7), round(a1/a0, 7), round(a2/a0, 7)]
+    except Exception as e:
+        print(f"Warning: fc={fc}, q={q}, err={e}")
+        return [0.0, 0.0, 0.0, 0.0, 0.0]
 
 # Generate table
 cpp_friendly_table = [
@@ -45,5 +52,5 @@ formatted_cpp = "{\n" + ",\n".join(
     for row in cpp_friendly_table
 ) + "\n};"
 
-# Show just the beginning for preview
+# Output
 print(formatted_cpp)
