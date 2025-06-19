@@ -13,11 +13,8 @@ using namespace protocol;
 
 using namespace sound_module;
 
-Filter::Filter(uint32_t sampleRate, uint8_t init_bpm, uint8_t voiceIndex):
-    // : cutoffLfo(sampleRate, init_bpm, LfoSubdivision::Quarter),
-    //   resonanceLfo(sampleRate, init_bpm, LfoSubdivision::Quarter),
-    //   cutoffLfoC(cutoffLfo, 8 ),
-    //   resonanceLfoC(resonanceLfo, 8 ),
+Filter::Filter(uint32_t sampleRate, uint8_t init_bpm, uint8_t voiceIndex)
+    :
       sample_rate(sampleRate),
       filterType(FilterType::LP12),
       baseCutoff(MAX_CUTOFF_RAW / 2),       // midpoint default
@@ -32,8 +29,6 @@ void Filter::resetState()
 {
     z1 = 0.0f;
     z2 = 0.0f;
-    // cutoffLfo.resetPhase();
-    // resonanceLfo.resetPhase();
 }
 
 float Filter::process(float input)
@@ -50,7 +45,7 @@ float Filter::process(float input)
     resonance_index = std::clamp(resonance_index, 0, RESONANCE_TABLE_SIZE - 1);
 
     // Only update coefficients if indices have changed
-    if (cutoff_index != lastCutoffIndex || resonance_index != lastResonanceIndex ||         filterType != lastFilterType)
+    if (cutoff_index != lastCutoffIndex || resonance_index != lastResonanceIndex || filterType != lastFilterType)
 
     {
         const float (*table)[RESONANCE_TABLE_SIZE][5] = nullptr;

@@ -1,5 +1,5 @@
 // voice.cpp
-#include "voice/voice.hpp"
+#include "voice.hpp"
 #include "esp_log.h"
 #include "cent_pitch_table.hpp"
 #include <cmath>
@@ -12,12 +12,13 @@ Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t
     : sampleRate(sample_rate),
       // lfo
       pitchLfo(sample_rate, initial_bpm),
-      //   ampLfo(sample_rate, initial_bpm),
-      //   panLfo(sample_rate, initial_bpm),
+      ampLfo(sample_rate, initial_bpm),
+      cutoffLfo(sampleRate, initial_bpm),
+      resonanceLfo(sampleRate, initial_bpm),
       pitchLfoC(pitchLfo, 512),
-      //   ampLfoC(ampLfo, 8, 3 + voiceIndex),
-      //   panLfoC(panLfo, 8, 4 + voiceIndex),
-
+      ampLfoC(ampLfo, 513),
+      cutoffLfoC(cutoffLfo, 514),
+      resonanceLfoC(resonanceLfo, 515),
       filter(sample_rate, initial_bpm, voiceIndex),
       pitchSettings(),
       midi_channel(channel),
@@ -30,10 +31,10 @@ void Voice::setBpm(uint16_t bpm)
 {
     ESP_LOGI(TAG, "Voice set pbm %d", bpm);
     bpm = bpm;
-    // ampLfo.setBpm(bpm);
+    ampLfo.setBpm(bpm);
     pitchLfo.setBpm(bpm);
-    // panLfo.setBpm(bpm);
-    filter.setBpm(bpm);
+    cutoffLfo.setBpm(bpm);
+    resonanceLfo.setBpm(bpm);
 }
 
 void Voice::setMidiChannel(uint8_t midiChannel)
@@ -45,7 +46,7 @@ void Voice::setMidiChannel(uint8_t midiChannel)
 void Voice::setAttack(uint8_t value)
 {
     envelopeSettings.attack = value;
-    for (auto *s : activeSounds)
+    for (auto *s : activeOscillators)
     {
         s->envelope.setAttack(value);
     }
@@ -53,7 +54,7 @@ void Voice::setAttack(uint8_t value)
 void Voice::setDecay(uint8_t value)
 {
     envelopeSettings.decay = value;
-    for (auto *s : activeSounds)
+    for (auto *s : activeOscillators)
     {
         s->envelope.setDecay(value);
     }
@@ -62,7 +63,7 @@ void Voice::setSustain(uint8_t value)
 {
     envelopeSettings.sustain = value;
 
-    for (auto *s : activeSounds)
+    for (auto *s : activeOscillators)
     {
         s->envelope.setSustain(value);
     }
@@ -70,7 +71,7 @@ void Voice::setSustain(uint8_t value)
 void Voice::setRelease(uint8_t value)
 {
     envelopeSettings.release = value;
-    for (auto *s : activeSounds)
+    for (auto *s : activeOscillators)
     {
         s->envelope.setRelease(value);
     }
@@ -79,7 +80,7 @@ void Voice::setRelease(uint8_t value)
 void Voice::setOscillatorPwm(uint8_t value)
 {
     oscillatorSettings.pwm = value;
-    for (auto *s : activeSounds)
+    for (auto *s : activeOscillators)
     {
         s->setPwm(value);
     }
@@ -88,9 +89,9 @@ void Voice::setOscillatorPwm(uint8_t value)
 void Voice::setOscillatorShape(protocol::OscillatorShape value)
 {
     oscillatorSettings.shape = value;
-    for (auto *s : activeSounds)
+    for (auto *o : activeOscillators)
     {
-        s->setShape(value);
+        o->setShape(value);
     }
 }
 

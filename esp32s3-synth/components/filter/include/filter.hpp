@@ -33,21 +33,6 @@ namespace sound_module
         /// Process a single sample through the filter, applying any active LFO modulation
         float process(float input);
 
-        void setBpm(uint8_t bpm)
-        {
-            // cutoffLfo.setBpm(bpm);
-            // resonanceLfo.setBpm(bpm);
-        }
-
-        // Public modulation sources
-        // /// LFO for dynamic modulation of cutoff
-        // LFO cutoffLfo;
-        // /// LFO for dynamic modulation of resonance
-        // LFO resonanceLfo;
-
-        // CachedLFO cutoffLfoC;
-        // CachedLFO resonanceLfoC;
-
     private:
         uint32_t sample_rate;
         FilterType filterType = FilterType::LP12;

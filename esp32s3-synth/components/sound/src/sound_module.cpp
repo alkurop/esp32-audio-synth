@@ -11,13 +11,13 @@ using namespace midi_module;
 static const char *TAG = "SOUND_MODULE";
 
 SoundModule::SoundModule(const SoundConfig &config)
-    : config(config), buffer(config.bufferSize *2)
+    : config(config), buffer(config.bufferSize * 2)
 {
 
-    soundPool.reserve(config.maxPoliphony);
+    oscillatorPool.reserve(config.maxPoliphony);
     for (size_t i = 0; i < config.maxPoliphony; ++i)
     {
-        soundPool.emplace_back(config.sampleRate, state.settingsBpm); // ✅ safe and direct
+        oscillatorPool.emplace_back(config.sampleRate, state.settingsBpm); // ✅ safe and direct
     }
 
     voices.reserve(config.numVoices);
@@ -71,7 +71,7 @@ void SoundModule::init()
 
 void SoundModule::handle_note(const NoteMessage &msg)
 {
-    std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 lock
+    std::lock_guard<std::mutex> lock(activeOscillatorsMutex); // 🔒 lock
 
     for (auto &voice : voices)
     {
@@ -98,36 +98,28 @@ void SoundModule::process()
 
     float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
     {
-        std::lock_guard<std::mutex> lock(activeSoundsMutex); // 🔒 protect voices
+        std::lock_guard<std::mutex> lock(activeOscillatorsMutex); // 🔒 protect voices
 
         for (size_t i = 0; i < num_samples; ++i)
         {
-            float mix = 0.0f;
-            int activeCount = 0;
+            float mixLeft = 0.0f;
+            float mixRight = 0.0f;
 
             for (auto &voice : voices)
             {
-                float sample = voice.getSample(); // mono float
+                auto sample = voice.getSample(); // mono float
 
-                if (sample != 0.0f)
+                if (sample.left != 0.0f || sample.right != 0.0f)
                 {
-                    mix += sample;
-                    activeCount++;
+                    mixLeft += sample.left;
+                    mixRight += sample.right;
                 }
             }
+            int16_t intLeft = static_cast<int16_t>(mixLeft * config.amplitude * volumeScale);
+            int16_t intRight = static_cast<int16_t>(mixRight * config.amplitude * volumeScale);
 
-            if (activeCount > 0)
-            {
-                mix /= static_cast<float>(activeCount);
-            }
-
-            // int16_t intSample = static_cast<int16_t>(mix  * volumeScale);
-            int16_t intSample = static_cast<int16_t>(mix * config.amplitude * volumeScale);
-
-            // Duplicate mono sample to both channels
-            // buffer[i] = intSample; // Left
-            buffer[2 * i ] = intSample; // Left
-            buffer[2 * i + 1] = intSample; // Right
+            buffer[2 * i] = intLeft;
+            buffer[2 * i + 1] = intRight;
         }
     }
     size_t bytes_written;
@@ -154,15 +146,15 @@ void SoundModule::updateBpmSetting()
     {
         voice.setBpm(bpm);
     }
-    for (auto &s : soundPool)
+    for (auto &s : oscillatorPool)
     {
         s.setBpm(bpm);
     }
 }
 
-Sound *SoundModule::allocateSound()
+Oscillator *SoundModule::allocateSound()
 {
-    for (auto &s : soundPool)
+    for (auto &s : oscillatorPool)
     {
         if (!s.isPlaying())
             return &s;

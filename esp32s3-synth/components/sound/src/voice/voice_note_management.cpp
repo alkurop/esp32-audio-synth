@@ -1,5 +1,5 @@
 // voice.cpp
-#include "voice/voice.hpp"
+#include "voice.hpp"
 #include <cmath>
 #include <esp_log.h>
 
@@ -7,9 +7,9 @@ using namespace sound_module;
 static const char *TAG = "Voice";
 
 // Find an active Sound by MIDI note
-Sound *Voice::find_note_to_release(uint8_t midi_note)
+Oscillator *Voice::find_note_to_release(uint8_t midi_note)
 {
-    for (auto *s : activeSounds)
+    for (auto *s : activeOscillators)
     {
         if (s->isNoteOn() && s->midi_note == midi_note)
             return s;
@@ -18,7 +18,7 @@ Sound *Voice::find_note_to_release(uint8_t midi_note)
 }
 
 // Note on: trigger new sound, retrigger LFOs, and envelope
-void Voice::noteOn(Sound *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity)
+void Voice::noteOn(Oscillator *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity)
 {
     if (ch != midi_channel)
     {
@@ -26,7 +26,7 @@ void Voice::noteOn(Sound *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity
     }
 
     // 1. Skip if this note is already active
-    for (auto *s : activeSounds)
+    for (auto *s : activeOscillators)
     {
         if (s->midi_note == midi_note && s->isNoteOn())
         {
@@ -43,7 +43,7 @@ void Voice::noteOn(Sound *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity
     sound->envelope.setRelease(envelopeSettings.release);
     float base_freq = midi_note_freq[midi_note];
     sound->noteOn(base_freq, velocity, midi_note);
-    activeSounds.push_back(sound);
+    activeOscillators.push_back(sound);
 
     // ESP_LOGI(TAG, "Sound added to voice, new count %d", activeSounds.size());
 }
@@ -54,7 +54,7 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
     if (ch != midi_channel)
         return;
 
-    Sound *match = find_note_to_release(midi_note);
+    Oscillator *match = find_note_to_release(midi_note);
     if (match)
     {
         match->noteOff();
@@ -64,7 +64,7 @@ void Voice::noteOff(uint8_t ch, uint8_t midi_note)
 // Turn off all notes immediately
 void Voice::all_notes_off()
 {
-    for (auto *s : activeSounds)
+    for (auto *s : activeOscillators)
     {
         s->noteOff();
         s->envelope.gateOff();

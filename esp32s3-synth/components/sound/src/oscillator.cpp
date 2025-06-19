@@ -1,4 +1,4 @@
-#include "sound/sound.hpp"
+#include "oscillator.hpp"
 #include "protocol.hpp"
 #include "sine_table.hpp"
 #include "saw_tooth_table.hpp"
@@ -14,10 +14,10 @@ using namespace sound_module;
 using namespace protocol;
 static const char *TAG = "Sound";
 
-Sound::Sound(uint32_t sample_rate, uint16_t initial_bpm)
+Oscillator::Oscillator(uint32_t sample_rate, uint16_t initial_bpm)
     : envelope(sample_rate, initial_bpm), sample_rate(sample_rate) {}
 
-void Sound::noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
+void Oscillator::noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
 {
     ESP_LOGD(TAG, "Sound trigger freq %f velocity %u note %u", frequency, velocity_in, midi_note);
     setVelocity(velocity_in);
@@ -27,14 +27,14 @@ void Sound::noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
     envelope.gateOn();
 }
 
-void Sound::noteOff()
+void Oscillator::noteOff()
 {
     ESP_LOGD(TAG, "Sound release note %u", midi_note);
     active = false;
     envelope.gateOff();
 }
 
-void Sound::setFrequency(float frequency)
+void Oscillator::setFrequency(float frequency)
 {
     auto p = frequency / sample_rate;
     if (p != phase_increment)
@@ -44,7 +44,7 @@ void Sound::setFrequency(float frequency)
     }
 }
 
-float Sound::getSample()
+float Oscillator::getSample()
 {
     phase += phase_increment;
     if (phase >= 1.0f)
@@ -89,34 +89,34 @@ float Sound::getSample()
     return waveform * envelope.next();
 }
 
-void Sound::setShape(protocol::OscillatorShape newShape)
+void Oscillator::setShape(protocol::OscillatorShape newShape)
 {
     shape = newShape;
     // restart waveform on shape change
     phase = 0.0f;
 }
 
-void Sound::setPwm(uint8_t newPwm)
+void Oscillator::setPwm(uint8_t newPwm)
 {
     pwm = newPwm;
 }
 
-void Sound::setVelocity(uint8_t velocity)
+void Oscillator::setVelocity(uint8_t velocity)
 {
     velNorm = (static_cast<float>(velocity) / 127.0f) * VELOCITY_GLOBAL_SCALER;
 }
 
-void Sound::setBpm(uint16_t bpm)
+void Oscillator::setBpm(uint16_t bpm)
 {
     envelope.setBpm(bpm);
 }
 
-bool Sound::isPlaying()
+bool Oscillator::isPlaying()
 {
     return active || !envelope.is_idle();
 }
 
-bool Sound::isNoteOn()
+bool Oscillator::isNoteOn()
 {
     return active;
 }

@@ -5,13 +5,13 @@
 #include <functional>
 #include <optional>
 #include "note_freq_table.hpp"
-#include "sound/sound.hpp"
+#include "oscillator.hpp"
 #include "menu_struct.hpp"
 #include "lfo.hpp"
 #include "cached_lfo.hpp"
 #include "filter.hpp"
 #include "protocol.hpp"
-// #include "stereo.hpp"
+#include "stereo.hpp"
 
 using namespace protocol;
 namespace sound_module
@@ -35,14 +35,14 @@ namespace sound_module
          * Note on/off handlers.
          * velocity: normalized 0.0–1.0
          */
-        void noteOn(Sound *sound, uint8_t channel, uint8_t midi_note, uint8_t velocity);
+        void noteOn(Oscillator *sound, uint8_t channel, uint8_t midi_note, uint8_t velocity);
         void noteOff(uint8_t channel, uint8_t midi_note);
 
         /**
          * Generate the next mixed sample for this voice.
          * @return Sample amplitude in [-1.0, 1.0]
          */
-        float getSample();
+        Stereo getSample();
 
         // Voice-level controls
         void setVolume(uint8_t volume);
@@ -62,12 +62,14 @@ namespace sound_module
         const uint16_t sampleRate;
 
         LFO pitchLfo;
-        // LFO ampLfo;
-        // LFO panLfo;
+        LFO ampLfo;
+        LFO cutoffLfo;
+        LFO resonanceLfo;
 
         CachedLFO pitchLfoC;
-        // CachedLFO ampLfoC;
-        // CachedLFO panLfoC;
+        CachedLFO ampLfoC;
+        CachedLFO cutoffLfoC;
+        CachedLFO resonanceLfoC;
 
         Filter filter;
         voice::PitchSettings pitchSettings;
@@ -80,10 +82,10 @@ namespace sound_module
         voice::EnvelopeSettings envelopeSettings;
         voice::OscillatorSettings oscillatorSettings;
 
-        std::vector<Sound *> activeSounds;
+        std::vector<Oscillator *> activeOscillators;
 
 
-        Sound *find_note_to_release(uint8_t midi_note); // can be a nullptr
+        Oscillator *find_note_to_release(uint8_t midi_note); // can be a nullptr
 
         void all_notes_off();
     };

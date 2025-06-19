@@ -9,10 +9,10 @@ namespace sound_module
     ///
     /// Simple oscillator-based voice
     /// Supports trigger/release, pitch modulation, and waveform settings.
-    class Sound
+    class Oscillator
     {
     public:
-        explicit Sound(uint32_t sample_rate, uint16_t initial_bpm);
+        explicit Oscillator(uint32_t sample_rate, uint16_t initial_bpm);
 
         /// Trigger the oscillator: set frequency, velocity, and reset phase
         void noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note);

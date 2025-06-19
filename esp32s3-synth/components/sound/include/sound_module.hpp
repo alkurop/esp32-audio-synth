@@ -8,10 +8,10 @@
 #include <freertos/task.h>
 #include <driver/gpio.h>
 #include <driver/i2s_std.h>
-#include "voice/voice.hpp"
+#include "voice.hpp"
 #include "midi_parser.hpp"
 #include "menu_struct.hpp"
-#include "sound/sound.hpp"
+#include "oscillator.hpp"
 #include "cached_lfo.hpp"
 #include <mutex> // add this at the top
 
@@ -74,12 +74,12 @@ namespace sound_module
         std::vector<Voice> voices;
         TaskHandle_t audioTask = nullptr;
         GlobalState state;
-        std::vector<Sound> soundPool;
+        std::vector<Oscillator> oscillatorPool;
 
         // Internal audio task entry point
         static void audio_task_entry(void *arg);
-        Sound *allocateSound();
-        std::mutex activeSoundsMutex;
+        Oscillator *allocateSound();
+        std::mutex activeOscillatorsMutex;
         std::vector<int16_t> buffer; // Stereo output buffer (L, R)
     };
 
