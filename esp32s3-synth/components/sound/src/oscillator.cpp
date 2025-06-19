@@ -44,7 +44,7 @@ void Oscillator::setFrequency(float frequency)
     }
 }
 
-float Oscillator::getSample()
+IRAM_ATTR float Oscillator::getSample()
 {
     phase += phase_increment;
     if (phase >= 1.0f)

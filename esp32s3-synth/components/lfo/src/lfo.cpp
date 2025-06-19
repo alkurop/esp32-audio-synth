@@ -8,6 +8,8 @@
 #include "lookup.hpp"
 #include "esp_log.h"
 #include "esp_timer.h"
+#include "esp_attr.h"
+
 static const char *TAG = "Lfo";
 static constexpr float MICROSECONDS_TO_SECONDS = 1.0f / 1'000'000.0f;
 
@@ -57,7 +59,7 @@ void LFO::resetPhase()
 }
 
 // Get the current LFO output, bipolar range: –depth … +depth
-float LFO::getValue()
+IRAM_ATTR float LFO::getValue()
 {
     if (depth == 0)
         return 0.0f;
@@ -88,7 +90,8 @@ uint8_t LFO::getDepth() { return depth; }
 
 void LFO::advancePhaseMicroseconds(uint32_t elapsed_us)
 {
-    if(depth == 0) return;
+    if (depth == 0)
+        return;
     // Avoid recalculating BPM and beatsPerCycle each time
     phase += cyclesPerSecond * elapsed_us * MICROSECONDS_TO_SECONDS;
 

@@ -30,22 +30,23 @@ void Filter::resetState()
     z2 = 0.0f;
 }
 
-float Filter::process(float input, float modulatedCutoff, float modulatedResonance)
+IRAM_ATTR float Filter::process(float input, float modulatedCutoff, float modulatedResonance)
 {
-    // Bypass if filter is disabled
-    if (baseCutoff == 0 && baseResonance != 0)
+    if (baseCutoff == 0 && baseResonance)
         return input;
 
-    // Apply LFO modulation in unipolar downward direction
-    int effectiveCutoff = std::clamp<int>(baseCutoff - static_cast<int>(modulatedCutoff), 0, MAX_CUTOFF_RAW);
-    int effectiveResonance = std::clamp<int>(baseResonance - static_cast<int>(modulatedResonance), 0, MAX_RESONANCE_RAW);
-    // ESP_LOGI(TAG, "modulatedCutoff %f effectiveCutoff %d", modulatedCutoff, effectiveCutoff);
+    // Quantize and apply modulation (cutting down only)
+    constexpr int QUANTIZATION_STEP = 4;
+    int quantizedCutoffMod = (static_cast<int>(modulatedCutoff) / QUANTIZATION_STEP) * QUANTIZATION_STEP;
+    int effectiveCutoff = std::clamp<int>(baseCutoff - quantizedCutoffMod, 0, MAX_CUTOFF_RAW);
 
-    // Normalize and convert to table indices
-    int cutoff_index = static_cast<int>((float(effectiveCutoff) / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
-    int resonance_index = static_cast<int>((float(effectiveResonance) / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
+    // Use base resonance directly
+    int effectiveResonance = baseResonance;
 
-    // Clamp to table bounds (defensive)
+    // Convert to table indices
+    int cutoff_index = static_cast<int>((static_cast<float>(effectiveCutoff) / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
+    int resonance_index = static_cast<int>((static_cast<float>(effectiveResonance) / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
+
     cutoff_index = std::clamp(cutoff_index, 0, CUTOFF_TABLE_SIZE - 1);
     resonance_index = std::clamp(resonance_index, 0, RESONANCE_TABLE_SIZE - 1);
 
@@ -80,12 +81,6 @@ float Filter::process(float input, float modulatedCutoff, float modulatedResonan
         lastB2 = coeffs[2];
         lastA1 = coeffs[3];
         lastA2 = coeffs[4];
-
-        ESP_LOGI(TAG,
-                 "cutoff_index %d resonance_index %d "
-                 "lastB0 %f lastB1 %f lastB2 %f lastA1 %f lastA2 %f",
-                 cutoff_index, resonance_index,
-                 lastB0, lastB1, lastB2, lastA1, lastA2);
 
         lastCutoffIndex = cutoff_index;
         lastResonanceIndex = resonance_index;

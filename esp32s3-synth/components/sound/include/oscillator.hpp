@@ -3,6 +3,7 @@
 #include "oscillator_settings.hpp" // for OscillatorShape, oscShapes, yesNo
 #include "envelope.hpp"
 #include <math.h>
+#include "esp_attr.h"
 
 namespace sound_module
 {
@@ -25,11 +26,11 @@ namespace sound_module
 
         /// Generate and return one sample at the current phase;
         /// returns zero if inactive
-        float getSample();
+        IRAM_ATTR float getSample();
 
         /// Configuration setters
         void setShape(protocol::OscillatorShape newShape);
-        void setPwm(uint8_t pwm);     // 0–31
+        void setPwm(uint8_t pwm); // 0–31
         void setBpm(uint16_t bpm);
 
         /// Configuration getters
@@ -44,7 +45,7 @@ namespace sound_module
         void reset();
 
     private:
-        bool active = false; ///< true if currently playing
+        bool active = false;          ///< true if currently playing
         const uint32_t sample_rate;   ///< samples per second
         float phase = 0.0f;           ///< oscillator phase [0,1)
         float phase_increment = 0.0f; ///< increment per sample

@@ -44,12 +44,10 @@ void settings::setPitchLfoPage(Voice &voice, uint8_t field, int16_t value)
 
 void settings::setFilterCutoffLfoPage(Voice &voice, uint8_t field, int16_t value)
 {
-    auto lfo = voice.cutoffLfo;
-    setLfo(lfo, field, value);
+    setLfo(voice.cutoffLfo, field, value);
 };
 
 void settings::setFilterResLfoPage(Voice &voice, uint8_t field, int16_t value)
 {
-    auto lfo = voice.resonanceLfo;
-    setLfo(lfo, field, value);
+    setLfo(voice.resonanceLfo, field, value);
 };

@@ -10,15 +10,14 @@ static const char *TAG = "Voice";
 // Constructor: set sample rate, polyphony, initialize sounds and envelope
 Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm)
     : sampleRate(sample_rate),
-      // lfo
       pitchLfo(sample_rate, initial_bpm),
       ampLfo(sample_rate, initial_bpm),
       cutoffLfo(sampleRate, initial_bpm),
       resonanceLfo(sampleRate, initial_bpm),
       pitchLfoC(pitchLfo, 512),
       ampLfoC(ampLfo, 513),
-      cutoffLfoC(cutoffLfo, 514),
-      resonanceLfoC(resonanceLfo, 515),
+      cutoffLfoC(cutoffLfo, 1014),
+      resonanceLfoC(resonanceLfo, 1015),
       filter(sample_rate, initial_bpm, voiceIndex),
       pitchSettings(),
       midi_channel(channel),

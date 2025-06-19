@@ -3,6 +3,7 @@
 #include "lfo.hpp"
 #include "cached_lfo.hpp"
 #include "filter_settings.hpp"
+#include "esp_attr.h"
 
 using namespace protocol;
 
@@ -31,7 +32,7 @@ namespace sound_module
         void setResonance(uint8_t q) { baseResonance = q; };
 
         /// Process a single sample through the filter, applying any active LFO modulation
-        float process(float input, float modulatedCutoff, float modulatedResonance);
+       IRAM_ATTR float process(float input, float modulatedCutoff, float modulatedResonance);
 
     private:
         uint32_t sample_rate;
@@ -49,5 +50,7 @@ namespace sound_module
         float lastA1 = 0.0f, lastA2 = 0.0f;
         void resetState();
     };
+
+    
 
 } // namespace sound_module

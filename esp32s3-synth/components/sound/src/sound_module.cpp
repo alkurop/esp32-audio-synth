@@ -92,7 +92,7 @@ void SoundModule::handle_note(const NoteMessage &msg)
             voice.noteOff(msg.channel, msg.note);
     }
 }
-void SoundModule::process()
+IRAM_ATTR void SoundModule::process()
 {
     size_t num_samples = config.bufferSize;
 

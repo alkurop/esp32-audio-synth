@@ -6,13 +6,14 @@
 #include <channel_settings.hpp>
 #include "cent_pitch_table.hpp"
 #include "pan_table.hpp"
+#include "esp_attr.h"
 
 using namespace sound_module;
 using namespace protocol;
 
 static const char *TAG = "Voice";
 
-Stereo Voice::getSample()
+IRAM_ATTR Stereo Voice::getSample()
 {
     // 0) Master gain smoothing
     float sm_gain = volumeSettings.gain_smoothed.next();
@@ -50,9 +51,9 @@ Stereo Voice::getSample()
         ++iterator;
     }
     float cutoffMod = cutoffLfoC.getValue();  
-    float resMod = resonanceLfoC.getValue();  
+    // float resMod = resonanceLfoC.getValue();  
     // 4) Filter
-    mix = filter.process(mix, cutoffMod, resMod) * sm_gain;
+    mix = filter.process(mix, cutoffMod, 0) * sm_gain;
 
     // 5) Final gain
     return Stereo{mix, mix};

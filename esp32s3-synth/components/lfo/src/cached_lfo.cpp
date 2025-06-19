@@ -6,7 +6,7 @@
 
 static const char *TAG = "CachedLFO";
 
-CachedLFO::CachedLFO(LFO &lfoRef, uint16_t intervalTicks, uint16_t phaseOffset)
+CachedLFO::CachedLFO(LFO &lfoRef, uint16_t intervalTicks)
     : lfo(lfoRef),
       interval(intervalTicks),
       value(0.0f) {}

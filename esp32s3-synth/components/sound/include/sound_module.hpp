@@ -13,7 +13,8 @@
 #include "menu_struct.hpp"
 #include "oscillator.hpp"
 #include "cached_lfo.hpp"
-#include <mutex> // add this at the top
+#include <mutex>      // add this at the top
+#include "esp_attr.h" // ✅ Add this line to use IRAM_ATTR
 
 namespace sound_module
 {
@@ -52,7 +53,7 @@ namespace sound_module
     public:
         explicit SoundModule(const SoundConfig &config);
         void init();
-        void process();
+        IRAM_ATTR void process();
 
         // MIDI input handler
         void handle_note(const midi_module::NoteMessage &msg);
@@ -65,7 +66,7 @@ namespace sound_module
 
         CachedLFO &getThatLfo()
         {
-            return voices[0].pitchLfoC;
+            return voices[0].cutoffLfoC;
         };
 
     private:

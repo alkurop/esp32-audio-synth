@@ -6,7 +6,7 @@
 class CachedLFO
 {
 public:
-    CachedLFO(LFO &lfoRef, uint16_t intervalTicks = 8, uint16_t phaseOffset = 0);
+    CachedLFO(LFO &lfoRef, uint16_t intervalTicks = 8);
     float getValue();
 
 private:
