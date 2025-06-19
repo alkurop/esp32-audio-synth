@@ -11,7 +11,7 @@ using namespace midi_module;
 static const char *TAG = "SOUND_MODULE";
 
 SoundModule::SoundModule(const SoundConfig &config)
-    : config(config), buffer(config.bufferSize)
+    : config(config), buffer(config.bufferSize *2)
 {
 
     soundPool.reserve(config.maxPoliphony);
@@ -39,7 +39,7 @@ void SoundModule::init()
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
     i2s_std_config_t tx_std_cfg = {
         .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(config.sampleRate),
-        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
+        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
         .gpio_cfg = {
             .mclk = I2S_GPIO_UNUSED,
             .bclk = config.i2s.bclk_io,
@@ -125,8 +125,9 @@ void SoundModule::process()
             int16_t intSample = static_cast<int16_t>(mix * config.amplitude * volumeScale);
 
             // Duplicate mono sample to both channels
-            buffer[i] = intSample; // Left
-            // buffer[2 * i + 1] = intSample; // Right
+            // buffer[i] = intSample; // Left
+            buffer[2 * i ] = intSample; // Left
+            buffer[2 * i + 1] = intSample; // Right
         }
     }
     size_t bytes_written;
@@ -138,11 +139,11 @@ void SoundModule::audio_task_entry(void *arg)
     auto *self = static_cast<SoundModule *>(arg);
     while (true)
     {
-        int64_t start = esp_timer_get_time();
+        // int64_t start = esp_timer_get_time();
         self->process();
-        int64_t elapsed_us = esp_timer_get_time() - start;
+        // int64_t elapsed_us = esp_timer_get_time() - start;
         // ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
-        vTaskDelay(1); // 👈 allows watchdog to breathe
+        // vTaskDelay(1); // 👈 allows watchdog to breathe
     }
 }
 

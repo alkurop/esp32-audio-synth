@@ -62,12 +62,12 @@ namespace sound_module
         const uint16_t sampleRate;
 
         LFO pitchLfo;
-        LFO ampLfo;
-        LFO panLfo;
+        // LFO ampLfo;
+        // LFO panLfo;
 
         CachedLFO pitchLfoC;
-        CachedLFO ampLfoC;
-        CachedLFO panLfoC;
+        // CachedLFO ampLfoC;
+        // CachedLFO panLfoC;
 
         Filter filter;
         voice::PitchSettings pitchSettings;

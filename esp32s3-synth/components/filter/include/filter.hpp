@@ -35,18 +35,18 @@ namespace sound_module
 
         void setBpm(uint8_t bpm)
         {
-            cutoffLfo.setBpm(bpm);
-            resonanceLfo.setBpm(bpm);
+            // cutoffLfo.setBpm(bpm);
+            // resonanceLfo.setBpm(bpm);
         }
 
         // Public modulation sources
-        /// LFO for dynamic modulation of cutoff
-        LFO cutoffLfo;
-        /// LFO for dynamic modulation of resonance
-        LFO resonanceLfo;
+        // /// LFO for dynamic modulation of cutoff
+        // LFO cutoffLfo;
+        // /// LFO for dynamic modulation of resonance
+        // LFO resonanceLfo;
 
-        CachedLFO cutoffLfoC;
-        CachedLFO resonanceLfoC;
+        // CachedLFO cutoffLfoC;
+        // CachedLFO resonanceLfoC;
 
     private:
         uint32_t sample_rate;

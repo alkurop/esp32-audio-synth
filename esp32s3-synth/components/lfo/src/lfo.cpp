@@ -9,6 +9,7 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 static const char *TAG = "Lfo";
+static constexpr float MICROSECONDS_TO_SECONDS = 1.0f / 1'000'000.0f;
 
 using namespace sound_module;
 // Constructor: initialize sample rate, BPM, subdivision, depth defaults
@@ -43,25 +44,23 @@ void LFO::setWaveform(LfoWaveform w)
 // Set modulation depth (0–127), generic units
 void LFO::setDepth(uint8_t newDepth)
 {
-    ESP_LOGI(TAG, "Set depth %d", newDepth);
+    // ESP_LOGI(TAG, "Set depth %d", newDepth);
 
     depth = newDepth;
 }
 
 // Reset phase to start of cycle
-void LFO::resetPhase() { phase = 0.0f; }
+void LFO::resetPhase()
+{
+    phase = 0.0f;
+    cyclesPerSecond = (static_cast<float>(bpm) / 60.0f) / beatsPerCycleMap[static_cast<int>(sub)];
+}
 
 // Get the current LFO output, bipolar range: –depth … +depth
-float LFO::getValue(uint16_t ticks)
+float LFO::getValue()
 {
-
     if (depth == 0)
         return 0.0f;
-    uint32_t now = esp_timer_get_time(); // microseconds
-    uint32_t elapsed = now - lastCallTime;
-    lastCallTime = now;
-
-    advancePhaseMicroseconds(elapsed); // scale phase increment correctly
 
     float raw = 0.f;
     switch (waveform)
@@ -70,21 +69,17 @@ float LFO::getValue(uint16_t ticks)
         raw = interpolateLookup(phase, sineTable);
         break;
     case LfoWaveform::Triangle:
-        // triangle from –1…+1
         raw = interpolateLookup(phase, triangleTable);
         break;
     case LfoWaveform::Sawtooth:
-        // ramp up: –1…+1
         raw = interpolateLookup(phase, sawTable);
         break;
     case LfoWaveform::Pulse:
-        // 50% duty square: +1 first half, –1 second
         raw = (phase < 0.5f) ? 1.0f : -1.0f;
         break;
     default:
         raw = 0.0f;
     }
-    ESP_LOGI(TAG, "Phase Raw %f phase %f", raw, phase);
 
     return raw * float(depth);
 }
@@ -93,15 +88,11 @@ uint8_t LFO::getDepth() { return depth; }
 
 void LFO::advancePhaseMicroseconds(uint32_t elapsed_us)
 {
+    if(depth == 0) return;
+    // Avoid recalculating BPM and beatsPerCycle each time
+    phase += cyclesPerSecond * elapsed_us * MICROSECONDS_TO_SECONDS;
 
-    float beatsPerCycle = beatsPerCycleMap[static_cast<int>(sub)];
-    float cyclesPerBeat = 1.0f / beatsPerCycle; // this is the key fix
-    float rateHz = (bpm / 60.0f) * cyclesPerBeat;
-    ESP_LOGI(TAG, "beatsPerCycle %f rateHz %f sub %d", beatsPerCycle, rateHz, static_cast<int>(sub));
-
-    float seconds = elapsed_us / 1'000'000.0f;
-    phase += rateHz * seconds;
-
+    // Faster wraparound using subtraction instead of floorf
     if (phase >= 1.0f)
-        phase -= floorf(phase);
+        phase -= static_cast<int>(phase); // remove integer part
 }

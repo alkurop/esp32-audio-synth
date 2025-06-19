@@ -29,7 +29,7 @@ public:
     void resetPhase();
 
     // Get the current LFO output, bipolar range: –depth … +depth
-    float getValue(uint16_t ticks);
+    float getValue();
 
     void advancePhaseMicroseconds(uint32_t elapsed_us);
 
@@ -42,5 +42,5 @@ private:
     uint8_t bpm = 120;                            // beats per minute
     float phase = 0.0f;                           // [0.0, 1.0) cycle phase
     LfoWaveform waveform;
-    uint32_t lastCallTime;
+    float cyclesPerSecond = 0.0f;
 };

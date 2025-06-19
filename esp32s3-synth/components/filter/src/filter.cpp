@@ -13,11 +13,11 @@ using namespace protocol;
 
 using namespace sound_module;
 
-Filter::Filter(uint32_t sampleRate, uint8_t init_bpm, uint8_t voiceIndex)
-    : cutoffLfo(sampleRate, init_bpm, LfoSubdivision::Quarter),
-      resonanceLfo(sampleRate, init_bpm, LfoSubdivision::Quarter),
-      cutoffLfoC(cutoffLfo, 8, voiceIndex),
-      resonanceLfoC(resonanceLfo, 8, voiceIndex + 1),
+Filter::Filter(uint32_t sampleRate, uint8_t init_bpm, uint8_t voiceIndex):
+    // : cutoffLfo(sampleRate, init_bpm, LfoSubdivision::Quarter),
+    //   resonanceLfo(sampleRate, init_bpm, LfoSubdivision::Quarter),
+    //   cutoffLfoC(cutoffLfo, 8 ),
+    //   resonanceLfoC(resonanceLfo, 8 ),
       sample_rate(sampleRate),
       filterType(FilterType::LP12),
       baseCutoff(MAX_CUTOFF_RAW / 2),       // midpoint default
@@ -32,8 +32,8 @@ void Filter::resetState()
 {
     z1 = 0.0f;
     z2 = 0.0f;
-    cutoffLfo.resetPhase();
-    resonanceLfo.resetPhase();
+    // cutoffLfo.resetPhase();
+    // resonanceLfo.resetPhase();
 }
 
 float Filter::process(float input)

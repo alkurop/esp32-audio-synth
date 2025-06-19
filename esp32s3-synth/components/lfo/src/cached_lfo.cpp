@@ -2,37 +2,33 @@
 #include "esp_log.h"
 #include "lfo.hpp"
 #include <cmath>
- 
+#include "esp_timer.h"
 
 static const char *TAG = "CachedLFO";
 
 CachedLFO::CachedLFO(LFO &lfoRef, uint16_t intervalTicks, uint16_t phaseOffset)
     : lfo(lfoRef),
       interval(intervalTicks),
-      phase(phaseOffset % intervalTicks),
-      counter(0),
       value(0.0f) {}
 
 float CachedLFO::getValue()
 {
-    counter = (counter + 1) % interval;
+    tickAccumulator++;
 
-    if (counter == phase)
+    if (tickAccumulator >= interval && lfo.getDepth() != 0)
     {
-        value = lfo.getValue(1);
-        // ESP_LOGI(TAG, "lfo gen new value %f", value);
+        tickAccumulator = 0;
+
+        uint32_t now = esp_timer_get_time();
+        uint32_t elapsed = now - lastCallTime;
+        lastCallTime = now;
+
+        lfo.advancePhaseMicroseconds(elapsed);
+        value = lfo.getValue();
+
+        // Optional debug log
+        // ESP_LOGI(TAG, "LFO updated after %lu µs", elapsed);
     }
+
     return value;
-}
-
-void CachedLFO::setInterval(uint16_t newInterval)
-{
-    interval = newInterval;
-    counter = 0;
-    phase %= interval;
-}
-
-void CachedLFO::setPhase(uint16_t newPhase)
-{
-    phase = newPhase % interval;
 }

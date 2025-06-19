@@ -12,11 +12,11 @@ Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t
     : sampleRate(sample_rate),
       // lfo
       pitchLfo(sample_rate, initial_bpm),
-      ampLfo(sample_rate, initial_bpm),
-      panLfo(sample_rate, initial_bpm),
-      pitchLfoC(pitchLfo, 8, 2 + voiceIndex),
-      ampLfoC(ampLfo, 8, 3 + voiceIndex),
-      panLfoC(panLfo, 8, 4 + voiceIndex),
+      //   ampLfo(sample_rate, initial_bpm),
+      //   panLfo(sample_rate, initial_bpm),
+      pitchLfoC(pitchLfo, 512),
+      //   ampLfoC(ampLfo, 8, 3 + voiceIndex),
+      //   panLfoC(panLfo, 8, 4 + voiceIndex),
 
       filter(sample_rate, initial_bpm, voiceIndex),
       pitchSettings(),
@@ -30,9 +30,9 @@ void Voice::setBpm(uint16_t bpm)
 {
     ESP_LOGI(TAG, "Voice set pbm %d", bpm);
     bpm = bpm;
-    ampLfo.setBpm(bpm);
+    // ampLfo.setBpm(bpm);
     pitchLfo.setBpm(bpm);
-    panLfo.setBpm(bpm);
+    // panLfo.setBpm(bpm);
     filter.setBpm(bpm);
 }
 
@@ -102,7 +102,7 @@ void Voice::updatePitchOffset()
         pitchSettings.transpose_semitones * 100 +
         pitchSettings.transpose_octave * 1200;
 
-    pitchSettings.pitchRatio = centsToPitchRatio( pitchSettings.totalTransposeCents);
+    pitchSettings.pitchRatio = centsToPitchRatio(pitchSettings.totalTransposeCents);
 
     ESP_LOGI(TAG, "Updated pitch offset: %d cents pitchRation %f", pitchSettings.totalTransposeCents, pitchSettings.pitchRatio);
 }

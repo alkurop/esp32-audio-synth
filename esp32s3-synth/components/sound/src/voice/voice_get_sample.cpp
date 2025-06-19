@@ -38,6 +38,7 @@ float Voice::getSample()
 
     // float pitchRatio = pitchSettings.pitchRatio * pitchLfoRatio;
 
+    // float pitchLfoCents = pitchLfoC.getValue(); // This is your LFO value in cents
     float pitchLfoCents = pitchLfoC.getValue(); // This is your LFO value in cents
     float totalCents = pitchSettings.totalTransposeCents + pitchLfoCents;
     float pitchRatio = sound_module::centsToPitchRatio(totalCents);

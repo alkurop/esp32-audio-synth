@@ -40,7 +40,7 @@ void Sound::setFrequency(float frequency)
     if (p != phase_increment)
     {
         phase_increment = frequency / sample_rate;
-        ESP_LOGI(TAG, "Pahse inncdement changed freq %f phase_increment %f", frequency, phase_increment);
+        // ESP_LOGI(TAG, "Pahse inncdement changed freq %f phase_increment %f", frequency, phase_increment);
     }
 }
 

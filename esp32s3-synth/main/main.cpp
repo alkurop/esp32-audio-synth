@@ -78,14 +78,7 @@ void initMidi()
 extern "C" void app_main()
 {
     soundModule.init();
-    // initMidi();
+    initMidi();
     masterKnob.init(masterKnobCallback);
     ESP_ERROR_CHECK(receiver.init(updateCallback, sendBpm));
-    auto lfo = soundModule.getThatLfo();
-    while (true)
-    {
-        auto value = lfo.getValue();
-        ESP_LOGI(TAG, "Pitch lfo value is %f", value);
-        vTaskDelay(pdMS_TO_TICKS(500));
-    }
 }
