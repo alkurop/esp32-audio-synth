@@ -9,6 +9,7 @@
 #include "receiver.hpp"
 #include "knob.hpp"
 #include "setting_router.hpp"
+#include "cached_lfo.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
@@ -80,4 +81,9 @@ extern "C" void app_main()
     // initMidi();
     masterKnob.init(masterKnobCallback);
     ESP_ERROR_CHECK(receiver.init(updateCallback, sendBpm));
+    while (true)
+    {
+        ESP_LOGI(TAG, "Pitch lfo value is ", );
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
 }

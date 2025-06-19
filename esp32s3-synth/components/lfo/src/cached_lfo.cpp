@@ -20,7 +20,7 @@ float CachedLFO::getValue()
     if (counter == phase)
     {
         value = lfo.getValue(interval);
-        ESP_LOGI(TAG, "lfo gen new value %f", value);
+        // ESP_LOGI(TAG, "lfo gen new value %f", value);
     }
     return value;
 }

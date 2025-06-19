@@ -6,6 +6,9 @@
 #include "triangle_table.hpp"
 #include "square_table.hpp"
 #include "lookup.hpp"
+#include "esp_log.h"
+static const char *TAG = "Lfo";
+
 using namespace sound_module;
 // Constructor: initialize sample rate, BPM, subdivision, depth defaults
 LFO::LFO(uint32_t sampleRate, uint8_t initialBpm, LfoSubdivision initialSub)
@@ -37,7 +40,12 @@ void LFO::setWaveform(LfoWaveform w)
 }
 
 // Set modulation depth (0–127), generic units
-void LFO::setDepth(uint8_t newDepth) { depth = newDepth; }
+void LFO::setDepth(uint8_t newDepth)
+{
+    ESP_LOGI(TAG, "Set depth %d", newDepth);
+
+    depth = newDepth;
+}
 
 // Reset phase to start of cycle
 void LFO::resetPhase() { phase = 0.0f; }

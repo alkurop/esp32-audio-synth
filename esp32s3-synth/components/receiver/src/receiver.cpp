@@ -104,13 +104,18 @@ esp_err_t Receiver::init(UpdateCallback updateCallback, BpmCallback bpmCallback)
 
     ESP_LOGI("Receiver", "I2C slave initialized on port %d", config.i2c_port);
     receiveQueue = xQueueCreate(8, sizeof(FieldUpdateList *));
+    sendQueue = xQueueCreate(8, sizeof(uint8_t));
+
     if (!receiveQueue)
     {
         ESP_LOGE("Receiver", "Failed to create update queue");
         return ESP_ERR_NO_MEM;
     }
-    this->receiveTask();
-    this->sendTask();
+    xTaskCreatePinnedToCore([](void *arg)
+                            { static_cast<Receiver *>(arg)->receiveTask(); }, "receiver_rx", 4096, this, 5, &receiveTaskHandle, 0); // Core 1
+
+    xTaskCreatePinnedToCore([](void *arg)
+                            { static_cast<Receiver *>(arg)->sendTask(); }, "receiver_tx", 4096, this, 5, &sendTaskHandle, 0); // Core 1
     return ESP_OK;
 }
 
@@ -132,6 +137,8 @@ void Receiver::receiveTask()
                 delete msg;
             }
         }
+        // optional: yield for scheduling fairness
+        vTaskDelay(1);
     }
 }
 
@@ -170,5 +177,6 @@ void Receiver::sendTask()
             }
         }
         // Loop again if no event arrived in 10 ticks
+        
     }
 }

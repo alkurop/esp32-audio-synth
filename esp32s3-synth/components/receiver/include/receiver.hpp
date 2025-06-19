@@ -21,8 +21,6 @@ namespace protocol
         uint8_t receiver_address; ///< SSD1306 I2C address
     };
 
-   
-
     class Receiver
     {
     private:
@@ -37,6 +35,8 @@ namespace protocol
         esp_err_t init(UpdateCallback updateCallback, BpmCallback BpmCallback);
         QueueHandle_t receiveQueue = nullptr;
         QueueHandle_t sendQueue = nullptr;
+        TaskHandle_t receiveTaskHandle = nullptr;
+        TaskHandle_t sendTaskHandle = nullptr;
         void receiveTask();
         void sendTask();
     };
