@@ -81,9 +81,11 @@ extern "C" void app_main()
     // initMidi();
     masterKnob.init(masterKnobCallback);
     ESP_ERROR_CHECK(receiver.init(updateCallback, sendBpm));
+    auto lfo = soundModule.getThatLfo();
     while (true)
     {
-        ESP_LOGI(TAG, "Pitch lfo value is ", );
-        vTaskDelay(pdMS_TO_TICKS(100));
+        auto value = lfo.getValue();
+        ESP_LOGI(TAG, "Pitch lfo value is %f", value);
+        vTaskDelay(pdMS_TO_TICKS(500));
     }
 }

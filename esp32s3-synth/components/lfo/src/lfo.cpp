@@ -7,6 +7,7 @@
 #include "square_table.hpp"
 #include "lookup.hpp"
 #include "esp_log.h"
+#include "esp_timer.h"
 static const char *TAG = "Lfo";
 
 using namespace sound_module;
@@ -56,7 +57,11 @@ float LFO::getValue(uint16_t ticks)
 
     if (depth == 0)
         return 0.0f;
-    advancePhase(ticks); // scale phase increment correctly
+    uint32_t now = esp_timer_get_time(); // microseconds
+    uint32_t elapsed = now - lastCallTime;
+    lastCallTime = now;
+
+    advancePhaseMicroseconds(elapsed); // scale phase increment correctly
 
     float raw = 0.f;
     switch (waveform)
@@ -79,18 +84,24 @@ float LFO::getValue(uint16_t ticks)
     default:
         raw = 0.0f;
     }
+    ESP_LOGI(TAG, "Phase Raw %f phase %f", raw, phase);
 
     return raw * float(depth);
 }
 
 uint8_t LFO::getDepth() { return depth; }
 
-void LFO::advancePhase(uint16_t ticks)
+void LFO::advancePhaseMicroseconds(uint32_t elapsed_us)
 {
-    float beatsPerCycle = static_cast<float>(static_cast<uint8_t>(sub)) / 64.0f;
-    float rateHz = (static_cast<float>(bpm) / 60.0f) * beatsPerCycle;
 
-    phase += ticks * (rateHz / float(sample_rate));
+    float beatsPerCycle = beatsPerCycleMap[static_cast<int>(sub)];
+    float cyclesPerBeat = 1.0f / beatsPerCycle; // this is the key fix
+    float rateHz = (bpm / 60.0f) * cyclesPerBeat;
+    ESP_LOGI(TAG, "beatsPerCycle %f rateHz %f sub %d", beatsPerCycle, rateHz, static_cast<int>(sub));
+
+    float seconds = elapsed_us / 1'000'000.0f;
+    phase += rateHz * seconds;
+
     if (phase >= 1.0f)
-        phase -= floorf(phase); // wraparound
+        phase -= floorf(phase);
 }

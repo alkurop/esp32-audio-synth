@@ -6,7 +6,7 @@ file(GLOB_RECURSE SRCS
 idf_component_register(
     SRCS ${SRCS}
     INCLUDE_DIRS "include"
-    REQUIRES log protocol lookup
+    REQUIRES log protocol lookup esp_timer
 )
 
 

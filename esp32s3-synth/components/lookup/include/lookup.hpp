@@ -9,10 +9,10 @@ namespace sound_module
     {
         const size_t size = table.size();
         float fidx = phase * size;
-        int idx = static_cast<int>(fidx);
-        float frac = fidx - idx;
+        int idx = static_cast<int>(fidx) % size;
+        float frac = fidx - static_cast<float>(idx);
 
-        float a = table[idx % size];
+        float a = table[idx];
         float b = table[(idx + 1) % size];
 
         return a + frac * (b - a); // linear interpolation

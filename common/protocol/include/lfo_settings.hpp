@@ -5,17 +5,28 @@ namespace protocol
 {
 
     constexpr const uint8_t LFO_DEPTH_MAX = 127;
-    
+
     enum class LfoSubdivision : uint8_t
     {
-        Double = 128,       // "2/1"
-        Whole = 64,         // "1/1"
-        Half = 32,          // "1/2"
-        Quarter = 16,       // "1/4"
-        DottedQuarter = 24, // "3/8"
-        Eighth = 8,         // "1/8"
-        Sixteenth = 4,      // "1/16"
-        ThirtySecond = 2,   // "1/32"
+        Double = 0,    // "2/1"
+        Whole,         // "1/1"
+        Half,          // "1/2"
+        Quarter,       // "1/4"
+        DottedQuarter, // "3/8"
+        Eighth,        // "1/8"
+        Sixteenth,     // "1/16"
+        ThirtySecond,  // "1/32"
+    };
+
+    static constexpr float beatsPerCycleMap[] = {
+        2.0f,    // Double (2 beats per cycle)
+        1.0f,    // Whole
+        0.5f,    // Half
+        0.25f,   // Quarter
+        0.375f,  // Dotted Quarter (3/8)
+        0.125f,  // Eighth
+        0.0625f, // Sixteenth
+        0.03125f // Thirty-second
     };
 
     // New: which waveform the LFO outputs
@@ -35,15 +46,15 @@ namespace protocol
 
     enum class LFOField : uint8_t
     {
-        Form,
         Subdiv,
+        Form,
         Depth,
         _Count
     };
 
     static constexpr FieldInfo lfoInfo[] = {
         {
-            .label = "Form",
+            .label = "Subd",
             .type = FieldType::Options,
             .min = 0,
             .max = 0,
@@ -53,7 +64,7 @@ namespace protocol
             .increment = 1,
         },
         {
-            .label = "Subd",
+            .label = "Form",
             .type = FieldType::Options,
             .min = 0,
             .max = 0,
@@ -73,5 +84,4 @@ namespace protocol
             .increment = 1,
         },
     };
-
 }

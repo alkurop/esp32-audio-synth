@@ -10,7 +10,7 @@ namespace sound_module
 
     inline float computeSine(int i)
     {
-        return std::sinf(2.0f * static_cast<float>(M_PI) * i / protocol::LOOKUP_TABLE_SIZE);
+        return std::sinf(2.0f * static_cast<float>(M_PI) * (i + 0.5f) / protocol::LOOKUP_TABLE_SIZE);
     };
 
     // Static sine table initialized once at program startup

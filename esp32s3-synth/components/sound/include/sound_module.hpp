@@ -12,6 +12,7 @@
 #include "midi_parser.hpp"
 #include "menu_struct.hpp"
 #include "sound/sound.hpp"
+#include "cached_lfo.hpp"
 #include <mutex> // add this at the top
 
 namespace sound_module
@@ -61,6 +62,11 @@ namespace sound_module
         GlobalState &getState() { return state; }
         void updateBpmSetting();
         Voice &getVoice(uint8_t index) { return getVoices()[index]; }
+
+        CachedLFO &getThatLfo()
+        {
+            return voices[0].pitchLfoC;
+        };
 
     private:
         SoundConfig config;

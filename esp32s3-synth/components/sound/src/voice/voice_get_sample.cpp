@@ -14,7 +14,6 @@ static const char *TAG = "Voice";
 
 float Voice::getSample()
 {
-    float lfoValue = pitchLfoC.getValue(); // This is your LFO value in cents
     // 0) Master gain smoothing
     float sm_gain = volumeSettings.gain_smoothed.next();
     if (sm_gain <= 1e-6f || activeSounds.size() == 0)

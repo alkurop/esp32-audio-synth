@@ -31,7 +31,7 @@ public:
     // Get the current LFO output, bipolar range: –depth … +depth
     float getValue(uint16_t ticks);
 
-    void advancePhase(uint16_t ticks = 1);
+    void advancePhaseMicroseconds(uint32_t elapsed_us);
 
     uint8_t getDepth();
 
@@ -42,4 +42,5 @@ private:
     uint8_t bpm = 120;                            // beats per minute
     float phase = 0.0f;                           // [0.0, 1.0) cycle phase
     LfoWaveform waveform;
+    uint32_t lastCallTime;
 };
