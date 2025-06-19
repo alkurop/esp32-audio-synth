@@ -49,9 +49,10 @@ Stereo Voice::getSample()
 
         ++iterator;
     }
-
+    float cutoffMod = cutoffLfoC.getValue();  
+    float resMod = resonanceLfoC.getValue();  
     // 4) Filter
-    mix =  filter.process(mix) * sm_gain;
+    mix = filter.process(mix, cutoffMod, resMod) * sm_gain;
 
     // 5) Final gain
     return Stereo{mix, mix};

@@ -31,7 +31,7 @@ namespace sound_module
         void setResonance(uint8_t q) { baseResonance = q; };
 
         /// Process a single sample through the filter, applying any active LFO modulation
-        float process(float input);
+        float process(float input, float modulatedCutoff, float modulatedResonance);
 
     private:
         uint32_t sample_rate;

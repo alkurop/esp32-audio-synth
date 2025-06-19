@@ -14,8 +14,7 @@ using namespace protocol;
 using namespace sound_module;
 
 Filter::Filter(uint32_t sampleRate, uint8_t init_bpm, uint8_t voiceIndex)
-    :
-      sample_rate(sampleRate),
+    : sample_rate(sampleRate),
       filterType(FilterType::LP12),
       baseCutoff(MAX_CUTOFF_RAW / 2),       // midpoint default
       baseResonance(MAX_RESONANCE_RAW / 2), // midpoint default
@@ -31,24 +30,32 @@ void Filter::resetState()
     z2 = 0.0f;
 }
 
-float Filter::process(float input)
+float Filter::process(float input, float modulatedCutoff, float modulatedResonance)
 {
-    if (baseCutoff == 0 && baseResonance)
+    // Bypass if filter is disabled
+    if (baseCutoff == 0 && baseResonance != 0)
         return input;
 
-    // Convert cutoff and resonance to table indices
-    int cutoff_index = static_cast<int>((static_cast<float>(baseCutoff) / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
-    int resonance_index = static_cast<int>((static_cast<float>(baseResonance) / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
+    // Apply LFO modulation in unipolar downward direction
+    int effectiveCutoff = std::clamp<int>(baseCutoff - static_cast<int>(modulatedCutoff), 0, MAX_CUTOFF_RAW);
+    int effectiveResonance = std::clamp<int>(baseResonance - static_cast<int>(modulatedResonance), 0, MAX_RESONANCE_RAW);
+    // ESP_LOGI(TAG, "modulatedCutoff %f effectiveCutoff %d", modulatedCutoff, effectiveCutoff);
 
-    // Clamp to valid table range
+    // Normalize and convert to table indices
+    int cutoff_index = static_cast<int>((float(effectiveCutoff) / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
+    int resonance_index = static_cast<int>((float(effectiveResonance) / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
+
+    // Clamp to table bounds (defensive)
     cutoff_index = std::clamp(cutoff_index, 0, CUTOFF_TABLE_SIZE - 1);
     resonance_index = std::clamp(resonance_index, 0, RESONANCE_TABLE_SIZE - 1);
 
-    // Only update coefficients if indices have changed
-    if (cutoff_index != lastCutoffIndex || resonance_index != lastResonanceIndex || filterType != lastFilterType)
-
+    // Update coefficients if filter state changed
+    if (cutoff_index != lastCutoffIndex ||
+        resonance_index != lastResonanceIndex ||
+        filterType != lastFilterType)
     {
         const float (*table)[RESONANCE_TABLE_SIZE][5] = nullptr;
+
         switch (filterType)
         {
         case FilterType::LP12:
@@ -74,14 +81,18 @@ float Filter::process(float input)
         lastA1 = coeffs[3];
         lastA2 = coeffs[4];
 
-        ESP_LOGI(TAG, "cutoff_index %d resonance_index %d lastB0 %f lastB1 %f lastB2 %f lastA1 %f lastA2 %f", cutoff_index, resonance_index, lastB0, lastB1, lastB2, lastA1, lastA2);
+        ESP_LOGI(TAG,
+                 "cutoff_index %d resonance_index %d "
+                 "lastB0 %f lastB1 %f lastB2 %f lastA1 %f lastA2 %f",
+                 cutoff_index, resonance_index,
+                 lastB0, lastB1, lastB2, lastA1, lastA2);
 
         lastCutoffIndex = cutoff_index;
         lastResonanceIndex = resonance_index;
         lastFilterType = filterType;
     }
 
-    // Apply cached coefficients using Transposed Direct Form II
+    // Transposed Direct Form II filter
     float y = lastB0 * input + z1;
     z1 = lastB1 * input + z2 - lastA1 * y;
     z2 = lastB2 * input - lastA2 * y;
