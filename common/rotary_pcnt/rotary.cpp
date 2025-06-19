@@ -103,44 +103,56 @@ void Rotary::processEvents()
 
     while (true)
     {
+        // Block until an event comes in
         if (xQueueReceive(eventQueue, &event_count, portMAX_DELAY) == pdTRUE)
         {
-            vTaskDelay(pdMS_TO_TICKS(10));
-            pcnt_unit_get_count(unit, &rawCount);
-            int detents = rawCount / STEPS_PER_INDENT;
+            bool didWork = false;
 
-            if (detents != prevCount)
+            // Process all pending events quickly
+            while (uxQueueMessagesWaiting(eventQueue) > 0 || !didWork)
             {
-                int delta = detents - prevCount;
-                prevCount = detents;
+                pcnt_unit_get_count(unit, &rawCount);
+                int detents = rawCount / STEPS_PER_INDENT;
 
-                int next = static_cast<int>(currentPosition) + (delta > 0 ? config.increment : -static_cast<int>(config.increment));
+                if (detents != prevCount)
+                {
+                    didWork = true;
+                    int delta = detents - prevCount;
+                    prevCount = detents;
 
-                if (config.wrapAround)
-                {
-                    // wrap behavior
-                    if (next > static_cast<int>(config.maxValue))
-                        currentPosition = config.minValue;
-                    else if (next < static_cast<int>(config.minValue))
-                        currentPosition = config.maxValue;
-                    else
-                        currentPosition = static_cast<int16_t>(next);
-                    if (callback)
-                        callback(config.id, currentPosition);
-                }
-                else
-                {
-                    // clamp behavior
-                    next = std::clamp(next, static_cast<int>(config.minValue), static_cast<int>(config.maxValue));
-                    auto castNext = static_cast<int16_t>(next);
-                    if (castNext != currentPosition)
+                    int next = static_cast<int>(currentPosition) + (delta > 0 ? config.increment : -static_cast<int>(config.increment));
+
+                    if (config.wrapAround)
                     {
-                        currentPosition = castNext;
+                        if (next > static_cast<int>(config.maxValue))
+                            currentPosition = config.minValue;
+                        else if (next < static_cast<int>(config.minValue))
+                            currentPosition = config.maxValue;
+                        else
+                            currentPosition = static_cast<int16_t>(next);
+
                         if (callback)
                             callback(config.id, currentPosition);
                     }
+                    else
+                    {
+                        next = std::clamp(next, static_cast<int>(config.minValue), static_cast<int>(config.maxValue));
+                        auto castNext = static_cast<int16_t>(next);
+                        if (castNext != currentPosition)
+                        {
+                            currentPosition = castNext;
+                            if (callback)
+                                callback(config.id, currentPosition);
+                        }
+                    }
                 }
+
+                // Drain next event if available
+                xQueueReceive(eventQueue, &event_count, 0);
             }
+
+            // Yield briefly to avoid hogging CPU
+            vTaskDelay(pdMS_TO_TICKS(1));
         }
     }
 }

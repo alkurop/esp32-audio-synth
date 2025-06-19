@@ -22,7 +22,6 @@ void Voice::noteOn(Sound *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity
 {
     if (ch != midi_channel)
     {
-        ESP_LOGI(TAG, "Wrong channel");
         return;
     }
 

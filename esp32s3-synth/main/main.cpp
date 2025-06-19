@@ -77,7 +77,7 @@ void initMidi()
 extern "C" void app_main()
 {
     soundModule.init();
-    initMidi();
+    // initMidi();
     masterKnob.init(masterKnobCallback);
     ESP_ERROR_CHECK(receiver.init(updateCallback, sendBpm));
 }

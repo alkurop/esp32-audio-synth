@@ -142,6 +142,7 @@ void SoundModule::audio_task_entry(void *arg)
         self->process();
         int64_t elapsed_us = esp_timer_get_time() - start;
         // ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
+        vTaskDelay(1); // 👈 allows watchdog to breathe
     }
 }
 

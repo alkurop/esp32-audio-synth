@@ -14,9 +14,12 @@ static const char *TAG = "Voice";
 
 float Voice::getSample()
 {
+    float lfoValue = pitchLfoC.getValue(); // This is your LFO value in cents
+    ESP_LOGI(TAG, "Pitch lfo value %f", lfoValue);
+
     // 0) Master gain smoothing
     float sm_gain = volumeSettings.gain_smoothed.next();
-    if (sm_gain <= 1e-6f)
+    if (sm_gain <= 1e-6f || activeSounds.size() == 0)
         return 0.0f;
 
     // // // 1) Pitch, amplitude, and pan modulation
@@ -31,13 +34,16 @@ float Voice::getSample()
     // sound->setFrequency(modFreq);
 
     // float totalPitchCents = static_cast<float>(pitchSettings.pitchRatio);
- // 1) Pitch LFO modulation (in cents → ratio)
+    // 1) Pitch LFO modulation (in cents → ratio)
 
     // float pitchLfoCents = pitchLfoC.getValue(); // returns e.g., -127 to +127
     // float pitchLfoRatio = std::pow(2.0f, pitchLfoCents / 1200.0f); // cents → freq ratio
 
     // float pitchRatio = pitchSettings.pitchRatio * pitchLfoRatio;
-    float pitchRatio = pitchSettings.pitchRatio;
+
+    float pitchLfoCents = pitchLfoC.getValue(); // This is your LFO value in cents
+    float totalCents = pitchSettings.totalTransposeCents + pitchLfoCents;
+    float pitchRatio = sound_module::centsToPitchRatio(totalCents);
 
     // 3) Mix active sounds with pitch, amp, pan
     float mix = 0.0f;
@@ -66,7 +72,7 @@ float Voice::getSample()
 
     // 4) Filter
     // mixR = mixL;
-    return filter.process(mix) * sm_gain ;
+    return filter.process(mix) * sm_gain;
     // return mix * sm_gain;
 
     // 5) Final gain

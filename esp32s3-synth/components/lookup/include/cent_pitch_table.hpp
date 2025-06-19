@@ -12,7 +12,7 @@ namespace sound_module
     constexpr size_t CENT_PITCH_TABLE_SIZE = CENT_MAX - CENT_MIN + 1;
     constexpr int CENT_OFFSET = -CENT_MIN;
 
-    constexpr std::array<float, CENT_PITCH_TABLE_SIZE> centPitchTable = []()
+    const std::array<float, CENT_PITCH_TABLE_SIZE> centPitchTable = []()
     {
         std::array<float, CENT_PITCH_TABLE_SIZE> table = {};
         for (size_t i = 0; i < CENT_PITCH_TABLE_SIZE; ++i)
