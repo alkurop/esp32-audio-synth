@@ -10,3 +10,4 @@ idf_component_register(
 )
 
 
+target_compile_options(${COMPONENT_LIB} PRIVATE -O3 -ffast-math -funroll-loops -fstrict-aliasing)
