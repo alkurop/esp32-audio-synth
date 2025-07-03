@@ -13,7 +13,7 @@ using namespace protocol;
 
 static const char *TAG = "Voice";
 
-IRAM_ATTR Stereo Voice::getSample()
+Stereo Voice::getSample()
 {
     // 0) Master gain smoothing
     float sm_gain = volumeSettings.gain_smoothed.next();
@@ -21,8 +21,11 @@ IRAM_ATTR Stereo Voice::getSample()
         return Stereo{0.0f, 0.0f};
 
     float ampMod = (ampLfoC.getValue() + 127.0f) / 254.0f; // Normalize to 0.0 … 1.0
+                                                           // 2) one‐pole IIR: new = α·raw + (1–α)·old
+    ampLfoSmoothed = AMP_ALPHA * ampMod + (1.0f - AMP_ALPHA) * ampLfoSmoothed;
 
-    float pitchLfoCents = pitchLfoC.getValue(); // This is your LFO value in cents
+    float rawLfo = pitchLfoC.getValue();
+    float pitchLfoCents = rawLfo * (pitchLfoDepth / 127.0f);
     float totalCents = pitchSettings.totalTransposeCents + pitchLfoCents;
     float pitchRatio = sound_module::centsToPitchRatio(totalCents);
 
@@ -44,14 +47,14 @@ IRAM_ATTR Stereo Voice::getSample()
         sound->setFrequency(modFreq);
 
         // float sample = sound->getSample() * sound->velNorm;
-        float sample = sound->getSample() * sound->velNorm * ampMod;
+        float sample = sound->getSample() * sound->velNorm * ampLfoSmoothed;
 
         mix += sample;
 
         ++iterator;
     }
-    float cutoffMod = cutoffLfoC.getValue();  
-    // float resMod = resonanceLfoC.getValue();  
+    float cutoffMod = cutoffLfoC.getValue();
+    // float resMod = resonanceLfoC.getValue();
     // 4) Filter
     mix = filter.process(mix, cutoffMod, 0) * sm_gain;
 

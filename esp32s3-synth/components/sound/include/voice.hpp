@@ -78,12 +78,16 @@ namespace sound_module
         size_t midi_channel = 0;
         uint16_t bpm;
 
+        float ampLfoSmoothed = 1.0f;              
+        static constexpr float AMP_ALPHA = 0.003f; // tweak  
+        static constexpr float pitchLfoDepth = 200.0f;
+
+
         voice::VolumeSettings volumeSettings;
         voice::EnvelopeSettings envelopeSettings;
         voice::OscillatorSettings oscillatorSettings;
 
         std::vector<Oscillator *> activeOscillators;
-
 
         Oscillator *find_note_to_release(uint8_t midi_note); // can be a nullptr
 
