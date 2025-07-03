@@ -30,22 +30,15 @@ void Filter::resetState()
     z2 = 0.0f;
 }
 
-IRAM_ATTR float Filter::process(float input, float modulatedCutoff, float modulatedResonance)
+float Filter::process(float input)
 {
     if (baseCutoff == 0 && baseResonance)
         return input;
 
     // Quantize and apply modulation (cutting down only)
-    constexpr int QUANTIZATION_STEP = 4;
-    int quantizedCutoffMod = (static_cast<int>(modulatedCutoff) / QUANTIZATION_STEP) * QUANTIZATION_STEP;
-    int effectiveCutoff = std::clamp<int>(baseCutoff - quantizedCutoffMod, 0, MAX_CUTOFF_RAW);
-
-    // Use base resonance directly
-    int effectiveResonance = baseResonance;
-
     // Convert to table indices
-    int cutoff_index = static_cast<int>((static_cast<float>(effectiveCutoff) / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
-    int resonance_index = static_cast<int>((static_cast<float>(effectiveResonance) / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
+    int cutoff_index = static_cast<int>((static_cast<float>(baseCutoff) / MAX_CUTOFF_RAW) * (CUTOFF_TABLE_SIZE - 1));
+    int resonance_index = static_cast<int>((static_cast<float>(baseResonance) / MAX_RESONANCE_RAW) * (RESONANCE_TABLE_SIZE - 1));
 
     cutoff_index = std::clamp(cutoff_index, 0, CUTOFF_TABLE_SIZE - 1);
     resonance_index = std::clamp(resonance_index, 0, RESONANCE_TABLE_SIZE - 1);

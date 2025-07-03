@@ -31,13 +31,9 @@ namespace protocol
         Tuning,
         PitchLFO,
         AmpLFO,
-        FilterCLFO,
-        FilterRLFO,
         Global, ///< Global BPM settings page
         _Count
     };
-
-
 
     // somewhere in your menu namespace, after the Page & *Field enums:
     static constexpr std::array<uint8_t, static_cast<size_t>(Page::_Count)> fieldsPerPage = {
@@ -54,10 +50,6 @@ namespace protocol
         // PitchLFO page (same as Filter LFO)
         static_cast<uint8_t>(LFOField::_Count),
         // Amp LFO page
-        static_cast<uint8_t>(LFOField::_Count),
-        // FilterC LFO page
-        static_cast<uint8_t>(LFOField::_Count),
-        // FilterR LFO page
         static_cast<uint8_t>(LFOField::_Count),
         // Global BPM page
         static_cast<uint8_t>(GlobalField::_Count),
@@ -80,8 +72,6 @@ namespace protocol
         {"Tuning", tuningInfo, sizeof(tuningInfo) / sizeof(FieldInfo)},
         {"Pitch LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"Amp LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
-        {"FilterC LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
-        {"FilterR LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
     };
 

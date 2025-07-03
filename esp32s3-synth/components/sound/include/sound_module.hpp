@@ -53,7 +53,7 @@ namespace sound_module
     public:
         explicit SoundModule(const SoundConfig &config);
         void init();
-        IRAM_ATTR void process();
+        void process();
 
         // MIDI input handler
         void handle_note(const midi_module::NoteMessage &msg);
@@ -63,11 +63,6 @@ namespace sound_module
         GlobalState &getState() { return state; }
         void updateBpmSetting();
         Voice &getVoice(uint8_t index) { return getVoices()[index]; }
-
-        CachedLFO &getThatLfo()
-        {
-            return voices[0].cutoffLfoC;
-        };
 
     private:
         SoundConfig config;

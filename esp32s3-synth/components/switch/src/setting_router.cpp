@@ -78,20 +78,6 @@ void SettingRouter::setUpdate(const FieldUpdate &update)
             update.value);
         break;
 
-    case Page::FilterCLFO:
-        settings::setFilterCutoffLfoPage(
-            soundModule.getVoice(update.voiceIndex),
-            update.field,
-            update.value);
-        break;
-    case Page::FilterRLFO:
-
-        settings::setFilterResLfoPage(
-            soundModule.getVoice(update.voiceIndex),
-            update.field,
-            update.value);
-        break;
-
     case Page::PitchLFO:
         settings::setPitchLfoPage(
             soundModule.getVoice(update.voiceIndex),

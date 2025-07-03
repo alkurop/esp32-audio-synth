@@ -32,7 +32,7 @@ namespace sound_module
         void setResonance(uint8_t q) { baseResonance = q; };
 
         /// Process a single sample through the filter, applying any active LFO modulation
-       IRAM_ATTR float process(float input, float modulatedCutoff, float modulatedResonance);
+        float process(float input);
 
     private:
         uint32_t sample_rate;
@@ -50,7 +50,5 @@ namespace sound_module
         float lastA1 = 0.0f, lastA2 = 0.0f;
         void resetState();
     };
-
-    
 
 } // namespace sound_module

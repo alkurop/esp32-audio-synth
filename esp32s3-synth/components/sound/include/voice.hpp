@@ -63,13 +63,9 @@ namespace sound_module
 
         LFO pitchLfo;
         LFO ampLfo;
-        LFO cutoffLfo;
-        LFO resonanceLfo;
 
         CachedLFO pitchLfoC;
         CachedLFO ampLfoC;
-        CachedLFO cutoffLfoC;
-        CachedLFO resonanceLfoC;
 
         Filter filter;
         voice::PitchSettings pitchSettings;

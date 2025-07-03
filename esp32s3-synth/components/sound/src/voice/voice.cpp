@@ -12,12 +12,8 @@ Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t
     : sampleRate(sample_rate),
       pitchLfo(sample_rate, initial_bpm),
       ampLfo(sample_rate, initial_bpm),
-      cutoffLfo(sampleRate, initial_bpm),
-      resonanceLfo(sampleRate, initial_bpm),
       pitchLfoC(pitchLfo, 512),
       ampLfoC(ampLfo, 513),
-      cutoffLfoC(cutoffLfo, 1014),
-      resonanceLfoC(resonanceLfo, 1015),
       filter(sample_rate, initial_bpm, voiceIndex),
       pitchSettings(),
       midi_channel(channel),
@@ -32,8 +28,6 @@ void Voice::setBpm(uint16_t bpm)
     bpm = bpm;
     ampLfo.setBpm(bpm);
     pitchLfo.setBpm(bpm);
-    cutoffLfo.setBpm(bpm);
-    resonanceLfo.setBpm(bpm);
 }
 
 void Voice::setMidiChannel(uint8_t midiChannel)

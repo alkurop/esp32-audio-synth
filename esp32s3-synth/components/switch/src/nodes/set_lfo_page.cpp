@@ -42,12 +42,4 @@ void settings::setPitchLfoPage(Voice &voice, uint8_t field, int16_t value)
     setLfo(voice.pitchLfo, field, value);
 };
 
-void settings::setFilterCutoffLfoPage(Voice &voice, uint8_t field, int16_t value)
-{
-    setLfo(voice.cutoffLfo, field, value);
-};
-
-void settings::setFilterResLfoPage(Voice &voice, uint8_t field, int16_t value)
-{
-    setLfo(voice.resonanceLfo, field, value);
-};
+ 
