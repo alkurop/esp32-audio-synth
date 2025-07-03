@@ -106,17 +106,15 @@ void Rotary::processEvents()
         // Block until an event comes in
         if (xQueueReceive(eventQueue, &event_count, portMAX_DELAY) == pdTRUE)
         {
-            bool didWork = false;
-
-            // Process all pending events quickly
-            while (uxQueueMessagesWaiting(eventQueue) > 0 || !didWork)
+            // Process the first event (we already have it)
+            do
             {
+                // Read the raw PCNT count and compute detents
                 pcnt_unit_get_count(unit, &rawCount);
                 int detents = rawCount / STEPS_PER_INDENT;
 
                 if (detents != prevCount)
                 {
-                    didWork = true;
                     int delta = detents - prevCount;
                     prevCount = detents;
 
@@ -130,28 +128,23 @@ void Rotary::processEvents()
                             currentPosition = config.maxValue;
                         else
                             currentPosition = static_cast<int16_t>(next);
-
-                        if (callback)
-                            callback(config.id, currentPosition);
                     }
                     else
                     {
-                        next = std::clamp(next, static_cast<int>(config.minValue), static_cast<int>(config.maxValue));
-                        auto castNext = static_cast<int16_t>(next);
-                        if (castNext != currentPosition)
-                        {
-                            currentPosition = castNext;
-                            if (callback)
-                                callback(config.id, currentPosition);
-                        }
+                        next = std::clamp(next,
+                                          static_cast<int>(config.minValue),
+                                          static_cast<int>(config.maxValue));
+                        currentPosition = static_cast<int16_t>(next);
                     }
+
+                    if (callback)
+                        callback(config.id, currentPosition);
                 }
 
-                // Drain next event if available
-                xQueueReceive(eventQueue, &event_count, 0);
-            }
+                // Try to pull the next event (non-blocking)
+            } while (xQueueReceive(eventQueue, &event_count, 0) == pdTRUE);
 
-            // Yield briefly to avoid hogging CPU
+            // Yield so the IDLE task can run and pet the watchdog
             vTaskDelay(pdMS_TO_TICKS(1));
         }
     }
