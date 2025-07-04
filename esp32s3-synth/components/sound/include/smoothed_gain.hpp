@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-struct SmoothedValue
+struct SmoothedGain
 {
     float current = 0.0f; // the value we actually output each sample
     float target = 0.0f;  // the “destination” value we want to reach
@@ -24,5 +24,5 @@ struct SmoothedValue
 struct VolumeSettings
 {
     uint8_t volume;
-    SmoothedValue gain_smoothed;
+    SmoothedGain gain_smoothed;
 };

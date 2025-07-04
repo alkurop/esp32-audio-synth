@@ -120,7 +120,6 @@ extern "C" void app_main()
     ESP_ERROR_CHECK(sender.init());
     display.renderLoading();
     // wait until we start sending I2C data
-    vTaskDelay(pdMS_TO_TICKS(1000));
     createMenuRenderTask(&renderTaskContext);
     menuHolder.init([](const MenuState &state)
                     {

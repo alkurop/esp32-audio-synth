@@ -56,6 +56,6 @@ auto updateCallback = [](const EventList &events)
 extern "C" void app_main()
 {
     soundModule.init();
-    masterKnob.init(masterKnobCallback);
     ESP_ERROR_CHECK(receiver.init(updateCallback));
+    masterKnob.init(masterKnobCallback);
 }

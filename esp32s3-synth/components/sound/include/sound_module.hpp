@@ -1,4 +1,3 @@
-// sound_module.hpp
 #pragma once
 
 #include <cstdint>
@@ -10,6 +9,7 @@
 #include <driver/i2s_std.h>
 #include "voice.hpp"
 #include "menu_struct.hpp"
+#include "smoothed_gain.hpp"
 #include "oscillator.hpp"
 #include "cached_lfo.hpp"
 #include <mutex>      // add this at the top
@@ -41,7 +41,7 @@ namespace sound_module
     struct GlobalState
     {
         midi_module::TransportCommand transportState;
-        uint8_t masterVolume = 0;
+        volatile uint8_t masterVolume = 0;
         uint16_t midiBpm = 0;
         uint16_t settingsBpm = protocol::BPM_DEFAULT;
         bool isSynced = false;
