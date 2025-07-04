@@ -140,7 +140,7 @@ void SoundModule::audio_task_entry(void *arg)
 
 void SoundModule::updateBpmSetting()
 {
-    uint16_t bpm = state.usesSettingsBmp ? state.settingsBpm : state.midiBpm;
+    uint16_t bpm = state.isSynced ? state.midiBpm : state.settingsBpm;
     for (auto &voice : voices)
     {
         voice.setBpm(bpm);

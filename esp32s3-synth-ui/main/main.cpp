@@ -72,14 +72,22 @@ MidiSongPositionCallback songPositionCallback = [](const SongPosition &sp)
 MidiTransportCallback transportCallback = [](const TransportEvent &ev)
 {
     ESP_LOGI(TAG, "transport Position: %d", static_cast<int>(ev.command));
-    // settingSwitch.setTransportState(ev.command);
 };
 
-BpmCounter::BpmCallback bpmCallback = [](uint8_t bpm)
+auto bpmCallback = [](uint16_t bpm)
 {
     ESP_LOGI(TAG, "bpm: %d", bpm);
-    // settingSwitch.setBpmFromMidi(bpm);
-    // todo
+    EventList events;
+    events.reserve(1);
+    protocol::Event e;
+    e.type = protocol::EventType::BpmFromMidi;
+    e.midiBpm = bpm;
+    events.push_back(e);
+    auto result = sender.send(events);
+    if (result != ESP_OK)
+    {
+        ESP_LOGE(TAG, "sending falied with code %d", result);
+    }
 };
 
 auto rotaryCallback = [](uint8_t id, int16_t newValue)

@@ -8,7 +8,7 @@ namespace midi_module
     class BpmCounter
     {
     public:
-        using BpmCallback = std::function<void(uint8_t bpm)>;
+        using BpmCallback = std::function<void(uint16_t bpm)>;
 
         BpmCounter();
 
@@ -21,7 +21,7 @@ namespace midi_module
         BpmCallback bpmCallback;
         uint64_t lastBeatTimestamp = 0;
         uint8_t clockCount = 0;
-        uint8_t currentBpm = 0;
+        uint16_t currentBpm = 0;
 
         static constexpr uint8_t clocksPerBeat = 24;
         bool isActive = true;

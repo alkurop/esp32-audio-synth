@@ -8,7 +8,6 @@ using namespace midi_module;
 namespace protocol
 {
 
-
     static constexpr int8_t AUTOSAVE_SLOT = -1;
 
     template <class... Ts>
@@ -35,7 +34,8 @@ namespace protocol
     enum class EventType : uint8_t
     {
         MidiNote = 0x01,
-        FieldUpdate = 0x02
+        FieldUpdate = 0x02,
+        BpmFromMidi = 0x03,
     };
     using FieldUpdateList = std::vector<FieldUpdate>;
     struct Event
@@ -43,6 +43,7 @@ namespace protocol
         EventType type;
         MidiNoteEvent note;     // valid if type==MidiNote
         FieldUpdateList fields; // valid if type==FieldUpdate
+        uint16_t midiBpm; // valid if type==MidiBpm
     };
 
     using EventList = std::vector<Event>;

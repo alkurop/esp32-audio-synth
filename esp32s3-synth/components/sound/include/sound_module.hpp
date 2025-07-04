@@ -43,9 +43,9 @@ namespace sound_module
     {
         midi_module::TransportCommand transportState;
         uint8_t masterVolume = 0;
-        uint8_t midiBpm = 0;
+        uint16_t midiBpm = 0;
         uint16_t settingsBpm = protocol::global_settings::INITIAL_BMP;
-        bool usesSettingsBmp = false;
+        bool isSynced = false;
     };
 
     class SoundModule

@@ -73,10 +73,16 @@ namespace protocol
             buf.push_back(e.note.note);
             buf.push_back(e.note.velocity);
         }
-        else // FieldUpdate
+        else if (e.type == EventType::FieldUpdate)
         {
             auto fu = serializeFieldUpdates(e.fields);
             buf.insert(buf.end(), fu.begin(), fu.end());
+        }
+        else if (e.type == EventType::BpmFromMidi)
+        {
+            // Big-endian: high byte first, then low byte
+            buf.push_back(static_cast<uint8_t>(e.midiBpm >> 8));
+            buf.push_back(static_cast<uint8_t>(e.midiBpm & 0xFF));
         }
 
         return buf;
@@ -104,41 +110,53 @@ namespace protocol
         {
             if (offset + 1 > length)
                 break;
-            auto type = static_cast<EventType>(buffer[offset++]);
+            EventType type = static_cast<EventType>(buffer[offset++]);
+            Event e{type};
 
-            if (type == EventType::MidiNote)
+            switch (type)
             {
+            case EventType::MidiNote:
                 if (offset + 3 > length)
                 {
                     ESP_LOGW("PARSER", "Incomplete MidiNote packet");
-                    break;
+                    return result;
                 }
-                MidiNoteEvent note{
+                e.note = MidiNoteEvent{
                     buffer[offset],     // status
                     buffer[offset + 1], // note
-                    buffer[offset + 2], // velocity
+                    buffer[offset + 2]  // velocity
                 };
                 offset += 3;
-                result.push_back(Event{type, note, {}});
-            }
-            else if (type == EventType::FieldUpdate)
+                break;
+
+            case EventType::FieldUpdate:
             {
-                // Hand off to the existing field-update parser
                 size_t remain = length - offset;
                 auto fields = deserializeFieldUpdates(buffer + offset, remain);
-
-                // Consume exactly as many bytes as that parser did
                 uint8_t count = buffer[offset];
                 size_t packetSize = 1 + size_t(count) * sizeof(FieldUpdate);
                 offset += (packetSize <= remain ? packetSize : remain);
-
-                result.push_back(Event{type, {}, std::move(fields)});
-            }
-            else
-            {
-                ESP_LOGW("PARSER", "Unknown event type 0x%02X", uint8_t(type));
+                e.fields = std::move(fields);
                 break;
             }
+
+            case EventType::BpmFromMidi:
+                if (offset + 2 > length)
+                {
+                    ESP_LOGW("PARSER", "Incomplete MidiBpm packet");
+                    return result;
+                }
+                e.midiBpm = (uint16_t(buffer[offset]) << 8) |
+                            uint16_t(buffer[offset + 1]);
+                offset += 2;
+                break;
+
+            default:
+                ESP_LOGW("PARSER", "Unknown event type 0x%02X", uint8_t(type));
+                return result;
+            }
+
+            result.push_back(std::move(e));
         }
 
         return result;

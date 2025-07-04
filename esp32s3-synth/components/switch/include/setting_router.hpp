@@ -22,9 +22,8 @@ namespace settings
     public:
         SettingRouter(SoundModule &soundModule);
         void setMasterVolume(uint8_t volume);
-        void setBpmFromMidi(uint8_t bpm);
+        void setBpmFromMidi(uint16_t bpm);
         void setUpdateFromUi(const FieldUpdateList &update);
-        uint8_t getMidiBpm();
         void setTransportState(const TransportCommand &setTransportState);
     };
 

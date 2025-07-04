@@ -7,14 +7,12 @@ using namespace settings;
 
 SettingRouter::SettingRouter(SoundModule &soundModule) : soundModule(soundModule) {};
 
-uint8_t SettingRouter::getMidiBpm() { return soundModule.getState().midiBpm; }
-
 void SettingRouter::setMasterVolume(uint8_t volume)
 {
     soundModule.getState().masterVolume = volume;
 };
 
-void SettingRouter::setBpmFromMidi(uint8_t bpm)
+void SettingRouter::setBpmFromMidi(uint16_t bpm)
 {
     this->soundModule.getState().midiBpm = bpm;
     this->soundModule.updateBpmSetting();

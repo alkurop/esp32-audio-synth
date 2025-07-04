@@ -10,7 +10,7 @@ void settings::setGlobalPage(SoundModule &soundModule, uint8_t field, int16_t va
     case GlobalField::SyncMode:
     {
         auto isSynced = static_cast<bool>(value);
-        soundModule.getState().usesSettingsBmp = !isSynced;
+        soundModule.getState().isSynced = isSynced;
         soundModule.updateBpmSetting();
     }
     break;
