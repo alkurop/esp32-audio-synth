@@ -39,7 +39,7 @@ esp_err_t Button::install()
 {
     gpio_install_isr_service(0);
     ESP_RETURN_ON_ERROR(gpio_isr_handler_add(pin, ButtonHandler::button_handler, this), TAG, "gpio_isr_handler_add");
-    xTaskCreatePinnedToCore(buttonSender, "buttonSender", 3 * 1024, this, configMAX_PRIORITIES - 2, &handle, 1);
+    xTaskCreate(buttonSender, "buttonSender", 3 * 1024, this, configMAX_PRIORITIES - 5, &handle);
     return ESP_OK;
 };
 
