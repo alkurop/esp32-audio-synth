@@ -35,12 +35,12 @@ namespace store
 
         const std::vector<VoiceCache> &getVoiceData() const { return data; }
         const GlobalCache &getGlobalCache() const { return globalData; }
-        void setCallback(UpdateCallback callback) { this->callback = std::move(callback); }
+        void setCallback(FieldUpdateCallback callback) { this->callback = std::move(callback); }
 
     private:
         std::vector<VoiceCache> data;
         GlobalCache globalData;
-        UpdateCallback callback;
+        FieldUpdateCallback callback;
     };
 
 } // namespace menu

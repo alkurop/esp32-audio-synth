@@ -31,7 +31,7 @@ namespace menu
     {
     public:
         explicit Menu(uint8_t voiceCount);
-        void init(DisplayCallback displayCallback, UpdateCallback updateCallback);
+        void init(DisplayCallback displayCallback, FieldUpdateCallback updateCallback);
         void enterMenuPage();
         void exitPage();
         void closePopup();

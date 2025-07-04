@@ -72,8 +72,6 @@ FieldUpdateList Presets::loadDefaultVoice(uint8_t voiceIndex)
             result.insert(result.end(), fieldDefaults.begin(), fieldDefaults.end());
             break;
         }
-        case Page::FilterRLFO:
-        case Page::FilterCLFO:
         case Page::AmpLFO:
         case Page::PitchLFO:
         {

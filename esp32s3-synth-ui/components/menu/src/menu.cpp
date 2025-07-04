@@ -20,7 +20,7 @@ Menu::Menu(uint8_t voiceCount)
     state.mode = AppMode::Loading;
 }
 
-void Menu::init(DisplayCallback displayCb, UpdateCallback updateCb)
+void Menu::init(DisplayCallback displayCb, FieldUpdateCallback updateCb)
 {
     displayCallback = std::move(displayCb);
     cache.setCallback(updateCb);

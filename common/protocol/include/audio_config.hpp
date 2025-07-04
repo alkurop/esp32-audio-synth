@@ -11,4 +11,7 @@ namespace protocol
     constexpr const int BUFFER_SIZE = 1024;
     constexpr const int BPM_DEFAULT = 120;
 
+    constexpr const int RECEIVER_ARRDESS = 0x28;
+    constexpr const int I2C_CLOCK_SPEED = 400 * 1000;
+
 }

@@ -138,5 +138,8 @@ void Menu::saveProject(int16_t slotIndex, const std::string &name)
 
     // 5) Save it
     paramStore.saveProject(entry);
-    state.shouldAutoSave = true;
+    if (slotIndex != AUTOSAVE_SLOT)
+    {
+        state.shouldAutoSave = true;
+    }
 }

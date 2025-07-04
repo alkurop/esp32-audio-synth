@@ -1,20 +1,20 @@
 {
   "folders": [
     {
+      "name": "esp32s3-synth",
       "path": "esp32s3-synth"
     },
     {
+      "name": "esp32s3-synth-ui",
       "path": "esp32s3-synth-ui"
     },
     {
+      "name": "common",
       "path": "common"
     }
   ],
-
-  ],
   "settings": {
     "files.associations": {
-      "vector": "cpp",
       "array": "cpp",
       "atomic": "cpp",
       "bit": "cpp",
@@ -44,6 +44,7 @@
       "set": "cpp",
       "string": "cpp",
       "unordered_map": "cpp",
+      "vector": "cpp",
       "exception": "cpp",
       "algorithm": "cpp",
       "functional": "cpp",
@@ -85,6 +86,5 @@
       "typeinfo": "cpp",
       "variant": "cpp"
     }
-    // Optional: override ESP-IDF specific settings per folder if needed
   }
 }

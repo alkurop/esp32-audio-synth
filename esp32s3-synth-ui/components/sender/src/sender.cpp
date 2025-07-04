@@ -20,12 +20,12 @@ esp_err_t Sender::init()
         .scl_io_num = config.scl_pin,
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .glitch_ignore_cnt = 7,
-    };
+        .flags = {.enable_internal_pullup = false}};
 
     const i2c_device_config_t synthConfig = {
         .dev_addr_length = I2C_ADDR_BIT_LEN_7,     // using 7-bit addressing
         .device_address = config.receiver_address, // 7-bit slave address (e.g. 0x42)
-        .scl_speed_hz = config.clock_speed,        // e.g. 100000 for 100 kHz
+        .scl_speed_hz = config.clock_speed,
     };
 #pragma GCC diagnostic pop
     esp_err_t err;
@@ -53,7 +53,7 @@ esp_err_t Sender::init()
     return ESP_OK;
 }
 
-esp_err_t Sender::send(const FieldUpdateList &updates)
+esp_err_t Sender::send(const EventList &updates)
 {
     if (!isConnected)
     {
@@ -62,7 +62,7 @@ esp_err_t Sender::send(const FieldUpdateList &updates)
     }
 
     // 1) Serialize your updates into a byte buffer
-    std::vector<uint8_t> buffer = serializeFieldUpdates(updates);
+    std::vector<uint8_t> buffer = serializeEvents(updates);
     if (buffer.empty())
     {
         // Nothing to send
@@ -88,38 +88,4 @@ esp_err_t Sender::send(const FieldUpdateList &updates)
     }
 
     return err;
-}
-
-std::variant<FieldUpdate, esp_err_t> Sender::receiveBpm()
-{
-    if (!isConnected)
-    {
-        // init() was never called or failed
-        return ESP_ERR_INVALID_STATE;
-    }
-
-    // 1) Prepare a 2-byte buffer
-    uint8_t buf[2] = {0, 0};
-
-    // 2) Do a “pure read” by using transmit_receive with write_size = 0
-    //    Under the hood this issues: START → (addr << 1) | READ → read 2 bytes → STOP
-    esp_err_t err = i2c_master_transmit_receive(
-        dev_handle,  // handle from i2c_master_bus_add_device()
-        nullptr,     // no write-phase
-        0,           // write_size = 0
-        buf,         // read_buffer
-        sizeof(buf), // read_size = 2
-        100          // timeout = 100 ms
-    );
-
-    if (err != ESP_OK)
-    {
-        return err;
-    }
-
-    // 3) Reconstruct little-endian uint16_t
-    uint16_t value = static_cast<uint16_t>(buf[0]) |
-                     static_cast<uint16_t>(buf[1]) << 8;
-
-    return value;
 }

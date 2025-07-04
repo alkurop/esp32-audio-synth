@@ -11,7 +11,9 @@
                 "${config:idf.espAdfPath}/components/**",
                 "${config:idf.espAdfPathWin}/components/**",
                 "${workspaceFolder}/**",
-                "/Users/alex/esp/v5.4/esp-idf/components/freertos/FreeRTOS-Kernel/include"
+                "${workspaceFolder}/common/**",
+                "/Users/alex/esp/v5.4/esp-idf/components/newlib/platform_include",
+                "/Users/alex/esp/v5.4/esp-idf/components/newlib/platform_include"
             ],
             "browse": {
                 "path": [
@@ -19,11 +21,13 @@
                     "${config:idf.espIdfPathWin}/components",
                     "${config:idf.espAdfPath}/components/**",
                     "${config:idf.espAdfPathWin}/components/**",
-                    "${workspaceFolder}"
+                    "${workspaceFolder}",
+                    "${workspaceFolder}/common"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
             "compilerPath": "${config:idf.toolsPath}/tools/xtensa-esp-elf/esp-14.2.0_20241119/xtensa-esp-elf/bin/xtensa-esp32s3-elf-gcc"
+
         }
     ],
     "version": 4

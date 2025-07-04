@@ -40,11 +40,8 @@ void MidiParser::feed(const uint8_t packet[4])
             break;
 
         case MidiMessageType::NoteOn:
-            parseNoteMessage(packet, true);
-            break;
-
         case MidiMessageType::NoteOff:
-            parseNoteMessage(packet, false);
+            parseNoteMessage(packet);
             break;
 
         default:
@@ -96,20 +93,12 @@ void MidiParser::parseSongPosition(const uint8_t packet[4])
     }
 }
 
-void MidiParser::parseNoteMessage(const uint8_t packet[4], bool on)
+void MidiParser::parseNoteMessage(const uint8_t packet[4])
 {
-    uint8_t status = packet[1];
-    uint8_t channel = status & 0x0F;
-
-    NoteMessage msg;
-    msg.channel = channel;
-    msg.note = packet[2];
-    msg.velocity = packet[3];
-    msg.on = on && msg.velocity > 0;
 
     if (noteMessageCallback)
     {
-        noteMessageCallback(msg);
+        noteMessageCallback(parseMidiNoteEvent(packet));
     }
 }
 

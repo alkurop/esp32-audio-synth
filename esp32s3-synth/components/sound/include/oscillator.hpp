@@ -26,7 +26,7 @@ namespace sound_module
 
         /// Generate and return one sample at the current phase;
         /// returns zero if inactive
-        IRAM_ATTR float getSample();
+        float getSample();
 
         /// Configuration setters
         void setShape(protocol::OscillatorShape newShape);

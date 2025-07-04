@@ -1,16 +1,15 @@
 #pragma once
-#include <cstdint>
+
 #include "audio_config.hpp"
 #include "menu_struct.hpp"
+#include "events.hpp"
 
+using namespace midi_module;
 namespace protocol
 {
-    constexpr const uint8_t RECEIVER_ARRDESS = 0x28;
-    constexpr const uint32_t i2c_frequency = 100 * 1000;
-    constexpr const uint32_t I2C_CLOCK_SPEED = i2c_frequency;
-    
-    static constexpr int8_t AUTOSAVE_SLOT = -1;
 
+
+    static constexpr int8_t AUTOSAVE_SLOT = -1;
 
     template <class... Ts>
     struct overloaded : Ts...
@@ -27,12 +26,26 @@ namespace protocol
         int16_t value;
     };
 
-    using FieldUpdateList = std::vector<FieldUpdate>;
-    using UpdateCallback = std::function<void(FieldUpdateList)>;
-
     struct IncomingMessage
     {
         uint8_t *buffer;
         size_t length;
     };
+
+    enum class EventType : uint8_t
+    {
+        MidiNote = 0x01,
+        FieldUpdate = 0x02
+    };
+    using FieldUpdateList = std::vector<FieldUpdate>;
+    struct Event
+    {
+        EventType type;
+        MidiNoteEvent note;     // valid if type==MidiNote
+        FieldUpdateList fields; // valid if type==FieldUpdate
+    };
+
+    using EventList = std::vector<Event>;
+    using UpdateCallback = std::function<void(EventList)>;
+    using FieldUpdateCallback = std::function<void(FieldUpdateList)>;
 }

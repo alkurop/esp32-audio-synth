@@ -56,7 +56,7 @@ namespace sound_module
         void process();
 
         // MIDI input handler
-        void handle_note(const midi_module::NoteMessage &msg);
+        void handle_note(const midi_module::MidiNoteEvent &msg);
 
         // Access voices for advanced control
         std::vector<Voice> &getVoices() { return voices; }

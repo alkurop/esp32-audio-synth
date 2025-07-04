@@ -38,8 +38,7 @@ namespace protocol
     public:
         explicit Sender(const SenderConfig &config);
         esp_err_t init();
-        esp_err_t send(const FieldUpdateList &updates);
-        std::variant<FieldUpdate, esp_err_t> receiveBpm();
+        esp_err_t send(const EventList &updates);
     };
 
 }

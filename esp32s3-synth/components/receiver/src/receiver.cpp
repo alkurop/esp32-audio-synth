@@ -48,21 +48,9 @@ static bool IRAM_ATTR i2c_slave_receive_cb(
     return false;
 }
 
-bool IRAM_ATTR i2c_slave_request_cb(i2c_slave_dev_handle_t i2c_slave, const i2c_slave_request_event_data_t *evt_data, void *arg)
-{
-    Receiver *self = static_cast<Receiver *>(arg);
-    auto evt = 0;
-    BaseType_t hpTaskWoken = pdFALSE;
-    xQueueSendFromISR(self->sendQueue, &evt, &hpTaskWoken);
-    if (hpTaskWoken)
-        portYIELD_FROM_ISR();
-    return false;
-}
-
-esp_err_t Receiver::init(UpdateCallback updateCallback, BpmCallback bpmCallback)
+esp_err_t Receiver::init(UpdateCallback updateCallback)
 {
     this->callback = updateCallback;
-    this->bpmCallback = bpmCallback;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
@@ -72,8 +60,8 @@ esp_err_t Receiver::init(UpdateCallback updateCallback, BpmCallback bpmCallback)
         .sda_io_num = config.sda_pin,
         .scl_io_num = config.scl_pin,
         .clk_source = I2C_CLK_SRC_DEFAULT,
-        .send_buf_depth = 2000,
-        .receive_buf_depth = 2000,
+        .send_buf_depth = 4000,
+        .receive_buf_depth = 4000,
         .slave_addr = config.receiver_address,
         .flags = {.enable_internal_pullup = false}
 
@@ -89,7 +77,7 @@ esp_err_t Receiver::init(UpdateCallback updateCallback, BpmCallback bpmCallback)
     }
 
     i2c_slave_event_callbacks_t cbs = {
-        .on_request = i2c_slave_request_cb,
+        .on_request = nullptr,
         .on_receive = i2c_slave_receive_cb,
     };
 
@@ -104,7 +92,6 @@ esp_err_t Receiver::init(UpdateCallback updateCallback, BpmCallback bpmCallback)
 
     ESP_LOGI("Receiver", "I2C slave initialized on port %d", config.i2c_port);
     receiveQueue = xQueueCreate(8, sizeof(FieldUpdateList *));
-    sendQueue = xQueueCreate(8, sizeof(uint8_t));
 
     if (!receiveQueue)
     {
@@ -112,10 +99,8 @@ esp_err_t Receiver::init(UpdateCallback updateCallback, BpmCallback bpmCallback)
         return ESP_ERR_NO_MEM;
     }
     xTaskCreatePinnedToCore([](void *arg)
-                            { static_cast<Receiver *>(arg)->receiveTask(); }, "receiver_rx", 4096, this, 5, &receiveTaskHandle, 0); // Core 1
+                            { static_cast<Receiver *>(arg)->receiveTask(); }, "receiver_rx", 8192, this, 5, &receiveTaskHandle, 1); // Core 1
 
-    xTaskCreatePinnedToCore([](void *arg)
-                            { static_cast<Receiver *>(arg)->sendTask(); }, "receiver_tx", 4096, this, 5, &sendTaskHandle, 0); // Core 1
     return ESP_OK;
 }
 
@@ -130,53 +115,14 @@ void Receiver::receiveTask()
             if (msg && msg->buffer)
             {
                 // ⛳ Deserialization happens here!
-                FieldUpdateList updates = protocol::deserializeFieldUpdates(msg->buffer, msg->length);
+                EventList events = protocol::deserializeEvents(msg->buffer, msg->length);
                 // 👇 User-defined callback gets parsed data
-                callback(updates);
+                callback(events);
                 heap_caps_free(msg->buffer);
                 delete msg;
             }
         }
         // optional: yield for scheduling fairness
         vTaskDelay(1);
-    }
-}
-
-void Receiver::sendTask()
-{
-    for (;;)
-    {
-        uint8_t evt;
-        if (xQueueReceive(sendQueue, &evt, pdMS_TO_TICKS(10)) == pdTRUE && bpmCallback)
-        {
-            // 1) Get the latest signed 16-bit BPM
-            int16_t bpm = bpmCallback();
-
-            // 2) Pack it into a 2-byte little-endian array
-            uint8_t data_buffer[2];
-            data_buffer[0] = static_cast<uint8_t>(bpm & 0xFF);        // LSB
-            data_buffer[1] = static_cast<uint8_t>((bpm >> 8) & 0xFF); // MSB
-
-            // 3) Declare write_len as uint32_t to match i2c_slave_write’s prototype
-            uint32_t write_len = 0;
-            esp_err_t err = i2c_slave_write(
-                device,              // i2c_slave_dev_handle_t
-                data_buffer,         // pointer to our 2-byte payload
-                sizeof(data_buffer), // = 2
-                &write_len,          // now uint32_t*
-                1000                 // timeout in ms
-            );
-
-            if (err != ESP_OK)
-            {
-                ESP_LOGE(TAG, "Write to master failed with code %d", err);
-            }
-            else if (write_len != sizeof(data_buffer))
-            {
-                ESP_LOGE(TAG, "Write to master failed with wrong size");
-            }
-        }
-        // Loop again if no event arrived in 10 ticks
-        
     }
 }

@@ -12,7 +12,6 @@
 namespace protocol
 {
 
-    using BpmCallback = std::function<int16_t()>;
     struct ReceiverConfig
     {
         gpio_num_t sda_pin;       ///< I2C SDA pin
@@ -27,18 +26,14 @@ namespace protocol
         ReceiverConfig config;
         bool isConnected;
         UpdateCallback callback;
-        BpmCallback bpmCallback;
         i2c_slave_dev_handle_t device;
 
     public:
         explicit Receiver(const ReceiverConfig &config) : config(config) {}
-        esp_err_t init(UpdateCallback updateCallback, BpmCallback BpmCallback);
+        esp_err_t init(UpdateCallback updateCallback);
         QueueHandle_t receiveQueue = nullptr;
-        QueueHandle_t sendQueue = nullptr;
         TaskHandle_t receiveTaskHandle = nullptr;
-        TaskHandle_t sendTaskHandle = nullptr;
         void receiveTask();
-        void sendTask();
     };
 
 }

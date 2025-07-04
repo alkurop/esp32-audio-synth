@@ -6,7 +6,7 @@ file(GLOB_RECURSE MENU_SRCS
 idf_component_register(
     SRCS ${MENU_SRCS}
     INCLUDE_DIRS "include"
-    REQUIRES 
+    REQUIRES  log
 )
 
 

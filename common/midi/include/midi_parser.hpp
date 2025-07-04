@@ -5,47 +5,14 @@
 #include <esp_timer.h>
 #include <esp_log.h>
 #include "bpm_counter.hpp"
+#include "events.hpp"
 
 namespace midi_module
 {
-    struct ControllerChange
-    {
-        uint8_t channel;    // MIDI channel (0–15)
-        uint8_t controller; // Controller number (e.g. 1 = mod wheel)
-        uint8_t value;      // Value (0–127)
-    };
 
-    using MidiControllerCallback = std::function<void(const ControllerChange &)>;
-
-    struct SongPosition
-    {
-        uint16_t position; // Position in MIDI beats (16th notes)
-    };
+    using MidiNoteCallback = std::function<void(const MidiNoteEvent &)>;
     using MidiSongPositionCallback = std::function<void(const SongPosition &)>;
-
-    struct NoteMessage
-    {
-        uint8_t channel;  // MIDI channel (0–15)
-        bool on;          // true = Note On, false = Note Off
-        uint8_t note;     // MIDI note number (0–127)
-        uint8_t velocity; // Velocity or release velocity
-    };
-
-    using MidiNoteMessageCallback = std::function<void(const NoteMessage &)>;
-
-    enum class TransportCommand : uint8_t
-    {
-        Start = 0xFA,
-        Continue = 0xFB,
-        Stop = 0xFC,
-        Unknown = 0x00
-    };
-
-    struct TransportEvent
-    {
-        TransportCommand command;
-    };
-
+    using MidiControllerCallback = std::function<void(const ControllerChange &)>;
     using MidiTransportCallback = std::function<void(const TransportEvent &)>;
 
     class MidiParser
@@ -53,13 +20,13 @@ namespace midi_module
     private:
         MidiControllerCallback controllerCallback;
         MidiSongPositionCallback songPositionCallback;
-        MidiNoteMessageCallback noteMessageCallback;
+        MidiNoteCallback noteMessageCallback;
         MidiTransportCallback transportCallback;
         BpmCounter bpmCounter;
 
         void parseControllerChange(const uint8_t packet[4]);
         void parseSongPosition(const uint8_t packet[4]);
-        void parseNoteMessage(const uint8_t packet[4], bool on);
+        void parseNoteMessage(const uint8_t packet[4]);
         void parseTransportCommand(const uint8_t packet[4]);
         void parseTimingClock(const uint8_t packet[4]); // new use of BpmCounter
 
@@ -72,7 +39,7 @@ namespace midi_module
         // Register callback for MIDI CC messages
         void setControllerCallback(MidiControllerCallback cb) { this->controllerCallback = cb; };
         void setSongPositionCallback(MidiSongPositionCallback cb) { this->songPositionCallback = cb; };
-        void setNoteMessageCallback(MidiNoteMessageCallback cb) { this->noteMessageCallback = cb; };
+        void setNoteMessageCallback(MidiNoteCallback cb) { this->noteMessageCallback = cb; };
         void setTransportCallback(MidiTransportCallback cb) { this->transportCallback = cb; };
         void setBpmCallback(BpmCounter::BpmCallback callback) { this->bpmCounter.setCallback(callback); };
     };

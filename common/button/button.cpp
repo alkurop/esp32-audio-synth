@@ -1,4 +1,5 @@
 #include "button.hpp"
+
 using namespace ui;
 const constexpr char *TAG{"Button module"};
 

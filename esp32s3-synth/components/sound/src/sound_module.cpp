@@ -64,23 +64,23 @@ void SoundModule::init()
             this,
             configMAX_PRIORITIES - 1,
             &audioTask,
-            1 // core 1
+            0 // core 1
         );
     }
 }
 
-void SoundModule::handle_note(const NoteMessage &msg)
+void SoundModule::handle_note(const MidiNoteEvent &msg)
 {
     std::lock_guard<std::mutex> lock(activeOscillatorsMutex); // 🔒 lock
 
     for (auto &voice : voices)
     {
-        if (msg.on)
+        if (msg.isNoteOn())
         {
             auto *activeSound = allocateSound();
             if (activeSound)
             {
-                voice.noteOn(activeSound, msg.channel, msg.note, msg.velocity);
+                voice.noteOn(activeSound, msg.channel(), msg.note, msg.velocity);
                 // ESP_LOGI(TAG, "Handle note");
             }
             else
@@ -88,18 +88,17 @@ void SoundModule::handle_note(const NoteMessage &msg)
                 ESP_LOGI(TAG, "All sound are taken");
             }
         }
-        else
-            voice.noteOff(msg.channel, msg.note);
+        else if (msg.isNoteOff())
+            voice.noteOff(msg.channel(), msg.note);
     }
 }
 IRAM_ATTR void SoundModule::process()
 {
     size_t num_samples = config.bufferSize;
 
-    float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
     {
         std::lock_guard<std::mutex> lock(activeOscillatorsMutex); // 🔒 protect voices
-
+        float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
         for (size_t i = 0; i < num_samples; ++i)
         {
             float mixLeft = 0.0f;
