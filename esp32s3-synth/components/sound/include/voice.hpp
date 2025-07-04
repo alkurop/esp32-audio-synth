@@ -12,10 +12,13 @@
 #include "filter.hpp"
 #include "protocol.hpp"
 #include "stereo.hpp"
+#include "smoothed_gain.hpp"
 
 using namespace protocol;
 namespace sound_module
 {
+
+ 
 
     /**
      * Voice: manages polyphonic Sounds with a shared ADSR envelope.
@@ -74,12 +77,11 @@ namespace sound_module
         size_t midi_channel = 0;
         uint16_t bpm;
 
-        float ampLfoSmoothed = 1.0f;              
-        static constexpr float AMP_ALPHA = 0.003f; // tweak  
+        float ampLfoSmoothed = 1.0f;
+        static constexpr float AMP_ALPHA = 0.003f; // tweak
         static constexpr float pitchLfoDepth = 200.0f;
 
-
-        voice::VolumeSettings volumeSettings;
+        VolumeSettings volumeSettings;
         voice::EnvelopeSettings envelopeSettings;
         voice::OscillatorSettings oscillatorSettings;
 

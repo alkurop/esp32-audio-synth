@@ -23,32 +23,6 @@ namespace protocol
         constexpr float MIN_DB = -60.0f;
         constexpr float MAX_DB = 0.0f;
 
-        struct SmoothedValue
-        {
-            float current = 0.0f; // the value we actually output each sample
-            float target = 0.0f;  // the “destination” value we want to reach
-            float alpha = 0.002f; // smoothing coefficient (controls ramp speed)
-
-            // Call this whenever you want to change the parameter (e.g. volume)
-            void setTarget(float newTarget)
-            {
-                target = newTarget;
-            }
-
-            // Call this once per audio sample to step `current` toward `target`.
-            float next()
-            {
-                current += alpha * (target - current);
-                return current;
-            }
-        };
-
-        struct VolumeSettings
-        {
-            uint8_t volume;
-            SmoothedValue gain_smoothed;
-        };
-
         struct OscillatorSettings
         {
             protocol::OscillatorShape shape;

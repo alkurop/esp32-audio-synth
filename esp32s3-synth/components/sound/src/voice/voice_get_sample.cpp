@@ -15,7 +15,7 @@ static const char *TAG = "Voice";
 
 Stereo Voice::getSample()
 {
-    // 0) Master gain smoothing
+    // 0) Voice gain smoothing
     float sm_gain = volumeSettings.gain_smoothed.next();
     if (sm_gain <= 1e-6f || activeOscillators.size() == 0)
         return Stereo{0.0f, 0.0f};
