@@ -7,7 +7,7 @@
 static constexpr char *TAG = "Receiver";
 using namespace protocol;
 
-static bool IRAM_ATTR i2c_slave_receive_cb(
+static bool i2c_slave_receive_cb(
     i2c_slave_dev_handle_t i2c_slave,
     const i2c_slave_rx_done_event_data_t *evt_data,
     void *arg)

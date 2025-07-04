@@ -9,7 +9,6 @@
 #include <driver/gpio.h>
 #include <driver/i2s_std.h>
 #include "voice.hpp"
-#include "midi_parser.hpp"
 #include "menu_struct.hpp"
 #include "oscillator.hpp"
 #include "cached_lfo.hpp"

@@ -2,7 +2,6 @@
 #include "sound_module.hpp"
 #include "protocol.hpp"
 #include "menu_struct.hpp"
-#include "midi_parser.hpp"
 #include <cstdint>
 
 using namespace protocol;

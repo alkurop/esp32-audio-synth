@@ -4,6 +4,7 @@
 #include <driver/i2s_std.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <esp_timer.h>
 #include "sound_module.hpp"
 
 using namespace sound_module;

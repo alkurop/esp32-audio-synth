@@ -1,5 +1,4 @@
 #pragma once
-#include "midi_module.hpp"
 #include "sound_module.hpp"
 #include "receiver.hpp"
 #include "protocol.hpp"

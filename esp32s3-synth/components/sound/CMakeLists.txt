@@ -6,7 +6,7 @@ file(GLOB_RECURSE SRC
 idf_component_register(
     SRCS ${SRC}
     INCLUDE_DIRS "include"
-    REQUIRES protocol sound midi driver envelope lfo lookup filter
+    REQUIRES protocol sound driver envelope lfo lookup filter esp_timer
 )
 
 

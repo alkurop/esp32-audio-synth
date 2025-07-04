@@ -2,13 +2,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include <esp_log.h>
-#include "synth_config.hpp"
 #include "sound_module.hpp"
 #include "protocol.hpp"
 #include "receiver.hpp"
 #include "knob.hpp"
 #include "setting_router.hpp"
 #include "cached_lfo.hpp"
+#include "synth_config.hpp"
 
 using namespace midi_module;
 using namespace sound_module;
