@@ -16,8 +16,8 @@ namespace protocol
         {
             .label = "Oct",
             .type = FieldType::Range,
-            .min = -2,
-            .max = 2,
+            .min = -3,
+            .max = 3,
             .opts = nullptr,
             .optCount = 0,
             .defaultValue = 0,

@@ -1,5 +1,6 @@
 #pragma once
 #include "field_type.hpp"
+#include "audio_config.hpp"
 
 namespace protocol
 {
@@ -13,12 +14,7 @@ namespace protocol
         _Count
     };
 
-    namespace global_settings
-    {
-        constexpr const uint16_t INITIAL_BMP = 120;
-    };
-
-    static constexpr FieldInfo bpmInfo[] = {
+       static constexpr FieldInfo bpmInfo[] = {
         {
             .label = "Sync",
             .type = FieldType::Options,
@@ -36,7 +32,7 @@ namespace protocol
             .max = 300,
             .opts = nullptr,
             .optCount = 0,
-            .defaultValue = global_settings::INITIAL_BMP,
+            .defaultValue = BPM_DEFAULT,
             .increment = 1,
         },
     };

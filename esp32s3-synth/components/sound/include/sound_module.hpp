@@ -44,7 +44,7 @@ namespace sound_module
         midi_module::TransportCommand transportState;
         uint8_t masterVolume = 0;
         uint16_t midiBpm = 0;
-        uint16_t settingsBpm = protocol::global_settings::INITIAL_BMP;
+        uint16_t settingsBpm = protocol::BPM_DEFAULT;
         bool isSynced = false;
     };
 
