@@ -5,18 +5,20 @@ const constexpr char *TAG{"Button module"};
 
 static void buttonSender(void *arg)
 {
-    auto button = static_cast<Button *>(arg);
-    while (1)
-    {
-        vTaskSuspend(button->handle);
-        button->ping();
+ auto b = static_cast<Button*>(arg);
+    for (;;) {
+        // one context switch: ISR → this task via notification
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        b->ping();
     }
 }
 
 IRAM_ATTR void ButtonHandler::button_handler(void *arg)
 {
     auto button = static_cast<Button *>(arg);
-    xTaskResumeFromISR(button->handle);
+    BaseType_t woke = pdFALSE;
+    vTaskNotifyGiveFromISR(button->handle, &woke);
+    portYIELD_FROM_ISR(woke);
 };
 
 esp_err_t Button::init(gpio_num_t pin, uint8_t number, ButtonListener listener)

@@ -61,7 +61,7 @@ void SoundModule::init()
         xTaskCreatePinnedToCore(
             audio_task_entry,
             "audio_task",
-            8192,
+            8192 * 16,
             this,
             configMAX_PRIORITIES - 1,
             &audioTask,

@@ -91,3 +91,4 @@ RotaryConfig cfg3 = {
     .pin_dt = ROTARY3_DT,
     .increment = 1,
     .wrapAround = false};
+

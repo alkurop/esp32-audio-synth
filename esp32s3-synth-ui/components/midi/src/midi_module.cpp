@@ -66,7 +66,7 @@ void MidiModule::init(MidiReadCallback readCallback)
   esp_tusb_init_console(TINYUSB_CDC_ACM_0); // log to usb
 
   xTaskCreatePinnedToCore(midiReader, "midiReader", 4 * 1024, this,
-                          configMAX_PRIORITIES - 2, &handle, 1);
+                          configMAX_PRIORITIES - 2, &handle, 0);
 };
 
 void MidiModule::sendValue(uint8_t program, uint8_t value)

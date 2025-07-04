@@ -8,7 +8,6 @@
 #include <esp_sleep.h>
 #include <driver/gpio.h>
 
-
 #define BUTTON_DEBOUNCE_MILLIS_ON 40
 #define BUTTON_DEBOUNCE_MILLIS_OFF 60
 

@@ -2,6 +2,7 @@
 #include "protocol.hpp"
 #include "sine_table.hpp"
 #include "saw_tooth_table.hpp"
+#include "noise_table.hpp"
 #include "triangle_table.hpp"
 #include "square_table.hpp"
 #include "lookup.hpp"
@@ -76,7 +77,7 @@ IRAM_ATTR float Oscillator::getSample()
         case protocol::OscillatorShape::Tri:
             return interpolateLookup(phase, triangleTable);
         case protocol::OscillatorShape::Noise:
-            return 2.0f * (static_cast<float>(std::rand()) / RAND_MAX) - 1.0f;
+            return interpolateLookup(phase, noiseTable);
         default:
             return 0.0f;
         }
