@@ -41,8 +41,14 @@ auto updateCallback = [](const EventList &events)
         {
             ESP_LOGD(TAG, "Midi note in: %d %d %d %d ", e.note.isNoteOn(), e.note.note, e.note.status, e.note.velocity);
             soundModule.handle_note(e.note);
+            break;
         }
-        break;
+        case protocol::EventType::BpmFromMidi:
+        {
+            settingSwitch.setBpmFromMidi(e.midiBpm);
+            ESP_LOGD(TAG, "Midi bpm in: %d ", e.midiBpm);
+            break;
+        }
         }
     }
 };

@@ -239,5 +239,5 @@ extern "C" void app_main()
         // overwrite any pending state so we only keep the latest
         xQueueOverwrite(menuRenderQueue, &state); }, updateCallback);
 
-    // initMidi();
+    initMidi();
 }
