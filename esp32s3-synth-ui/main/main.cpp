@@ -15,6 +15,8 @@
 #include "config.hpp"
 #include "sender.hpp"
 #include "midi_module.hpp"
+#include "create_send_events.hpp"
+#include "render.hpp"
 
 using namespace ui;
 using namespace menu;
@@ -31,6 +33,8 @@ Rotary rotary2(cfg2);
 Rotary rotary3(cfg3);
 Rotary *encoders[ENCODER_COUNT] = {&rotary0, &rotary1, &rotary2, &rotary3};
 
+RenderTaskCtx renderTaskContext = {.display = &display, .encoders = encoders, .encoderCount = ENCODER_COUNT};
+
 Button button0;
 Button button1;
 Button button2;
@@ -39,172 +43,56 @@ Sender sender(senderConfig);
 
 Menu menuHolder(protocol::NUM_VOICES);
 
-// MIDI packet callback
-MidiReadCallback midiReadCallback = [](const uint8_t packet[4])
-{
-    midiParser.feed(packet);
-};
+auto midiReadCallback = [](const uint8_t packet[4])
+{ midiParser.feed(packet); };
 
-// MIDI event callbacks
-MidiControllerCallback controllerCallback = [](const ControllerChange &cc)
+auto controllerCallback = [](const ControllerChange &cc)
 {
     // handle CC as needed
 };
 
-MidiNoteCallback noteMessageCallback = [](const MidiNoteEvent &note)
+auto noteMessageCallback = [](const MidiNoteEvent &note)
 {
-    EventList events;
-    events.reserve(1);
-    protocol::Event e;
-    e.type = protocol::EventType::MidiNote;
-    e.note = note;
-    events.push_back(e);
-    auto result = sender.send(events);
-    if (result != ESP_OK)
-    {
-        ESP_LOGE(TAG, "sending falied with code %d", result);
-    }
+    auto events = createNoteEventList(note);
+    sender.send(events);
 };
 
 MidiSongPositionCallback songPositionCallback = [](const SongPosition &sp)
 { ESP_LOGI(TAG, "Song Position: %d", sp.position); };
 
 MidiTransportCallback transportCallback = [](const TransportEvent &ev)
-{
-    ESP_LOGI(TAG, "transport Position: %d", static_cast<int>(ev.command));
-};
+{ ESP_LOGI(TAG, "transport Position: %d", static_cast<int>(ev.command)); };
 
 auto bpmCallback = [](uint16_t bpm)
 {
-    ESP_LOGI(TAG, "bpm: %d", bpm);
-    EventList events;
-    events.reserve(1);
-    protocol::Event e;
-    e.type = protocol::EventType::BpmFromMidi;
-    e.midiBpm = bpm;
-    events.push_back(e);
-    auto result = sender.send(events);
-    if (result != ESP_OK)
-    {
-        ESP_LOGE(TAG, "sending falied with code %d", result);
-    }
+    auto events = createBpmEventList(bpm);
+    sender.send(events);
 };
 
 auto rotaryCallback = [](uint8_t id, int16_t newValue)
-{
-    menuHolder.rotateKnob(id, newValue);
-};
+{ menuHolder.rotateKnob(id, newValue); };
 
-auto left = [](uint8_t number, bool state)
-{
-    if (state)
-    {
-        menuHolder.exitPage();
-        ESP_LOGI(TAG, "Button left");
-    }
-};
-auto right = [](uint8_t number, bool state)
-{
-    if (state)
-    {
-        menuHolder.enterMenuPage();
-        ESP_LOGI(TAG, "Button right");
-    }
-};
-auto up = [](uint8_t number, bool state)
-{
-    if (!state)
-        return;
-    ESP_LOGI(TAG, "Button up");
-};
-auto down = [](uint8_t number, bool state)
-{
-    if (!state)
-        return;
-    ESP_LOGI(TAG, "Button down");
-};
+auto left = [](uint8_t number, bool pressed)
+{ if (pressed) menuHolder.exitPage(); };
 
-static QueueHandle_t menuRenderQueue = nullptr;
-static void render_task(void *arg)
-{
-    auto disp = static_cast<Display *>(arg);
-    MenuState st;
+auto right = [](uint8_t number, bool pressed)
+{ if (pressed) menuHolder.enterMenuPage(); };
 
-    ESP_LOGI(TAG, "Render task running on core %d", xPortGetCoreID());
-    for (;;)
-    {
-        // wait forever for a new state
-        if (xQueueReceive(menuRenderQueue, &st, portMAX_DELAY) == pdTRUE)
-        {
-            for (int i = 0; i < ENCODER_COUNT; i++)
-            {
-                updateEncoder(encoders[i], st.encoderRanges[i]);
-            }
-            // draw according to mode
-            switch (st.mode)
-            {
-            case AppMode::MenuList:
-                disp->renderMenuList(st);
-                break;
-            case AppMode::Page:
-                disp->renderMenuPage(st);
-                break;
-            case AppMode::Popup:
-                disp->renderPopup(st);
-                break;
-            case AppMode::Loading:
-                disp->renderLoading();
-            default:
-                break;
-            }
-        }
-    }
-}
+auto up = [](uint8_t number, bool pressed)
+{ ESP_LOGI(TAG, "Button up"); };
 
-void createMenuRenderTask()
-{
-    // — Create a 1‐element queue and start render_task on core 1
-    menuRenderQueue = xQueueCreate(1, sizeof(menu::MenuState));
-    configASSERT(menuRenderQueue);
-
-    BaseType_t ok = xTaskCreatePinnedToCore(
-        render_task,              // task function
-        "menu_render_task",       // name
-        RENDER_TASK_STACK,        // stack (bytes)
-        &display,                 // arg (SSD1306*)
-        configMAX_PRIORITIES - 1, // priority
-        nullptr,                  // no handle needed
-        1                         // pin to core 1
-    );
-    configASSERT(ok == pdPASS);
-}
+auto down = [](uint8_t number, bool pressed)
+{ ESP_LOGI(TAG, "Button down"); };
 
 auto updateCallback = [](const FieldUpdateList &updates)
 {
-    // 1) Wrap the updates in our tagged Event
-    protocol::Event e;
-    e.type = protocol::EventType::FieldUpdate;
-    e.fields = updates;
-
-    // 2) Make a one‐element EventList
-    EventList events;
-    events.reserve(1);
-    events.push_back(std::move(e));
-
-    // 3) Send it
-    auto result = sender.send(events);
-    if (result != ESP_OK)
-    {
-        ESP_LOGE(TAG, "sending falied with code %d", result);
-    }
+    auto events = createFileUpdateEventList(updates);
+    sender.send(events);
 };
 
 void initMidi()
 {
-    // // // Initialize modules
     midiModule.init(midiReadCallback);
-
-    // Set MIDI parser callbacks
     midiParser.setControllerCallback(controllerCallback);
     midiParser.setNoteMessageCallback(noteMessageCallback);
     midiParser.setSongPositionCallback(songPositionCallback);
@@ -233,7 +121,7 @@ extern "C" void app_main()
     display.renderLoading();
     // wait until we start sending I2C data
     vTaskDelay(pdMS_TO_TICKS(1000));
-    createMenuRenderTask();
+    createMenuRenderTask(&renderTaskContext);
     menuHolder.init([](const MenuState &state)
                     {
         // overwrite any pending state so we only keep the latest

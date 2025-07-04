@@ -42,7 +42,6 @@
 #define ROTARY3_DT GPIO_NUM_21
 
 #define ENCODER_COUNT 4
-#define RENDER_TASK_STACK 8 * 1024 // 8 KB
 
 using namespace ui;
 using namespace menu;
