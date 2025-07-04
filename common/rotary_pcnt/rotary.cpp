@@ -93,8 +93,8 @@ void Rotary::initGPIOInterrupt()
 }
 void Rotary::startTask()
 {
-    xTaskCreate([](void *arg)
-                { static_cast<Rotary *>(arg)->processEvents(); }, "rotary_task", 4096, this, 5, nullptr);
+    xTaskCreatePinnedToCore([](void *arg)
+                { static_cast<Rotary *>(arg)->processEvents(); }, "rotary_task", 4096, this, 5, nullptr,1);
 }
 
 void Rotary::processEvents()

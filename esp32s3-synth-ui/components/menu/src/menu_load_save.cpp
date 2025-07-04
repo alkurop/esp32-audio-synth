@@ -36,14 +36,14 @@ static void autoSaveTask(void *param)
 
 void Menu::initAutosaveTask()
 {
-    xTaskCreate(
+    xTaskCreatePinnedToCore(
         autoSaveTask,   // Task function
         "AutoSaveTask", // Name (for debugging)
         4096,           // Stack size (in words, 4KB here)
         this,           // Parameter to pass to the task
         1,              // Priority (low priority is good)
-        nullptr         // Task handle (optional, pass &handle if needed)
-    );
+        nullptr,        // Task handle (optional, pass &handle if needed),
+        1);
 }
 
 void Menu::loadVoice(uint8_t slotIndex)

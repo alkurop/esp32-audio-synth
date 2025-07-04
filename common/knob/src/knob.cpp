@@ -49,7 +49,7 @@ void Knob::init(MasterKnobCallback cb)
     //----------------------------------------
     // 3) Spawn the FreeRTOS “knob task”
     //----------------------------------------
-    BaseType_t rc = xTaskCreatePinnedToCore( knobTask, "MasterKnobTask", 4096, this, tskIDLE_PRIORITY + 1, &taskHandle, 0);
+    BaseType_t rc = xTaskCreatePinnedToCore( knobTask, "MasterKnobTask", 4096, this, tskIDLE_PRIORITY + 1, &taskHandle, 1);
     if (rc != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to create MasterKnobTask");

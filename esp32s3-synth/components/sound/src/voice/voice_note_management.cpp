@@ -20,7 +20,7 @@ Oscillator *Voice::find_note_to_release(uint8_t midi_note)
 // Note on: trigger new sound, retrigger LFOs, and envelope
 void Voice::noteOn(Oscillator *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity)
 {
-    if (ch != midi_channel)
+    if (ch != midi_channel || volumeSettings.volume == 0)
     {
         return;
     }
