@@ -118,3 +118,7 @@ bool Envelope::is_idle() const
 {
     return active == nullptr;
 }
+
+void Envelope::setToIdle(){
+    active = nullptr;
+}

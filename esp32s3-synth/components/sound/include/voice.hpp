@@ -18,8 +18,6 @@ using namespace protocol;
 namespace sound_module
 {
 
- 
-
     /**
      * Voice: manages polyphonic Sounds with a shared ADSR envelope.
      * Polyphony count and sample rate are specified at construction.
@@ -88,6 +86,8 @@ namespace sound_module
         std::vector<Oscillator *> activeOscillators;
 
         Oscillator *find_note_to_release(uint8_t midi_note); // can be a nullptr
+        
+        void garbageCollect();
 
         void all_notes_off();
     };

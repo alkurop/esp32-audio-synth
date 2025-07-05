@@ -24,14 +24,15 @@ void Voice::noteOn(Oscillator *sound, uint8_t ch, uint8_t midi_note, uint8_t vel
     {
         return;
     }
-
-    // 1. Skip if this note is already active
+    bool wasReset = false;
+    // 1. Reset if this note is already active
     for (auto *s : activeOscillators)
     {
         if (s->midi_note == midi_note && s->isNoteOn())
         {
-            ESP_LOGI(TAG, "Note is already playing – ignore new noteOn");
-            return;
+            s->reset();
+            wasReset = true;
+            // ESP_LOGI(TAG, "Note is already playing – reset");
         }
     }
 
@@ -43,9 +44,10 @@ void Voice::noteOn(Oscillator *sound, uint8_t ch, uint8_t midi_note, uint8_t vel
     sound->envelope.setRelease(envelopeSettings.release);
     float base_freq = midi_note_freq[midi_note];
     sound->noteOn(base_freq, velocity, midi_note);
-    activeOscillators.push_back(sound);
+    if (!wasReset)
+        activeOscillators.push_back(sound);
 
-    // ESP_LOGI(TAG, "Sound added to voice, new count %d", activeSounds.size());
+    ESP_LOGI(TAG, "Sound added to voice, new count %d", activeOscillators.size());
 }
 
 // Note off: release matching sound and envelope
@@ -68,5 +70,21 @@ void Voice::all_notes_off()
     {
         s->noteOff();
         s->envelope.gateOff();
+    }
+}
+
+void Voice::garbageCollect()
+{
+    for (auto it = activeOscillators.begin(); it != activeOscillators.end();)
+    {
+        Oscillator *sound = *it;
+        if (!sound->isPlaying())
+        {
+            it = activeOscillators.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
     }
 }

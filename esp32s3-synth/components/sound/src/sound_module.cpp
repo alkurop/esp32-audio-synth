@@ -84,10 +84,6 @@ void SoundModule::handle_note(const MidiNoteEvent &msg)
                 voice.noteOn(activeSound, msg.channel(), msg.note, msg.velocity);
                 // ESP_LOGI(TAG, "Handle note");
             }
-            else
-            {
-                ESP_LOGI(TAG, "All sound are taken");
-            }
         }
         else if (msg.isNoteOff())
             voice.noteOff(msg.channel(), msg.note);
@@ -136,7 +132,7 @@ void SoundModule::audio_task_entry(void *arg)
         int64_t elapsed_us = esp_timer_get_time() - start;
         // ESP_LOGI("AUDIO", "Process time: %lld us", elapsed_us);
         // esp_task_wdt_reset(); 👈 allows watchdog to breathe
-        taskYIELD();// 👈 allows watchdog to breathe
+        // taskYIELD(); // 👈 allows watchdog to breathe
     }
 }
 
@@ -160,6 +156,6 @@ Oscillator *SoundModule::allocateSound()
         if (!s.isPlaying())
             return &s;
     }
-    // All slots full
+    // No free sounds
     return nullptr;
 }

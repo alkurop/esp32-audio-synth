@@ -43,12 +43,14 @@ namespace sound_module
         bool isPlaying();
         bool isNoteOn();
         void reset();
+        uint64_t getTimestamp();
 
     private:
         bool active = false;          ///< true if currently playing
         const uint32_t sample_rate;   ///< samples per second
         float phase = 0.0f;           ///< oscillator phase [0,1)
         float phase_increment = 0.0f; ///< increment per sample
+        uint64_t note_on_timestamp_us;
         // Oscillator settings
         protocol::OscillatorShape shape = protocol::OscillatorShape::Sine;
         uint8_t pwm = 0;

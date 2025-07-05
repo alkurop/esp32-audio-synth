@@ -26,6 +26,7 @@ public:
 
     void gateOn();
     void gateOff();
+    void setToIdle();
 
     float next();
     bool is_idle() const;

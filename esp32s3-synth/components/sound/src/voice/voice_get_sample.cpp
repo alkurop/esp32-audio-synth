@@ -11,53 +11,38 @@
 using namespace sound_module;
 using namespace protocol;
 
-static const char *TAG = "Voice";
+#define TAG = "Voice";
 
 Stereo Voice::getSample()
 {
-    // 0) Voice gain smoothing
+    // 0) Always clean up first
+    garbageCollect();
+
+    // 1) If nothing left, bail out immediately
+    if (activeOscillators.empty())
+        return {0.0f, 0.0f};
+
+    // 2) Compute modulators
     float sm_gain = volumeSettings.gain_smoothed.next();
-    if (sm_gain <= 1e-6f || activeOscillators.size() == 0)
-        return Stereo{0.0f, 0.0f};
-
-    float ampMod = (ampLfoC.getValue() + 127.0f) / 254.0f; // Normalize to 0.0 … 1.0
-                                                           // 2) one‐pole IIR: new = α·raw + (1–α)·old
-    ampLfoSmoothed = AMP_ALPHA * ampMod + (1.0f - AMP_ALPHA) * ampLfoSmoothed;
-
-    float rawLfo = pitchLfoC.getValue();
-    float pitchLfoCents = rawLfo * (pitchLfoDepth / 127.0f);
-    float totalCents = pitchSettings.totalTransposeCents + pitchLfoCents;
+    float ampRaw = (ampLfoC.getValue() + 127.0f) / 254.0f;
+    ampLfoSmoothed = AMP_ALPHA * ampRaw + (1.0f - AMP_ALPHA) * ampLfoSmoothed;
+    float pitchRaw = pitchLfoC.getValue();
+    float pitchOffset = pitchRaw * (pitchLfoDepth / 127.0f);
+    float totalCents = pitchSettings.totalTransposeCents + pitchOffset;
     float pitchRatio = sound_module::centsToPitchRatio(totalCents);
 
-    // 3) Mix active sounds with pitch, amp, pan
+    // 3) Mix & step every remaining voice (all are playing)
     float mix = 0.0f;
-
-    for (auto iterator = activeOscillators.begin(); iterator != activeOscillators.end();)
+    for (auto *s : activeOscillators)
     {
-        Oscillator *sound = *iterator;
-
-        if (!sound->isPlaying())
-        {
-            iterator = activeOscillators.erase(iterator);
-            // ESP_LOGI(TAG, "Sound erased from voice, new count %d", activeSounds.size());
-            continue;
-        }
-
-        float modFreq = midi_note_freq[sound->midi_note] * pitchRatio;
-        sound->setFrequency(modFreq);
-
-        // float sample = sound->getSample() * sound->velNorm;
-        float sample = sound->getSample() * sound->velNorm * ampLfoSmoothed;
-
-        mix += sample;
-
-        ++iterator;
+        s->setFrequency(midi_note_freq[s->midi_note] * pitchRatio);
+        mix += s->getSample() * s->velNorm * ampLfoSmoothed;
     }
-    // 4) Filter
+
+    // 4) Filter + master gain
     mix = filter.process(mix) * sm_gain;
 
-    // 5) Final gain
-    return Stereo{mix, mix};
+    return {mix, mix};
 }
 
 void Voice::setVolume(uint8_t newVolume)

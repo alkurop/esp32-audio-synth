@@ -10,6 +10,7 @@
 #include <cstdlib>   // for std::rand, RAND_MAX
 #include "esp_log.h" // for std::rand, RAND_MAX
 #include <algorithm>
+#include "esp_timer.h" // for esp_timer_get_time()
 
 using namespace sound_module;
 using namespace protocol;
@@ -20,7 +21,9 @@ Oscillator::Oscillator(uint32_t sample_rate, uint16_t initial_bpm)
 
 void Oscillator::noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note_in)
 {
-    ESP_LOGD(TAG, "Sound trigger freq %f velocity %u note %u", frequency, velocity_in, midi_note);
+    note_on_timestamp_us = esp_timer_get_time();
+
+    // ESP_LOGD(TAG, "Sound trigger freq %f velocity %u note %u", frequency, velocity_in, midi_note);
     setVelocity(velocity_in);
     phase = 0.0f;
     active = true;
@@ -30,7 +33,7 @@ void Oscillator::noteOn(float frequency, uint8_t velocity_in, uint8_t midi_note_
 
 void Oscillator::noteOff()
 {
-    ESP_LOGD(TAG, "Sound release note %u", midi_note);
+    // ESP_LOGD(TAG, "Sound release note %u", midi_note);
     active = false;
     envelope.gateOff();
 }
@@ -121,3 +124,11 @@ bool Oscillator::isNoteOn()
 {
     return active;
 }
+
+void Oscillator::reset()
+{
+    noteOff();
+    envelope.setToIdle();
+}
+
+uint64_t Oscillator::getTimestamp() { return note_on_timestamp_us; };
