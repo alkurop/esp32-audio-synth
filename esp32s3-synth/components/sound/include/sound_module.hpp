@@ -41,7 +41,7 @@ namespace sound_module
     struct GlobalState
     {
         midi_module::TransportCommand transportState;
-        volatile uint8_t masterVolume = 0;
+        VolumeSettings volumeSettings = {};
         uint16_t midiBpm = 0;
         uint16_t settingsBpm = protocol::BPM_DEFAULT;
         bool isSynced = false;

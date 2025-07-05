@@ -107,7 +107,7 @@ void Oscillator::setPwm(uint8_t newPwm)
 
 void Oscillator::setVelocity(uint8_t velocity)
 {
-    velNorm = (static_cast<float>(velocity) / 127.0f) * VELOCITY_GLOBAL_SCALER;
+    velNorm = (static_cast<float>(velocity) / 127.0f);
 }
 
 void Oscillator::setBpm(uint16_t bpm)

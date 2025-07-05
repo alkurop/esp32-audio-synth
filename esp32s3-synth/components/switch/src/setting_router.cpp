@@ -1,5 +1,6 @@
 #include "setting_router.hpp"
 #include "set_page.hpp"
+#include "smoothed_gain.hpp"
 #include "esp_log.h"
 static constexpr char *TAG = "Settings Router";
 
@@ -7,9 +8,8 @@ using namespace settings;
 
 SettingRouter::SettingRouter(SoundModule &soundModule) : soundModule(soundModule) {};
 
-void SettingRouter::setMasterVolume(uint8_t volume)
-{
-    soundModule.getState().masterVolume = volume;
+void SettingRouter::setMasterVolume(uint8_t volume) {
+    setSmoothedGain(soundModule.getState().volumeSettings, volume, 255, MIN_DB);
 };
 
 void SettingRouter::setBpmFromMidi(uint16_t bpm)

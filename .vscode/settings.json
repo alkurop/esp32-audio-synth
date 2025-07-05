@@ -5,6 +5,9 @@
         "bitset": "cpp",
         "string_view": "cpp",
         "regex": "cpp",
-        "array": "cpp"
+        "array": "cpp",
+        "chrono": "cpp",
+        "random": "cpp",
+        "limits": "cpp"
     }
 }

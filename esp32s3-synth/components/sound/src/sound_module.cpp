@@ -95,9 +95,10 @@ IRAM_ATTR void SoundModule::process()
 
     {
         std::lock_guard<std::mutex> lock(activeOscillatorsMutex); // 🔒 protect voices
-        float volumeScale = static_cast<float>(state.masterVolume) / 255.0f;
         for (size_t i = 0; i < num_samples; ++i)
         {
+            float volumeScale = state.volumeSettings.gain_smoothed.next();
+
             float mixLeft = 0.0f;
             float mixRight = 0.0f;
 

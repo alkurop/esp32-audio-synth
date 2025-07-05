@@ -47,19 +47,5 @@ Stereo Voice::getSample()
 
 void Voice::setVolume(uint8_t newVolume)
 {
-    // Clamp to [0..MAX_VOLUME]
-    if (newVolume > voice::VOL_MAX)
-        newVolume = voice::VOL_MAX;
-    volumeSettings.volume = newVolume;
-
-    // 1) Normalize to [0..1]:
-    float normalized = static_cast<float>(volumeSettings.volume) / static_cast<float>(voice::VOL_MAX);
-
-    // 2) Map normalized → dB:
-    float volume_dB = voice::MIN_DB + normalized * (0.0f - voice::MIN_DB);
-
-    // 3) Convert dB → linear and feed into the smoother:
-    float linearGain = std::pow(10.0f, volume_dB * 0.05f);
-    // ESP_LOGD(TAG, "Linear gain %f Volume_db %f", linearGain, volume_dB);
-    volumeSettings.gain_smoothed.setTarget(linearGain);
+    setSmoothedGain(volumeSettings, newVolume, voice::VOL_MAX, MIN_DB);
 }

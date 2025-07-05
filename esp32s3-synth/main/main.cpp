@@ -25,6 +25,7 @@ Knob masterKnob(masterKnobConfig);
 
 auto masterKnobCallback = [](uint8_t value)
 {
+    ESP_LOGD(TAG, "master knob  : %u ", value);
     settingSwitch.setMasterVolume(value);
 };
 
