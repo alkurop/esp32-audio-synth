@@ -1,4 +1,6 @@
 #include "midi_module.hpp"
+#include "esp_log.h"
+
 #define TAG "MidiModule"
 
 using namespace midi_module;
@@ -9,24 +11,26 @@ static void midiReader(void *arg)
   uint8_t packet[4];
   bool read = false;
   for (;;)
-  {
-    vTaskDelay(1);
-    // Check if module is mounted
-    while (tud_midi_mounted())
     {
-      read = tud_midi_packet_read(packet);
-      // Try to read a MIDI packet.
-      if (read)
-      {
-        // If a packet is available, invoke the callback.
-        midiModule->readCallback(packet);
-      }
-      else
-      {
-        vTaskDelay(1);
-      }
+        // 1) Service TinyUSB so it can receive new USB packets
+        tud_task();
+
+        // 2) Only delay if the device isn’t mounted
+        if (!tud_midi_mounted()) {
+            vTaskDelay(pdMS_TO_TICKS(5));
+            continue;
+        }
+
+        // 3) Drain every pending packet in one go
+        while (tud_midi_available())  // returns count of pending packets :contentReference[oaicite:0]{index=0}
+        {
+            tud_midi_packet_read(packet);  // always succeeds inside this loop :contentReference[oaicite:1]{index=1}
+            midiModule->readCallback(packet);
+        }
+
+        // 4) Let other tasks run briefly before next poll
+        taskYIELD();
     }
-  }
 }
 
 MidiModule::MidiModule()
@@ -65,8 +69,8 @@ void MidiModule::init(MidiReadCallback readCallback)
   tinyusb_driver_install(&midi_config);
   esp_tusb_init_console(TINYUSB_CDC_ACM_0); // log to usb
 
-  xTaskCreate(midiReader, "midiReader", 4 * 1024, this,
-              configMAX_PRIORITIES - 1, &handle);
+  xTaskCreatePinnedToCore(midiReader, "midiReader", 8 * 1024, this,
+              configMAX_PRIORITIES - 1, &handle, 1);
 };
 
 void MidiModule::sendValue(uint8_t program, uint8_t value)

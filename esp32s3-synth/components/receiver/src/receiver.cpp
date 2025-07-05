@@ -122,7 +122,5 @@ void Receiver::receiveTask()
                 delete msg;
             }
         }
-        // optional: yield for scheduling fairness
-        vTaskDelay(1);
     }
 }

@@ -57,16 +57,16 @@ esp_err_t Sender::init()
 void Sender::startSendTask()
 {
     // create a queue that holds EventList objects
-    queue = xQueueCreate(128, sizeof(EventList *));
+    queue = xQueueCreate(64, sizeof(EventList *));
     // spawn the worker on Core 0, passing `this` as the parameter
     xTaskCreatePinnedToCore(
         taskEntry,
         "SenderTask",
         8 * 1024,
         this, // pvParameters
-        tskIDLE_PRIORITY + 1,
+        configMAX_PRIORITIES - 1,
         &taskHandle,
-        0 // core 0
+        0
     );
 }
 
@@ -82,7 +82,6 @@ void Sender::taskEntry(void *pv)
             self->doSend(*evPtr);
             delete evPtr; // clean up
         }
-        vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
 

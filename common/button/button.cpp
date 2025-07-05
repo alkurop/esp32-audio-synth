@@ -1,12 +1,14 @@
 #include "button.hpp"
+#include "esp_intr_alloc.h"
 
 using namespace ui;
 const constexpr char *TAG{"Button module"};
 
 static void buttonSender(void *arg)
 {
- auto b = static_cast<Button*>(arg);
-    for (;;) {
+    auto b = static_cast<Button *>(arg);
+    for (;;)
+    {
         // one context switch: ISR → this task via notification
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         b->ping();
@@ -37,9 +39,9 @@ esp_err_t Button::init(gpio_num_t pin, uint8_t number, ButtonListener listener)
 
 esp_err_t Button::install()
 {
-    gpio_install_isr_service(0);
+    gpio_install_isr_service(ESP_INTR_FLAG_LOWMED);
     ESP_RETURN_ON_ERROR(gpio_isr_handler_add(pin, ButtonHandler::button_handler, this), TAG, "gpio_isr_handler_add");
-    xTaskCreate(buttonSender, "buttonSender", 3 * 1024, this, configMAX_PRIORITIES - 5, &handle);
+    xTaskCreatePinnedToCore(buttonSender, "buttonSender", 3 * 1024, this, configMAX_PRIORITIES - 5, &handle, 0);
     return ESP_OK;
 };
 

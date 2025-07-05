@@ -4,6 +4,7 @@
 #define COUNT_MAX 100
 #define STEPS_PER_INDENT 4 ///< Gray-code edges per detent (EC11-style = 4)
 using namespace ui;
+#include "esp_intr_alloc.h"
 
 // GPIO ISR handle - static so C linkage
 static void IRAM_ATTR gpio_isr(void *arg)
@@ -84,7 +85,7 @@ void Rotary::initGPIOInterrupt()
     ESP_ERROR_CHECK(gpio_config(&io_conf));
 
     // Install GPIO ISR service
-    gpio_install_isr_service(0);
+    gpio_install_isr_service(ESP_INTR_FLAG_LOWMED);
     // Attach ISR to CLK pin
     ESP_ERROR_CHECK(gpio_isr_handler_add(
         config.pin_clk,
@@ -93,8 +94,8 @@ void Rotary::initGPIOInterrupt()
 }
 void Rotary::startTask()
 {
-    xTaskCreate([](void *arg)
-                { static_cast<Rotary *>(arg)->processEvents(); }, "rotary_task", 4096, this, 5, nullptr);
+    xTaskCreatePinnedToCore([](void *arg)
+                            { static_cast<Rotary *>(arg)->processEvents(); }, "rotary_task", 4096, this, 5, nullptr, 0);
 }
 
 void Rotary::processEvents()
@@ -143,9 +144,6 @@ void Rotary::processEvents()
 
                 // Try to pull the next event (non-blocking)
             } while (xQueueReceive(eventQueue, &event_count, 0) == pdTRUE);
-
-            // Yield so the IDLE task can run and pet the watchdog
-            vTaskDelay(pdMS_TO_TICKS(1));
         }
     }
 }

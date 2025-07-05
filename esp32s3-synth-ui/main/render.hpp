@@ -65,13 +65,14 @@ static void createMenuRenderTask(RenderTaskCtx *context)
     configASSERT(menuRenderQueue);
 
 
-    BaseType_t ok = xTaskCreate(
+    BaseType_t ok = xTaskCreatePinnedToCore(
         render_task,              // task function
         "menu_render_task",       // name
         8 * 1024,                 // stack (bytes)
         context,                  // arg (SSD1306*)
         configMAX_PRIORITIES - 5, // priority
-        nullptr                  // no handle needed
+        nullptr,                  // no handle needed
+        0
     );
     configASSERT(ok == pdPASS);
 }
