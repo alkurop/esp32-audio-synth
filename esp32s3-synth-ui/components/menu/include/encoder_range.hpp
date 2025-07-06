@@ -12,14 +12,13 @@ namespace menu
     enum MenuPosition
     {
         List = 0,
-        Voice,
+        None,
         Channel,
         Volume
     };
     static_assert(KNOB_COUNT > 0, "KNOB_COUNT must be > 0");
 
     static inline std::array<EncoderRange, KNOB_COUNT> getEncoderRangesMenuList(
-        uint8_t voiceCount,
         const MenuState &state)
     {
         std::array<EncoderRange, KNOB_COUNT> R;
@@ -31,10 +30,7 @@ namespace menu
             .value = state.menuItemIndex};
 
         // voice selector
-        R[MenuPosition::Voice] = {
-            .min = 0,
-            .max = static_cast<int16_t>(voiceCount - 1),
-            .value = state.voiceIndex};
+        R[MenuPosition::None] = EncoderRange{.min = 0, .max = 0, .value = 0};
 
         // channel on Main List (always numeric)
         {

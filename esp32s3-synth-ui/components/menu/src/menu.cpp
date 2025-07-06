@@ -10,7 +10,7 @@
 #include "menu.hpp"
 #include "menu_struct.hpp"
 
-#define TAG  "Menu"
+#define TAG "Menu"
 
 using namespace menu;
 
@@ -114,9 +114,8 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
     case MenuPosition::List:
         state.menuItemIndex = pos;
         break;
-    case MenuPosition::Voice:
-        state.voiceIndex = pos;
-        break;
+    case MenuPosition::None:
+        return;
     case MenuPosition::Channel:
     {
         FieldUpdateList updates = {
@@ -182,7 +181,7 @@ std::array<EncoderRange, 4> Menu::calcEncoderRanges()
     switch (state.mode)
     {
     case AppMode::MenuList:
-        return getEncoderRangesMenuList(voiceCount, state);
+        return getEncoderRangesMenuList(state);
     case AppMode::Page:
         return getEncoderRangesPage(itemToPage(state.menuItemIndex), state);
     case AppMode::Popup:
@@ -214,19 +213,36 @@ void Menu::updatePageFromCache()
     }
 }
 
-void Menu::menuUp()
+void Menu::voiceUp()
 {
-    if (state.menuItemIndex < MENU_ITEM_COUNT - 1)
+    if (state.mode == AppMode::Popup)
+        return;
+
+    if (state.voiceIndex > 0)
     {
-        state.menuItemIndex++;
-        notify();
+        state.voiceIndex--;
+        updateVoiceUp();
     }
 }
-void Menu::menuDown()
+void Menu::voiceDown()
 {
-    if (state.menuItemIndex > 0)
+    if (state.mode == AppMode::Popup)
+        return;
+    if (state.voiceIndex < voiceCount - 1)
     {
-        state.menuItemIndex--;
-        notify();
+        state.voiceIndex++;
+        updateVoiceUp();
     }
+}
+
+void Menu::updateVoiceUp()
+{
+    // refresh dependent values
+    state.channel = cache.get(state.voiceIndex, Page::Channel, 0);
+    state.volume = cache.get(state.voiceIndex, Page::Channel, 1);
+    state.encoderRanges = calcEncoderRanges();
+
+    if (state.mode == AppMode::Page)
+        updatePageFromCache();
+    notify();
 }

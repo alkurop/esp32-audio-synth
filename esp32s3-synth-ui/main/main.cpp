@@ -77,10 +77,10 @@ auto right = [](uint8_t number, bool pressed)
 { if (pressed) menuHolder.enterMenuPage(); };
 
 auto up = [](uint8_t number, bool pressed)
-{ if (pressed) menuHolder.menuUp(); };
+{ if (pressed) menuHolder.voiceUp(); };
 
 auto down = [](uint8_t number, bool pressed)
-{ if (pressed) menuHolder.menuDown(); };
+{ if (pressed) menuHolder.voiceDown(); };
 
 auto updateCallback = [](const FieldUpdateList &updates)
 {
@@ -123,7 +123,7 @@ extern "C" void app_main()
 
     display.renderLoading();
     createMenuRenderTask(&renderTaskContext);
-    
+
     menuHolder.init(displayCallback, updateCallback);
-    initMidi();
+    // initMidi();
 }

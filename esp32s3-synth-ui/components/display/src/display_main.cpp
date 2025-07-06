@@ -10,7 +10,7 @@
 #include "display.hpp"
 #include "truncate.hpp"
 
-#define TAG "ui::SSD1306"
+#define TAG "ui::SSD1306";
 
 using namespace ui;
 using namespace menu;
@@ -145,7 +145,9 @@ void Display::renderMenuPage(const menu::MenuState &st)
 
     // Hide the main menu list
     showPage();
-
+    char buf[32];
+    std::snprintf(buf, sizeof(buf), "Voice %u  Ch %u  Vol %u", st.voiceIndex + CONFIG_HUMAN_INT_OFFSET, st.channel + CONFIG_HUMAN_INT_OFFSET, st.volume);
+    renderTopBar(buf, scr);
     // Compute layout
     int container_w = cfg.width - 8;
     const auto &pi = menuPages[st.menuItemIndex];
