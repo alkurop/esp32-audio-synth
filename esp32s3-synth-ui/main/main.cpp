@@ -35,10 +35,10 @@ Rotary *encoders[ENCODER_COUNT] = {&rotary0, &rotary1, &rotary2, &rotary3};
 
 RenderTaskCtx renderTaskContext = {.display = &display, .encoders = encoders, .encoderCount = ENCODER_COUNT};
 
-Button button0;
-Button button1;
-Button button2;
-Button button3;
+Button buttonDown;
+Button buttonUp;
+Button buttonRight;
+Button buttonLeft;
 Sender sender(senderConfig);
 
 Menu menuHolder(protocol::NUM_VOICES);
@@ -47,9 +47,7 @@ auto midiReadCallback = [](const uint8_t packet[4])
 { midiParser.feed(packet); };
 
 auto controllerCallback = [](const ControllerChange &cc)
-{
-    // handle CC as needed
-};
+{ ESP_LOGI(TAG, "Controller Change: %d %d", cc.controller, cc.value); };
 
 auto noteMessageCallback = [](const MidiNoteEvent &note)
 {
@@ -57,10 +55,10 @@ auto noteMessageCallback = [](const MidiNoteEvent &note)
     sender.send(events);
 };
 
-MidiSongPositionCallback songPositionCallback = [](const SongPosition &sp)
+auto songPositionCallback = [](const SongPosition &sp)
 { ESP_LOGI(TAG, "Song Position: %d", sp.position); };
 
-MidiTransportCallback transportCallback = [](const TransportEvent &ev)
+auto transportCallback = [](const TransportEvent &ev)
 { ESP_LOGI(TAG, "transport Position: %d", static_cast<int>(ev.command)); };
 
 auto bpmCallback = [](uint16_t bpm)
@@ -79,16 +77,19 @@ auto right = [](uint8_t number, bool pressed)
 { if (pressed) menuHolder.enterMenuPage(); };
 
 auto up = [](uint8_t number, bool pressed)
-{ ESP_LOGI(TAG, "Button up"); };
+{ if (pressed) menuHolder.menuUp(); };
 
 auto down = [](uint8_t number, bool pressed)
-{ ESP_LOGI(TAG, "Button down"); };
+{ if (pressed) menuHolder.menuDown(); };
 
 auto updateCallback = [](const FieldUpdateList &updates)
 {
     auto events = createFileUpdateEventList(updates);
     sender.send(events);
 };
+
+auto displayCallback = [](const MenuState &state)
+{ xQueueOverwrite(menuRenderQueue, &state); };
 
 void initMidi()
 {
@@ -107,24 +108,22 @@ extern "C" void app_main()
     rotary2.init(rotaryCallback);
     rotary3.init(rotaryCallback);
 
-    ESP_ERROR_CHECK(button0.init(B0, 0, up));
-    ESP_ERROR_CHECK(button1.init(B1, 1, down));
-    ESP_ERROR_CHECK(button2.init(B2, 2, right));
-    ESP_ERROR_CHECK(button3.init(B3, 3, left));
+    ESP_ERROR_CHECK(buttonDown.init(B0, 0, down));
+    ESP_ERROR_CHECK(buttonUp.init(B1, 1, up));
+    ESP_ERROR_CHECK(buttonRight.init(B2, 2, right));
+    ESP_ERROR_CHECK(buttonLeft.init(B3, 3, left));
 
-    button0.install();
-    button1.install();
-    button2.install();
-    button3.install();
+    buttonDown.install();
+    buttonUp.install();
+    buttonRight.install();
+    buttonLeft.install();
+
     ESP_ERROR_CHECK(display.init());
     ESP_ERROR_CHECK(sender.init());
-    display.renderLoading();
-    // wait until we start sending I2C data
-    createMenuRenderTask(&renderTaskContext);
-    menuHolder.init([](const MenuState &state)
-                    {
-        // overwrite any pending state so we only keep the latest
-        xQueueOverwrite(menuRenderQueue, &state); }, updateCallback);
 
+    display.renderLoading();
+    createMenuRenderTask(&renderTaskContext);
+    
+    menuHolder.init(displayCallback, updateCallback);
     initMidi();
 }
