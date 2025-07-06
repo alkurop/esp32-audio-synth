@@ -1,6 +1,6 @@
 #include "sustain.hpp"
 #include "esp_log.h"
-static const char *TAG = "Sustain";
+#define TAG "Sustain"
 
 SustainPhase::SustainPhase(float sampleRate) : EnvelopePhase(sampleRate) {};
 

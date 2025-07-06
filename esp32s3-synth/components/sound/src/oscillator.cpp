@@ -14,7 +14,7 @@
 
 using namespace sound_module;
 using namespace protocol;
-static const char *TAG = "Sound";
+#define TAG "Sound"
 
 Oscillator::Oscillator(uint32_t sample_rate, uint16_t initial_bpm)
     : envelope(sample_rate, initial_bpm), sample_rate(sample_rate) {}

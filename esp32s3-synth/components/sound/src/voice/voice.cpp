@@ -4,8 +4,9 @@
 #include "cent_pitch_table.hpp"
 #include <cmath>
 
+#define TAG "Voice"
+
 using namespace sound_module;
-static const char *TAG = "Voice";
 
 // Constructor: set sample rate, polyphony, initialize sounds and envelope
 Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t initial_bpm)

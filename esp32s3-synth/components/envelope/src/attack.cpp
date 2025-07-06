@@ -1,7 +1,7 @@
 #include "attack.hpp"
 #include "esp_log.h"
 #include <cmath>
-static const char *TAG = "Attack";
+#define TAG "Attack"
 
 AttackPhase::AttackPhase(float sampleRate) : EnvelopePhase(sampleRate)
 {

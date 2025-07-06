@@ -2,9 +2,9 @@
 #include <algorithm>
 #include <esp_log.h>
 
-constexpr const char *TAG = "MasterKnob";
+#define TAG "MasterKnob"
 
-static constexpr uint8_t DELTA_THRESHOLD = 5;                   
+static constexpr uint8_t DELTA_THRESHOLD = 5;
 static constexpr TickType_t POLL_INTERVAL = pdMS_TO_TICKS(100); // 100 ms → 10 Hz
 
 using namespace ui;
@@ -49,7 +49,7 @@ void Knob::init(MasterKnobCallback cb)
     //----------------------------------------
     // 3) Spawn the FreeRTOS “knob task”
     //----------------------------------------
-    BaseType_t rc = xTaskCreatePinnedToCore( knobTask, "MasterKnobTask", 4096, this, tskIDLE_PRIORITY + 1, &taskHandle, 1);
+    BaseType_t rc = xTaskCreatePinnedToCore(knobTask, "MasterKnobTask", 4096, this, tskIDLE_PRIORITY + 1, &taskHandle, 1);
     if (rc != pdPASS)
     {
         ESP_LOGE(TAG, "Failed to create MasterKnobTask");

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <algorithm>
 #include <esp_log.h>
-static const char *TAG = "Decay";
+#define TAG "Decay"
 
 DecayPhase::DecayPhase(float sampleRate) : EnvelopePhase(sampleRate)
 {

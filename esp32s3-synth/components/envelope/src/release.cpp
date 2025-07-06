@@ -2,7 +2,7 @@
 #include <cmath>
 #include <esp_log.h>
 #include <algorithm>
-static const char *TAG = "Release";
+#define TAG "Release"
 
 ReleasePhase::ReleasePhase(float sampleRate) : EnvelopePhase(sampleRate)
 {

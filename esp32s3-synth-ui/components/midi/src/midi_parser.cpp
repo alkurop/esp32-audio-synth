@@ -2,8 +2,7 @@
 #include "esp_log.h"
 
 using namespace midi_module;
-
-static constexpr const char *TAG = "MIDI_PARSER";
+#define TAG "MIDI_PARSER"
 
 MidiParser::MidiParser() = default;
 

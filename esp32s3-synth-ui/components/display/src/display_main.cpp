@@ -10,7 +10,7 @@
 #include "display.hpp"
 #include "truncate.hpp"
 
-static const char *TAG = "ui::SSD1306";
+#define TAG "ui::SSD1306"
 
 using namespace ui;
 using namespace menu;

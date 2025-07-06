@@ -10,7 +10,7 @@
 #include "menu.hpp"
 #include "menu_struct.hpp"
 
-static const char *TAG = "Menu";
+#define TAG  "Menu"
 
 using namespace menu;
 
@@ -111,13 +111,13 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
 {
     switch (knob)
     {
-    case 0:
+    case MenuPosition::List:
         state.menuItemIndex = pos;
         break;
-    case 1:
+    case MenuPosition::Voice:
         state.voiceIndex = pos;
         break;
-    case 2:
+    case MenuPosition::Channel:
     {
         FieldUpdateList updates = {
             FieldUpdate{state.voiceIndex, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Chan), pos}};
@@ -125,7 +125,7 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
         state.shouldAutoSave = true;
         break;
     }
-    case 3:
+    case MenuPosition::Volume:
     {
         FieldUpdateList updates = {
             FieldUpdate{state.voiceIndex, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Vol), pos}};
@@ -211,5 +211,22 @@ void Menu::updatePageFromCache()
     for (uint8_t knob = 0; knob < count; ++knob)
     {
         state.fieldValues[knob] = cache.get(state.voiceIndex, page, knob);
+    }
+}
+
+void Menu::menuUp()
+{
+    if (state.menuItemIndex < MENU_ITEM_COUNT - 1)
+    {
+        state.menuItemIndex++;
+        notify();
+    }
+}
+void Menu::menuDown()
+{
+    if (state.menuItemIndex > 0)
+    {
+        state.menuItemIndex--;
+        notify();
     }
 }

@@ -1,6 +1,6 @@
 #include "envelope.hpp"
 #include "esp_log.h" // for std::rand, RAND_MAX
-static const char *TAG = "Envelope";
+#define TAG  "Envelope"
 
 Envelope::Envelope(float sampleRate, uint16_t initialBpm)
     : sampleRate(sampleRate),

@@ -7,9 +7,10 @@
 #include "param_store.hpp"
 #include <inttypes.h>
 
+#define TAG "ParamStore"
+
 using namespace store;
 using namespace protocol;
-static const char *TAG = "ParamStore";
 
 std::vector<NameEntry> ParamStore::listProjectNames()
 {

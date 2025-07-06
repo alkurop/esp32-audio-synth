@@ -1,7 +1,7 @@
 // param_cache.cpp
 #include "cache.hpp"
 #include "esp_log.h"
-static const char *TAG = "ParamCache";
+#define TAG "ParamCache"
 
 using namespace store;
 

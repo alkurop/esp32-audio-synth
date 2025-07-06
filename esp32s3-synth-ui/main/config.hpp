@@ -47,7 +47,7 @@ using namespace ui;
 using namespace menu;
 using namespace protocol;
 
-static const char *TAG = "Main";
+#define TAG "UiMain"
 
 SenderConfig senderConfig = {
     .sda_pin = PROTOCOL_SDA_PIN,
@@ -91,4 +91,3 @@ RotaryConfig cfg3 = {
     .pin_dt = ROTARY3_DT,
     .increment = 1,
     .wrapAround = false};
-

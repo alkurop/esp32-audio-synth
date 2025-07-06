@@ -9,7 +9,8 @@
 #include "menu.hpp"
 #include "menu_struct.hpp"
 
-static const char *TAG = "Menu";
+#define TAG "Menu"
+
 using namespace menu;
 
 void Menu::changeValuePopup(uint8_t knob, int16_t pos)

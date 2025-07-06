@@ -7,9 +7,10 @@
 #include <esp_timer.h>
 #include "sound_module.hpp"
 
+#define TAG "SOUND_MODULE"
+
 using namespace sound_module;
 using namespace midi_module;
-static const char *TAG = "SOUND_MODULE";
 
 SoundModule::SoundModule(const SoundConfig &config)
     : config(config), buffer(config.bufferSize * 2)

@@ -4,7 +4,7 @@
 #include <cmath>
 #include "esp_timer.h"
 
-static const char *TAG = "CachedLFO";
+#define TAG  "CachedLFO"
 
 CachedLFO::CachedLFO(LFO &lfoRef, uint16_t intervalTicks)
     : lfo(lfoRef),

@@ -9,8 +9,7 @@
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "esp_attr.h"
-
-static const char *TAG = "Lfo";
+#define TAG "Lfo"
 static constexpr float MICROSECONDS_TO_SECONDS = 1.0f / 1'000'000.0f;
 
 using namespace sound_module;

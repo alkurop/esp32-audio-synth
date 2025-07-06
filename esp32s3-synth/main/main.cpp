@@ -14,7 +14,7 @@ using namespace midi_module;
 using namespace sound_module;
 using namespace protocol;
 using namespace ui;
-static const char *TAG = "Main";
+#define TAG "AudioMain"
 
 SoundModule soundModule(config);
 

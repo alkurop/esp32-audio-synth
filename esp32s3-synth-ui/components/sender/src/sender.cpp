@@ -2,7 +2,7 @@
 #include "sender.hpp"
 #include "serialize.hpp"
 
-static constexpr const char *TAG = "Sender";
+#define TAG "Sender"
 
 using namespace protocol;
 
@@ -66,8 +66,7 @@ void Sender::startSendTask()
         this, // pvParameters
         configMAX_PRIORITIES - 1,
         &taskHandle,
-        0
-    );
+        0);
 }
 
 void Sender::taskEntry(void *pv)

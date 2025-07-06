@@ -1,8 +1,9 @@
 #include "presets.hpp"
 #include "esp_log.h"
 
+#define TAG "Presets"
+
 using namespace store;
-static const char *TAG = "Presets";
 
 FieldUpdateList Presets::loadDefaultProject()
 {

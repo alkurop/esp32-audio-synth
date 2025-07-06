@@ -6,14 +6,16 @@
 #include "param_store.hpp"
 
 #define KNOB_COUNT 4
-
-#define MENU_POSITION_LIST 0
-#define MENU_POSITION_VOICE 1
-#define MENU_POSITION_CH 2
-#define MENU_POSITION_VOL 3
-
 namespace menu
 {
+
+    enum MenuPosition
+    {
+        List = 0,
+        Voice,
+        Channel,
+        Volume
+    };
     static_assert(KNOB_COUNT > 0, "KNOB_COUNT must be > 0");
 
     static inline std::array<EncoderRange, KNOB_COUNT> getEncoderRangesMenuList(
@@ -23,13 +25,13 @@ namespace menu
         std::array<EncoderRange, KNOB_COUNT> R;
 
         // page selector
-        R[MENU_POSITION_LIST] = {
+        R[MenuPosition::List] = {
             .min = 0,
             .max = static_cast<int16_t>(MENU_ITEM_COUNT - 1),
             .value = state.menuItemIndex};
 
         // voice selector
-        R[MENU_POSITION_VOICE] = {
+        R[MenuPosition::Voice] = {
             .min = 0,
             .max = static_cast<int16_t>(voiceCount - 1),
             .value = state.voiceIndex};
@@ -37,7 +39,7 @@ namespace menu
         // channel on Main List (always numeric)
         {
             const auto &fi = menuPages[size_t(Page::Channel)].fields[size_t(ChannelField::Chan)];
-            R[MENU_POSITION_CH] = {
+            R[MenuPosition::Channel] = {
                 .min = static_cast<int16_t>(fi.min),
                 .max = static_cast<int16_t>(fi.max),
                 .value = state.channel};
@@ -46,7 +48,7 @@ namespace menu
         // volume on Main List (always numeric)
         {
             const auto &fi = menuPages[size_t(Page::Channel)].fields[size_t(ChannelField::Vol)];
-            R[MENU_POSITION_VOL] = {
+            R[MenuPosition::Volume] = {
                 .min = static_cast<int16_t>(fi.min),
                 .max = static_cast<int16_t>(fi.max),
                 .value = state.volume};

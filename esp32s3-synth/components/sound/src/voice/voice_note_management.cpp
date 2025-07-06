@@ -2,9 +2,9 @@
 #include "voice.hpp"
 #include <cmath>
 #include <esp_log.h>
+#define TAG  "Voice"
 
 using namespace sound_module;
-static const char *TAG = "Voice";
 
 // Find an active Sound by MIDI note
 Oscillator *Voice::find_note_to_release(uint8_t midi_note)

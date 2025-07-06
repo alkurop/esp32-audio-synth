@@ -12,9 +12,9 @@
 #define LCD_CMD_BITS 8
 #define LCD_PARAM_BITS 8
 
-#define LCD_PIXEL_CLOCK_HZ (400 * 1000)
+#define TAG "ui::Display"
 
-static const char *TAG = "ui::Display";
+#define LCD_PIXEL_CLOCK_HZ (400 * 1000)
 
 using namespace ui;
 using namespace menu;

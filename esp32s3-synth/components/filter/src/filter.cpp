@@ -7,7 +7,7 @@
 #include "filter_table_notch.hpp"
 #include "esp_log.h"
 
-static const char *TAG = "Filter";
+#define TAG "Filter"
 
 using namespace protocol;
 

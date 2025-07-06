@@ -3,8 +3,7 @@
 #include "receiver.hpp"
 #include "serialize.hpp"
 #include <cstring>
-
-static constexpr char *TAG = "Receiver";
+#define TAG "Receiver"
 using namespace protocol;
 
 static bool i2c_slave_receive_cb(

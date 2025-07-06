@@ -1,9 +1,8 @@
 #include "button.hpp"
 #include "esp_intr_alloc.h"
+#define TAG "Button module"
 
 using namespace ui;
-const constexpr char *TAG{"Button module"};
-
 static void buttonSender(void *arg)
 {
     auto b = static_cast<Button *>(arg);

@@ -12,7 +12,8 @@
 #include "menu_struct.hpp"
 #include "load_save_mapper.hpp"
 
-static const char *TAG = "Menu";
+#define TAG  "Menu"
+
 using namespace menu;
 using namespace protocol;
 

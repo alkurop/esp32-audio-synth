@@ -7,13 +7,13 @@
 #include "param_store.hpp"
 #include <inttypes.h>
 
+#define TAG "ParamStore"
 using namespace store;
-static constexpr char KEY_PROJ_DATA[] = "pd_";
-static constexpr char KEY_PROJ_VOICE_COUNT[] = "pdc_"; // + project slot
-static constexpr char KEY_PROJ_VOICE_NAME[] = "pvn_";  // + project slot + "_" + voice index
-static constexpr char KEY_PROJ_GLOBAL_PARAMS[] = "pgf_";
 
-static const char *TAG = "ParamStore";
+#define KEY_PROJ_DATA "pd_"
+#define KEY_PROJ_VOICE_COUNT "pdc_" // + project slot
+#define KEY_PROJ_VOICE_NAME "pvn_"  // + project slot + "_" + voice index
+#define KEY_PROJ_GLOBAL_PARAMS "pgf_"
 
 void ParamStore::saveProject(const ProjectStoreEntry &entry)
 {

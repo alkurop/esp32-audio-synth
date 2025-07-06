@@ -2,7 +2,7 @@
 #include "set_page.hpp"
 #include "smoothed_gain.hpp"
 #include "esp_log.h"
-static constexpr char *TAG = "Settings Router";
+#define TAG "Settings Router"
 
 using namespace settings;
 

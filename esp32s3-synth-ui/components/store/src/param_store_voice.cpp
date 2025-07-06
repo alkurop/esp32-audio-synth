@@ -8,8 +8,8 @@
 #include <inttypes.h>
 
 using namespace store;
-static constexpr char KEY_VOICE_DATA[] = "vd_";
-static const char *TAG = "ParamStore";
+#define KEY_VOICE_DATA "vd_"
+#define TAG "ParamStore"
 
 VoiceStoreEntry ParamStore::loadVoice(uint8_t index)
 {
