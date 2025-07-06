@@ -2,7 +2,7 @@
 #include "voice.hpp"
 #include <cmath>
 #include <esp_log.h>
-#define TAG  "Voice"
+#define TAG "Voice"
 
 using namespace sound_module;
 
@@ -20,7 +20,7 @@ Oscillator *Voice::find_note_to_release(uint8_t midi_note)
 // Note on: trigger new sound, retrigger LFOs, and envelope
 void Voice::noteOn(Oscillator *sound, uint8_t ch, uint8_t midi_note, uint8_t velocity)
 {
-    if (ch != midi_channel || volumeSettings.volume == 0)
+    if (ch != midi_channel)
     {
         return;
     }
@@ -35,7 +35,8 @@ void Voice::noteOn(Oscillator *sound, uint8_t ch, uint8_t midi_note, uint8_t vel
             // ESP_LOGI(TAG, "Note is already playing – reset");
         }
     }
-
+    if (volumeSettings.volume == 0)
+        return;
     sound->setPwm(oscillatorSettings.pwm);
     sound->setShape(oscillatorSettings.shape);
     sound->envelope.setAttack(envelopeSettings.attack);
