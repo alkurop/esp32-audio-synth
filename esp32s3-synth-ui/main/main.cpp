@@ -4,7 +4,7 @@
 #include <esp_err.h>
 #include <cstdio>
 #include <array>
-#include <functional> // for std::reference_wrapper, std::ref
+#include <functional> 
 
 #include "rotary.hpp"
 #include "button.hpp"
@@ -17,6 +17,8 @@
 #include "midi_module.hpp"
 #include "create_send_events.hpp"
 #include "render.hpp"
+
+#define TAG "UiMain"
 
 using namespace ui;
 using namespace menu;
@@ -59,7 +61,7 @@ auto songPositionCallback = [](const SongPosition &sp)
 { ESP_LOGI(TAG, "Song Position: %d", sp.position); };
 
 auto transportCallback = [](const TransportEvent &ev)
-{ ESP_LOGI(TAG, "transport Position: %d", static_cast<int>(ev.command)); };
+{ ESP_LOGI(TAG, "Transport Position: %d", static_cast<int>(ev.command)); };
 
 auto bpmCallback = [](uint16_t bpm)
 {

@@ -18,9 +18,8 @@
 #define PROTOCOL_SDA_PIN GPIO_NUM_5 // red
 #define PROTOCOL_SCL_PIN GPIO_NUM_4 // yellow
 #define PROTOCOL_I2C_PORT I2C_NUM_0
-
 #define RECEIVER_ARRDESS 0x28
-#define I2C_CLOCK_SPEED 400 * 1000
+#define AUDIO_I2C_CLOCK_HZ 1000 * 1000
 
 // ESP32-S3 Pin Mapping for display I2C
 #define DISPLAY_SDA_PIN GPIO_NUM_14
@@ -51,14 +50,14 @@ using namespace ui;
 using namespace menu;
 using namespace protocol;
 
-#define TAG "UiMain"
+
 
 SenderConfig senderConfig = {
     .sda_pin = PROTOCOL_SDA_PIN,
     .scl_pin = PROTOCOL_SCL_PIN,
     .i2c_port = PROTOCOL_I2C_PORT,
     .receiver_address = RECEIVER_ARRDESS,
-    .clock_speed = I2C_CLOCK_SPEED};
+    .clock_speed = AUDIO_I2C_CLOCK_HZ};
 
 SSD1306Config displayConfig = {
     .sda_pin = DISPLAY_SDA_PIN,
