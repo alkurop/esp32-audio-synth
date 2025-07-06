@@ -12,7 +12,7 @@
 #include "menu_struct.hpp"
 #include "load_save_mapper.hpp"
 
-#define TAG  "Menu"
+#define TAG "Menu"
 
 using namespace menu;
 using namespace protocol;
@@ -20,7 +20,6 @@ using namespace protocol;
 static void autoSaveTask(void *param)
 {
     Menu *menu = static_cast<Menu *>(param);
-
     while (true)
     {
         vTaskDelay(pdMS_TO_TICKS(AUTOSAVE_INTERVAL_MS));

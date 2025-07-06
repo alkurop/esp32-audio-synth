@@ -16,14 +16,22 @@ FieldUpdateList Presets::loadDefaultProject()
     auto globalFields = loadGlobalFields();
     result.insert(result.end(), globalFields.begin(), globalFields.end());
     ESP_LOGI(TAG, "Load default project size of fields %d", result.size());
-
+    // for (auto &u : result)
+    // {
+    //     ESP_LOGI(TAG,
+    //              "vIdx=%u pByte=%u fld=%u val=%d",
+    //              u.voiceIndex,
+    //              u.pageByte,
+    //              u.field,
+    //              u.value);
+    // }
     return result;
 }
 
 FieldUpdateList Presets::loadGlobalFields()
 {
     FieldUpdateList result;
-    auto fieldDefaults = loadFieldDefaults(AUTOSAVE_SLOT, Page::Bpm, channelInfo);
+    auto fieldDefaults = loadFieldDefaults(AUTOSAVE_SLOT, Page::Bpm, bpmInfo);
     result.insert(result.end(), fieldDefaults.begin(), fieldDefaults.end());
     ESP_LOGI(TAG, "Load default global fields size of fields %d", result.size());
 
@@ -45,6 +53,10 @@ FieldUpdateList Presets::loadDefaultVoice(uint8_t voiceIndex)
             if (voiceIndex == 0)
             {
                 fieldDefaults[static_cast<uint8_t>(ChannelField::Vol)].value = voice::VOL_MAX;
+            }
+            else
+            {
+                fieldDefaults[static_cast<uint8_t>(ChannelField::Vol)].value = 0;
             }
             result.insert(result.end(), fieldDefaults.begin(), fieldDefaults.end());
             break;
@@ -85,7 +97,6 @@ FieldUpdateList Presets::loadDefaultVoice(uint8_t voiceIndex)
         }
     }
     ESP_LOGI(TAG, "Load default voice fields size of fields %d", result.size());
-
     return result;
 }
 

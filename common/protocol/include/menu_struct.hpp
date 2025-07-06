@@ -8,7 +8,7 @@
 #include "oscillator_settings.hpp"
 #include "tuning_settings.hpp"
 #include "filter_settings.hpp"
-#include "global_settings.hpp"
+#include "bpm_settings.hpp"
 #include "channel_settings.hpp"
 
 namespace protocol
