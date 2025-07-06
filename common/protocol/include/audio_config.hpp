@@ -12,7 +12,7 @@ namespace protocol
     constexpr const int BPM_DEFAULT = 120;
 
     constexpr const int RECEIVER_ARRDESS = 0x28;
-    constexpr const int I2C_CLOCK_SPEED = 1000 * 1000;
+    constexpr const int I2C_CLOCK_SPEED = 400 * 1000;
     
     constexpr int8_t MIN_DB = -60;
 

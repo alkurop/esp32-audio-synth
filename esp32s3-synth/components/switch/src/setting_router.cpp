@@ -41,7 +41,7 @@ void SettingRouter::setUpdate(const FieldUpdate &update)
 
     switch (page)
     {
-    case Page::Channel:
+    case Page::VolChan:
         settings::setChannelPage(
             soundModule.getVoice(update.voiceIndex),
             update.field,
@@ -90,7 +90,7 @@ void SettingRouter::setUpdate(const FieldUpdate &update)
             update.value);
         break;
 
-    case Page::Global:
+    case Page::Bpm:
         settings::setGlobalPage(soundModule, update.field, update.value);
         break;
 

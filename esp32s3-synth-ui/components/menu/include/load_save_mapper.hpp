@@ -164,7 +164,7 @@ namespace menu
             if (u.voiceIndex != voiceIndex)
                 continue;
 
-            if (u.pageByte == static_cast<uint8_t>(Page::Channel))
+            if (u.pageByte == static_cast<uint8_t>(Page::VolChan))
             {
                 if (u.field == static_cast<uint8_t>(ChannelField::Chan))
                     channel = static_cast<uint8_t>(u.value);

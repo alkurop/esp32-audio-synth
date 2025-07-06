@@ -23,7 +23,7 @@ FieldUpdateList Presets::loadDefaultProject()
 FieldUpdateList Presets::loadGlobalFields()
 {
     FieldUpdateList result;
-    auto fieldDefaults = loadFieldDefaults(AUTOSAVE_SLOT, Page::Global, channelInfo);
+    auto fieldDefaults = loadFieldDefaults(AUTOSAVE_SLOT, Page::Bpm, channelInfo);
     result.insert(result.end(), fieldDefaults.begin(), fieldDefaults.end());
     ESP_LOGI(TAG, "Load default global fields size of fields %d", result.size());
 
@@ -39,7 +39,7 @@ FieldUpdateList Presets::loadDefaultVoice(uint8_t voiceIndex)
 
         switch (page)
         {
-        case Page::Channel:
+        case Page::VolChan:
         {
             auto fieldDefaults = loadFieldDefaults(voiceIndex, page, channelInfo);
             if (voiceIndex == 0)

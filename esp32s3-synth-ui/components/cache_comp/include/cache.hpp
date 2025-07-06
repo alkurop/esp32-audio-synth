@@ -30,7 +30,7 @@ namespace store
         bool isGlobal(Page page) const
         {
             // only BPM is global for now
-            return page == Page::Global;
+            return page == Page::Bpm;
         }
 
         const std::vector<VoiceCache> &getVoiceData() const { return data; }

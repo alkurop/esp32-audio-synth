@@ -16,7 +16,7 @@ namespace protocol
 
     enum class AppMode : uint8_t
     {
-        Loading, // page/voice selector
+        Loading,  // page/voice selector
         MenuList, // page/voice selector
         Page,     // parameter editing
         Popup     // load/save dialog
@@ -24,38 +24,17 @@ namespace protocol
     // pages
     enum class Page : uint8_t
     {
-        Channel = 0,
-        Oscillator,
+
+        Oscillator = 0,
         Filter,
         Envelope,
         Tuning,
         PitchLFO,
         AmpLFO,
-        Global, ///< Global BPM settings page
+        Bpm, ///< Global BPM settings page
+        VolChan,
         _Count
     };
-
-    // somewhere in your menu namespace, after the Page & *Field enums:
-    static constexpr std::array<uint8_t, static_cast<size_t>(Page::_Count)> fieldsPerPage = {
-        // Channels page
-        static_cast<uint8_t>(ChannelField::_Count),
-        // Oscillator page
-        static_cast<uint8_t>(OscillatorField::_Count),
-        // Filter page
-        static_cast<uint8_t>(FilterField::_Count),
-        // Envelope page
-        static_cast<uint8_t>(EnvelopeField::_Count),
-        // Tuning page
-        static_cast<uint8_t>(TuningField::_Count),
-        // PitchLFO page (same as Filter LFO)
-        static_cast<uint8_t>(LFOField::_Count),
-        // Amp LFO page
-        static_cast<uint8_t>(LFOField::_Count),
-        // Global BPM page
-        static_cast<uint8_t>(GlobalField::_Count),
-    };
-
-
 
     struct PageInfo
     {
@@ -65,7 +44,6 @@ namespace protocol
     };
 
     static constexpr PageInfo menuPages[] = {
-        {"Vol/Channel", channelInfo, sizeof(channelInfo) / sizeof(FieldInfo)},
         {"Oscillator", oscInfo, sizeof(oscInfo) / sizeof(FieldInfo)},
         {"Filter", filterInfo, sizeof(filterInfo) / sizeof(FieldInfo)},
         {"Envelope", envInfo, sizeof(envInfo) / sizeof(FieldInfo)},
@@ -73,6 +51,7 @@ namespace protocol
         {"Pitch LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"Amp LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
+        {"Vol/Channel", channelInfo, sizeof(channelInfo) / sizeof(FieldInfo)},
     };
 
     static constexpr uint8_t MAX_FIELDS = 4;

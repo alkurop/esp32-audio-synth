@@ -34,7 +34,7 @@ namespace menu
 
         // channel on Main List (always numeric)
         {
-            const auto &fi = menuPages[size_t(Page::Channel)].fields[size_t(ChannelField::Chan)];
+            const auto &fi = menuPages[size_t(Page::VolChan)].fields[size_t(ChannelField::Chan)];
             R[MenuPosition::Channel] = {
                 .min = static_cast<int16_t>(fi.min),
                 .max = static_cast<int16_t>(fi.max),
@@ -43,7 +43,7 @@ namespace menu
 
         // volume on Main List (always numeric)
         {
-            const auto &fi = menuPages[size_t(Page::Channel)].fields[size_t(ChannelField::Vol)];
+            const auto &fi = menuPages[size_t(Page::VolChan)].fields[size_t(ChannelField::Vol)];
             R[MenuPosition::Volume] = {
                 .min = static_cast<int16_t>(fi.min),
                 .max = static_cast<int16_t>(fi.max),

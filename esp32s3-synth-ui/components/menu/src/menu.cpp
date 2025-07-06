@@ -119,7 +119,7 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
     case MenuPosition::Channel:
     {
         FieldUpdateList updates = {
-            FieldUpdate{state.voiceIndex, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Chan), pos}};
+            FieldUpdate{state.voiceIndex, static_cast<uint8_t>(Page::VolChan), static_cast<uint8_t>(ChannelField::Chan), pos}};
         cache.set(updates);
         state.shouldAutoSave = true;
         break;
@@ -127,7 +127,7 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
     case MenuPosition::Volume:
     {
         FieldUpdateList updates = {
-            FieldUpdate{state.voiceIndex, static_cast<uint8_t>(Page::Channel), static_cast<uint8_t>(ChannelField::Vol), pos}};
+            FieldUpdate{state.voiceIndex, static_cast<uint8_t>(Page::VolChan), static_cast<uint8_t>(ChannelField::Vol), pos}};
         cache.set(updates);
         state.shouldAutoSave = true;
         break;
@@ -137,8 +137,8 @@ void Menu::changeValueMenuList(uint8_t knob, int16_t pos)
     }
 
     // refresh dependent values
-    state.channel = cache.get(state.voiceIndex, Page::Channel, 0);
-    state.volume = cache.get(state.voiceIndex, Page::Channel, 1);
+    state.channel = cache.get(state.voiceIndex, Page::VolChan, 0);
+    state.volume = cache.get(state.voiceIndex, Page::VolChan, 1);
     state.encoderRanges = calcEncoderRanges();
     notify();
 }
@@ -238,8 +238,8 @@ void Menu::voiceDown()
 void Menu::updateVoiceUp()
 {
     // refresh dependent values
-    state.channel = cache.get(state.voiceIndex, Page::Channel, 0);
-    state.volume = cache.get(state.voiceIndex, Page::Channel, 1);
+    state.channel = cache.get(state.voiceIndex, Page::VolChan, 0);
+    state.volume = cache.get(state.voiceIndex, Page::VolChan, 1);
     state.encoderRanges = calcEncoderRanges();
 
     if (state.mode == AppMode::Page)

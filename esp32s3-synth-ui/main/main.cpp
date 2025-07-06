@@ -125,5 +125,5 @@ extern "C" void app_main()
     createMenuRenderTask(&renderTaskContext);
 
     menuHolder.init(displayCallback, updateCallback);
-    // initMidi();
+    initMidi();
 }
