@@ -60,7 +60,7 @@ namespace protocol
             .max = 0,
             .opts = subdivisions,
             .optCount = 8,
-            .defaultValue = 0,
+            .defaultValue = 2,
             .increment = 1,
         },
         {
@@ -80,7 +80,7 @@ namespace protocol
             .max = LFO_DEPTH_MAX,
             .opts = nullptr,
             .optCount = 0,
-            .defaultValue = 4,
+            .defaultValue = 0,
             .increment = 1,
         },
     };

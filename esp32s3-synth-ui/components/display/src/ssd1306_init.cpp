@@ -14,7 +14,6 @@
 
 #define TAG "ui::Display"
 
-#define LCD_PIXEL_CLOCK_HZ (400 * 1000)
 
 using namespace ui;
 using namespace menu;
@@ -77,7 +76,7 @@ esp_err_t Display::configureSSD1306()
         .dc_bit_offset = 6,
         .lcd_cmd_bits = LCD_CMD_BITS,
         .lcd_param_bits = LCD_PARAM_BITS,
-        .scl_speed_hz = LCD_PIXEL_CLOCK_HZ,
+        .scl_speed_hz = cfg.clock_speed,
     };
 
     // attach panel IO to the initialized bus

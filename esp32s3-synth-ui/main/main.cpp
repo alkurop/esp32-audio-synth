@@ -118,8 +118,8 @@ extern "C" void app_main()
     buttonRight.install();
     buttonLeft.install();
 
-    ESP_ERROR_CHECK(display.init());
     ESP_ERROR_CHECK(sender.init());
+    ESP_ERROR_CHECK(display.init());
 
     display.renderLoading();
     createMenuRenderTask(&renderTaskContext);

@@ -28,8 +28,9 @@ namespace ui
         gpio_num_t scl_pin;           ///< I2C SCL pin
         uint8_t width;                ///< Display width in pixels
         uint8_t height;               ///< Display height in pixels
-        uint8_t i2c_port = I2C_NUM_0; ///< I2C port (default: 0)
-        uint8_t i2c_addr = 0x3C;      ///< SSD1306 I2C address
+        uint8_t i2c_port; ///< I2C port (default: 0)
+        uint8_t i2c_addr;      ///< SSD1306 I2C address
+        uint32_t clock_speed;      ///< SSD1306 I2C address
     };
 
     struct PopupLayout

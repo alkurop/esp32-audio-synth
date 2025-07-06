@@ -46,7 +46,7 @@ namespace protocol
             .max = MAX_CUTOFF_RAW,
             .opts = nullptr,
             .optCount = 0,
-            .defaultValue = 4,
+            .defaultValue = 0,
             .increment = 1,
         },
         {
@@ -56,7 +56,7 @@ namespace protocol
             .max = MAX_RESONANCE_RAW,
             .opts = nullptr,
             .optCount = 0,
-            .defaultValue = 4,
+            .defaultValue = 0,
             .increment = 1,
         },
     };
