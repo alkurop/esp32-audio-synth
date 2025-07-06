@@ -50,8 +50,6 @@ using namespace ui;
 using namespace menu;
 using namespace protocol;
 
-
-
 SenderConfig senderConfig = {
     .sda_pin = PROTOCOL_SDA_PIN,
     .scl_pin = PROTOCOL_SCL_PIN,

@@ -11,6 +11,8 @@
 using namespace menu;
 using namespace ui;
 
+#define TAG "UI Renderer"
+
 struct RenderTaskCtx
 {
     Display *display;
