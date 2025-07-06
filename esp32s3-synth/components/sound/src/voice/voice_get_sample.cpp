@@ -19,7 +19,7 @@ Stereo Voice::getSample()
     garbageCollect();
 
     // 1) If nothing left, bail out immediately
-    if (activeOscillators.empty())
+    if (activeOscillators.empty() || volumeSettings.volume == 0)
         return {0.0f, 0.0f};
 
     // 2) Compute modulators
