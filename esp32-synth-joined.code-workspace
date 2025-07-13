@@ -87,6 +87,8 @@
       "variant": "cpp",
       "forward_list": "cpp",
       "print": "cpp"
-    }
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.pythonProjects": []
   }
 }
