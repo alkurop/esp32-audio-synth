@@ -66,7 +66,7 @@ void SoundModule::init()
             this,
             configMAX_PRIORITIES - 1,
             &audioTask,
-            0 // core 1
+            1 // core 1
         );
     }
 }

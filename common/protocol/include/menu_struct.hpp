@@ -31,8 +31,8 @@ namespace protocol
         Tuning,
         PitchLFO,
         AmpLFO,
-        Bpm, ///< Global BPM settings page
         VolChan,
+        Bpm, ///< Global BPM settings page
         _Count
     };
 
@@ -50,8 +50,8 @@ namespace protocol
         {"Tuning", tuningInfo, sizeof(tuningInfo) / sizeof(FieldInfo)},
         {"Pitch LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
         {"Amp LFO", lfoInfo, sizeof(lfoInfo) / sizeof(FieldInfo)},
-        {"BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
         {"Vol/Channel", channelInfo, sizeof(channelInfo) / sizeof(FieldInfo)},
+        {"BPM", bpmInfo, sizeof(bpmInfo) / sizeof(FieldInfo)},
     };
 
     static constexpr uint8_t MAX_FIELDS = 4;

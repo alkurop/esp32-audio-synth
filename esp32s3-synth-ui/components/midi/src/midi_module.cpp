@@ -9,8 +9,7 @@ static void midiReader(void *arg)
 {
   auto midiModule = static_cast<MidiModule *>(arg);
   uint8_t packet[4];
-  bool read = false;
-  for (;;)
+  for (;;) 
     {
         // 1) Service TinyUSB so it can receive new USB packets
         tud_task();
@@ -70,7 +69,7 @@ void MidiModule::init(MidiReadCallback readCallback)
   esp_tusb_init_console(TINYUSB_CDC_ACM_0); // log to usb
 
   xTaskCreatePinnedToCore(midiReader, "midiReader", 8 * 1024, this,
-              configMAX_PRIORITIES - 1, &handle, 1);
+              configMAX_PRIORITIES - 1, &handle, 0);
 };
 
 void MidiModule::sendValue(uint8_t program, uint8_t value)

@@ -121,6 +121,7 @@ extern "C" void app_main()
     buttonLeft.install();
 
     ESP_ERROR_CHECK(sender.init());
+    vTaskDelay(pdMS_TO_TICKS(1000));
     ESP_ERROR_CHECK(display.init());
 
     display.renderLoading();

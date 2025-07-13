@@ -4,6 +4,7 @@
 namespace protocol
 {
     constexpr const int LOOKUP_TABLE_SIZE = 1024;
+    constexpr const int RECEIVER_ARRDESS = 0x28;
     constexpr const int NUM_VOICES = 3;
     constexpr const int NUM_SOUNDS = 6;
     constexpr const int SAMPLE_RATE = 48000;

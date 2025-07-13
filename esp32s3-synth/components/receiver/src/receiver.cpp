@@ -98,7 +98,7 @@ esp_err_t Receiver::init(UpdateCallback updateCallback)
         return ESP_ERR_NO_MEM;
     }
     xTaskCreatePinnedToCore([](void *arg)
-                            { static_cast<Receiver *>(arg)->receiveTask(); }, "receiver_rx", 8192, this, 5, &receiveTaskHandle, 1); // Core 1
+                            { static_cast<Receiver *>(arg)->receiveTask(); }, "receiver_rx", 8192, this, 5, &receiveTaskHandle, 0); // Core 1
 
     return ESP_OK;
 }
