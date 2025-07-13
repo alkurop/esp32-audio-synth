@@ -72,6 +72,7 @@ namespace sound_module
         voice::PitchSettings pitchSettings;
 
     private:
+        uint8_t index;
         size_t midi_channel = 0;
         uint16_t bpm;
 

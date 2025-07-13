@@ -17,6 +17,7 @@ Voice::Voice(uint8_t voiceIndex, uint32_t sample_rate, uint8_t channel, uint16_t
       ampLfoC(ampLfo, 513),
       filter(sample_rate, initial_bpm, voiceIndex),
       pitchSettings(),
+      index(voiceIndex),
       midi_channel(channel),
       bpm(initial_bpm),
       volumeSettings()

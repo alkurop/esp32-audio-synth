@@ -9,8 +9,4 @@ idf_component_register(
     REQUIRES protocol lfo lookup
 )
 
-
-# Only add flags if we actually have sources
-if(SRC)
-    target_compile_options(${COMPONENT_LIB} PRIVATE -O3 -ffast-math -funroll-loops -fstrict-aliasing)
-endif()
+ 

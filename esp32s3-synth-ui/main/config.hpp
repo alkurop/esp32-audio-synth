@@ -18,7 +18,7 @@
 #define PROTOCOL_SDA_PIN GPIO_NUM_5 // red
 #define PROTOCOL_SCL_PIN GPIO_NUM_4 // yellow
 #define PROTOCOL_I2C_PORT I2C_NUM_1
-#define AUDIO_I2C_CLOCK_HZ 1000 * 1000
+#define AUDIO_I2C_CLOCK_HZ 400 * 1000
 
 // ESP32-S3 Pin Mapping for display I2C
 #define DISPLAY_SDA_PIN GPIO_NUM_14
