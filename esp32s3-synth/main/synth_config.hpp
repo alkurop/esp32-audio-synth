@@ -10,9 +10,9 @@ using namespace protocol;
 using namespace ui;
 
 // ESP32-S3 Pin Mapping for I2S
-#define I2S_BCK_IO GPIO_NUM_38
-#define I2S_WS_IO GPIO_NUM_40
-#define I2S_DO_IO GPIO_NUM_39
+#define I2S_BCK_IO GPIO_NUM_38      // changed to 40
+#define I2S_LRCK_IO GPIO_NUM_40     // changed to 41
+#define I2S_DO_IO GPIO_NUM_39       // changed to 42
 
 // ESP32-S3 Pin Mapping for I2C
 #define SDA_PIN GPIO_NUM_13 // red
@@ -30,7 +30,7 @@ SoundConfig config{
     .maxPoliphony = NUM_SOUNDS,
     .i2s = {
         .bclk_io = I2S_BCK_IO,
-        .lrclk_io = I2S_WS_IO,
+        .lrclk_io = I2S_LRCK_IO,
         .data_io = I2S_DO_IO},
 
 };
