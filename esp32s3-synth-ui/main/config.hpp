@@ -15,14 +15,14 @@
 #define B3 GPIO_NUM_12
 
 // ESP32-S3 Pin Mapping for protocol I2C
-#define PROTOCOL_SDA_PIN GPIO_NUM_5 // red
-#define PROTOCOL_SCL_PIN GPIO_NUM_4 // yellow
+#define PROTOCOL_SCL_PIN GPIO_NUM_13 // yellow
+#define PROTOCOL_SDA_PIN GPIO_NUM_14 // red
 #define PROTOCOL_I2C_PORT I2C_NUM_1
 #define AUDIO_I2C_CLOCK_HZ 400 * 1000
 
 // ESP32-S3 Pin Mapping for display I2C
-#define DISPLAY_SDA_PIN GPIO_NUM_14
-#define DISPLAY_SCL_PIN GPIO_NUM_13
+#define DISPLAY_SCL_PIN GPIO_NUM_4
+#define DISPLAY_SDA_PIN GPIO_NUM_5
 #define DISPLAY_I2C_PORT I2C_NUM_0
 #define DISPLAY_ADDRESS 0x3C
 #define LCD_PIXEL_CLOCK_HZ 400 * 1000
@@ -36,11 +36,11 @@
 #define ROTARY1_DT GPIO_NUM_38
 
 // Rotary encoder 2
-#define ROTARY2_CLK GPIO_NUM_45
+#define ROTARY2_CLK GPIO_NUM_47
 #define ROTARY2_DT GPIO_NUM_48
 
 // Rotary encoder 3
-#define ROTARY3_CLK GPIO_NUM_47
+#define ROTARY3_CLK GPIO_NUM_45
 #define ROTARY3_DT GPIO_NUM_21
 
 #define ENCODER_COUNT 4
